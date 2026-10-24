@@ -17,12 +17,12 @@ G.FIREBASE_CONFIG_READY = {
   measurementId: "G-HG8R2HRPKL"
 };
 
-// Kích hoạt Firebase CHỈ trên máy thử nghiệm local (localhost / 127.0.0.1)
-// Trên GitHub Pages (vunghia54.github.io) vẫn là null cho tới khi có lệnh phát hành chính thức.
-const isLocalTest = typeof location !== 'undefined' && (
+// Kích hoạt Firebase cho tên miền chính thức vunghia54.github.io và máy thử nghiệm local (localhost / 127.0.0.1)
+const isAllowedHost = typeof location !== 'undefined' && (
+  location.hostname === 'vunghia54.github.io' ||
   location.hostname === 'localhost' ||
   location.hostname === '127.0.0.1' ||
   location.hostname === ''
 );
 
-G.FIREBASE_CONFIG = isLocalTest ? G.FIREBASE_CONFIG_READY : null;
+G.FIREBASE_CONFIG = isAllowedHost ? G.FIREBASE_CONFIG_READY : null;
