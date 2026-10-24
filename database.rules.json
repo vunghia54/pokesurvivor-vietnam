@@ -8,7 +8,7 @@
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid",
         "$connId": {
-          ".validate": "newData.hasChildren(['at']) && newData.child('at').isNumber() && !newData.hasChildren(['name', 'email', 'ip', 'token'])"
+          ".validate": "newData.hasChildren(['at']) && newData.child('at').isNumber() && !newData.hasChild('name') && !newData.hasChild('email') && !newData.hasChild('ip') && !newData.hasChild('token')"
         }
       }
     },

@@ -127,6 +127,22 @@ G.Ranking = (() => {
   }
   cachePrune();
 
+  function clearCache(m, p, dex) {
+    if (m && p) {
+      const b = board(m, p, dex);
+      mem.delete('S:' + b);
+      try { localStorage.removeItem('ps.rk.c.S:' + b); } catch (e) {}
+    } else {
+      mem.clear();
+      try {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('ps.rk.c.')) localStorage.removeItem(k);
+        }
+      } catch (e) {}
+    }
+  }
+
   // Kỷ lục cá nhân tốt nhất đã lưu trên máy
   const bestKey = () => 'ps.rk.best.vn.' + ((fbx() && fbx().uid) || 'guest');
   function bests() {
@@ -719,6 +735,7 @@ G.Ranking = (() => {
     checkpoint,
     topKills,
     topTime,
+    clearCache,
     myRankKills,
     myRankTime,
     isAdmin,

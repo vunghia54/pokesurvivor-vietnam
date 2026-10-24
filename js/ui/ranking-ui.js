@@ -32,6 +32,14 @@ G.RankingUI = (() => {
     if (clearBtn) clearBtn.onclick = () => { if (pokeInp) pokeInp.value = ''; setDex(null); };
     const modBtn = $('rk-mod');
     if (modBtn) modBtn.onclick = () => G.ModUI.open();
+    const refreshBtn = $('rk-refresh');
+    if (refreshBtn) {
+      refreshBtn.onclick = async () => {
+        if (G.Ranking && G.Ranking.clearCache) G.Ranking.clearCache(mode, period, dex);
+        if (G.UI && G.UI.toast) G.UI.toast('Đang làm mới dữ liệu...');
+        await load();
+      };
+    }
   }
 
   function setDex(d) {

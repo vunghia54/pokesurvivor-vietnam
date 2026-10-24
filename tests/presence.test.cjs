@@ -33,7 +33,7 @@ test('Firebase Security Rules: database.rules.json presence verification', () =>
   assert.ok(connNode, '$connId node must exist under $uid');
   assert.ok(connNode['.validate'], 'Connection must have validation rule');
   assert.ok(connNode['.validate'].includes("newData.child('at').isNumber()"), 'Must validate that timestamp "at" is numeric');
-  assert.ok(connNode['.validate'].includes("!newData.hasChildren(['name', 'email', 'ip', 'token'])"), 'Must prevent storing PII (email, name, ip, token)');
+  assert.ok(connNode['.validate'].includes("!newData.hasChild('name') && !newData.hasChild('email') && !newData.hasChild('ip') && !newData.hasChild('token')"), 'Must prevent storing PII (email, name, ip, token)');
 
   // 5. Rooms section must remain intact
   assert.ok(rulesObj.rules.rooms, 'rooms section must be preserved');
