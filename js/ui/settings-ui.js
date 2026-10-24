@@ -48,7 +48,7 @@ G.SettingsUI = (() => {
   }
   function close() {
     $('scr-settings').classList.add('hidden');
-    if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) {
+    if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu') && !(G.UI.hasActiveSubscreen && G.UI.hasActiveSubscreen())) {
       G.UI.chrome(true);
       if (document.body) document.body.classList.remove('in-subscreen');
     }

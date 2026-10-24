@@ -93,16 +93,20 @@ test('v1.3.3 Navigation: Upgrades layout grid is responsive and non-overlapping'
 
 test('v1.3.3 Navigation: js/ui/ui.js handles show/chrome transitions cleanly', () => {
   assert.ok(
-    uiJs.includes('const isMenu = id === \'scr-menu\';'),
-    'Identifies whether active screen is main menu'
+    uiJs.includes("const isMenuOnly = id === 'scr-menu' && !hasActiveSubscreen();"),
+    'Identifies whether active screen is strictly main menu without active subscreens'
   );
   assert.ok(
-    uiJs.includes('chrome(isMenu);'),
+    uiJs.includes('chrome(isMenuOnly);'),
     'Toggles chrome according to menu state'
   );
   assert.ok(
-    uiJs.includes('document.body.classList.toggle(\'in-subscreen\', !isMenu);'),
+    uiJs.includes("document.body.classList.toggle('in-subscreen', !isMenuOnly);"),
     'Toggles in-subscreen body class'
+  );
+  assert.ok(
+    uiJs.includes('function hasActiveSubscreen()'),
+    'Provides hasActiveSubscreen checker for nested modals'
   );
   assert.ok(
     uiJs.includes('function refreshSubscreenResources()'),
@@ -116,15 +120,18 @@ test('v1.3.3 Navigation: Modals (settings, news) cleanly toggle subscreen state'
     'SettingsUI.open hides chrome and adds in-subscreen'
   );
   assert.ok(
-    settingsUiJs.includes("G.UI.chrome(true);") && settingsUiJs.includes("document.body.classList.remove('in-subscreen');"),
-    'SettingsUI.close restores chrome if returning to menu'
-  );
-  assert.ok(
     newsUiJs.includes("G.UI.chrome(false);") && newsUiJs.includes("document.body.classList.add('in-subscreen');"),
     'NewsUI.open hides chrome and adds in-subscreen'
   );
+});
+
+test('v1.3.3 Navigation: Nested modals check hasActiveSubscreen before restoring topbar', () => {
   assert.ok(
-    newsUiJs.includes("G.UI.chrome(true);") && newsUiJs.includes("document.body.classList.remove('in-subscreen');"),
-    'NewsUI.close restores chrome if returning to menu'
+    settingsUiJs.includes("!(G.UI.hasActiveSubscreen && G.UI.hasActiveSubscreen())"),
+    'SettingsUI respects underlying active subscreen before showing topbar'
+  );
+  assert.ok(
+    newsUiJs.includes("!(G.UI.hasActiveSubscreen && G.UI.hasActiveSubscreen())"),
+    'NewsUI respects underlying active subscreen before showing topbar'
   );
 });

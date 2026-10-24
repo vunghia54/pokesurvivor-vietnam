@@ -32,17 +32,17 @@ G.LoginUI = (() => {
       $('rec-link').disabled = false;
       if (!r.ok) { $('rec-err').textContent = r.error; return; }
       $('scr-recover').classList.add('hidden');
-      if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
+      if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu') && !(G.UI.hasActiveSubscreen && G.UI.hasActiveSubscreen())) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
       G.UI.toast(((window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN')) ? 'Đã liên kết Gmail! Nếu quên mật khẩu, hãy đăng nhập bằng Google.' : '¡Gmail vinculado! Si olvidas la contraseña, entra con Google.', 4500);
     };
     $('rec-later').onclick = () => {
       $('scr-recover').classList.add('hidden');
-      if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
+      if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu') && !(G.UI.hasActiveSubscreen && G.UI.hasActiveSubscreen())) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
     };
     $('rec-never').onclick = () => {
       try { localStorage.setItem('ps.recover.no.' + G.DB.fb.uid, '1'); } catch (e) { /* nada */ }
       $('scr-recover').classList.add('hidden');
-      if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
+      if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu') && !(G.UI.hasActiveSubscreen && G.UI.hasActiveSubscreen())) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
     };
     $('btn-google').onclick = async () => {
       $('login-err').textContent = '';
@@ -103,7 +103,7 @@ G.LoginUI = (() => {
       const n = queue.shift();
       if (!n) {
         $('scr-savenote').classList.add('hidden');
-        if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
+        if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu') && !(G.UI.hasActiveSubscreen && G.UI.hasActiveSubscreen())) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
         return;
       }
       try { localStorage.setItem(n.key, '1'); } catch (e) { /* nada */ }

@@ -10,14 +10,23 @@ G.UI = (() => {
   const SCREENS = ['scr-login', 'scr-test', 'scr-result', 'scr-starters', 'scr-menu',
                    'scr-dex', 'scr-upgrades', 'scr-shop', 'scr-bag', 'scr-gacha', 'scr-levelup', 'scr-pause', 'scr-over',
                    'scr-nick', 'scr-friends', 'scr-lobby', 'scr-rank', 'scr-item', 'scr-goals', 'scr-bond', 'scr-mod'];
+  const SUBSCREENS = ['scr-dex', 'scr-upgrades', 'scr-shop', 'scr-bag', 'scr-gacha', 'scr-levelup', 'scr-pause', 'scr-over',
+                      'scr-nick', 'scr-friends', 'scr-lobby', 'scr-rank', 'scr-item', 'scr-goals', 'scr-bond', 'scr-mod'];
+
+  function hasActiveSubscreen() {
+    return SUBSCREENS.some(s => {
+      const el = $(s);
+      return el && !el.classList.contains('hidden');
+    });
+  }
 
   function show(id, keepMenu = false) {
     for (const s of SCREENS) if (s !== id && !(keepMenu && s === 'scr-menu')) $(s).classList.add('hidden');
     $(id).classList.remove('hidden');
-    const isMenu = id === 'scr-menu';
-    chrome(isMenu);
-    document.body.classList.toggle('in-subscreen', !isMenu);
-    if (!isMenu) refreshSubscreenResources();
+    const isMenuOnly = id === 'scr-menu' && !hasActiveSubscreen();
+    chrome(isMenuOnly);
+    document.body.classList.toggle('in-subscreen', !isMenuOnly);
+    if (!isMenuOnly) refreshSubscreenResources();
   }
   function hide(id) { $(id).classList.add('hidden'); }
   function hideAll() { for (const s of SCREENS) $(s).classList.add('hidden'); }
@@ -189,7 +198,7 @@ G.UI = (() => {
 
   function closeLegal() {
     $('scr-legal').classList.add('hidden');
-    if (isOpen('scr-menu')) {
+    if (isOpen('scr-menu') && !hasActiveSubscreen()) {
       chrome(true);
       document.body.classList.remove('in-subscreen');
     }
@@ -371,6 +380,6 @@ G.UI = (() => {
     return cv;
   }
 
-  return { $, show, hide, hideAll, isOpen, chrome, refreshCoins, refreshSubscreenResources, toast, typeChips, stars, confirmDelete,
+  return { $, show, hide, hideAll, isOpen, chrome, refreshCoins, refreshSubscreenResources, hasActiveSubscreen, toast, typeChips, stars, confirmDelete,
            sprite, spriteCanvas, tick, initChrome, soundControls, hueSwap };
 })();
