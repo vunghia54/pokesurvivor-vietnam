@@ -388,7 +388,15 @@
 <!-- ====== Ranking ====== -->
 <section id="scr-rank" class="scr dim hidden">
   <div class="box wide">
-    <div class="row between"><h2>Bảng Xếp Hạng Online</h2><span class="row" style="gap:6px"><button id="rk-mod" class="btn small ghost hidden">Kiểm duyệt</button><button class="btn small ghost" data-back>Quay lại</button></span></div>
+    <div class="row between">
+      <div>
+        <h2 style="margin-bottom:2px">Bảng Xếp Hạng Online</h2>
+        <div class="rk-beta-badge" style="color:var(--gold);font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:4px">
+          <span>⚠️</span> <span>Bảng xếp hạng Beta — Thành tích chưa xác minh</span>
+        </div>
+      </div>
+      <span class="row" style="gap:6px"><button id="rk-mod" class="btn small ghost hidden">Kiểm duyệt</button><button class="btn small ghost" data-back>Quay lại</button></span>
+    </div>
     <div class="gen-tabs" id="rk-mode"></div>
     <div class="filters" id="rk-period"></div>
     <div class="row rk-tools" style="flex-wrap:wrap;gap:8px">
@@ -605,6 +613,6 @@
 </section>
 
 <!-- datos generados -->
-<script defer src="js/app.min.js?v=cfde12513c"></script>
+<script defer src="js/app.min.js?v=e2cad24aeb"></script>
 </body>
 </html>

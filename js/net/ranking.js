@@ -38,8 +38,8 @@ G.Ranking = (() => {
   const MIN_KILLS = 10;
   // Bảng xếp hạng theo từng Pokémon chỉ tính trong Mọi thời đại (tối thiểu 120s)
   const MIN_T_MON = 120;
-  // Cache đọc bảng: 2 giờ trong localStorage
-  const TTL = 2 * 3600 * 1000;
+  // Cache đọc bảng: 5 phút trong localStorage (cập nhật mới kịp thời, không hiển thị thành tích cũ)
+  const TTL = 5 * 60 * 1000;
   const GEN = 'vn1';
   const ALL = 'all_vn1';
 
@@ -260,94 +260,62 @@ G.Ranking = (() => {
           return;
         }
 
-        let newSum = null;
         let wrote = false;
+        const docRef = col(b).doc(id);
+        const oldSnap = await docRef.get().catch(() => null);
+        const o = (oldSnap && oldSnap.exists) ? oldSnap.data() : null;
+        const oldMaxK = o ? (o.maxKills != null ? o.maxKills : (o.kills || 0)) : 0;
+        const oldMaxT = o ? (o.maxTime != null ? o.maxTime : (o.t || 0)) : 0;
 
-        await fb.fs.runTransaction(async tx => {
-          const s = await tx.get(sumRef(b));
-          const old = await tx.get(col(b).doc(id));
-          const sd = s.exists ? s.data() : {};
-          const ktop = Object.assign({}, sd.ktop || {});
-          const ttop = Object.assign({}, sd.ttop || {});
+        const isRealUpK = entry.kills > oldMaxK;
+        const isRealUpT = entry.t > oldMaxT;
 
-          const o = old.exists ? old.data() : null;
-          const oldMaxK = o ? (o.maxKills || o.kills || 0) : 0;
-          const oldMaxT = o ? (o.maxTime || o.t || 0) : 0;
-
-          const upK = entry.kills > oldMaxK;
-          const upT = entry.t > oldMaxT;
-
-          if (!upK && !upT) return; // Không có kỷ lục nào bị phá
-
-          // Xây dựng tài liệu mới với 2 kỷ lục độc lập
-          const newDoc = {
-            maxKills: upK ? entry.kills : oldMaxK,
-            timeAtMaxKills: upK ? entry.t : (o ? (o.timeAtMaxKills || o.t || 0) : 0),
-            dexAtMaxKills: upK ? entry.dex : (o ? (o.dexAtMaxKills || o.dex || entry.dex) : entry.dex),
-            shinyAtMaxKills: upK ? entry.shiny : (o ? (o.shinyAtMaxKills || o.shiny || entry.shiny) : entry.shiny),
-            lvAtMaxKills: upK ? entry.lv : (o ? (o.lvAtMaxKills || o.lv || 1) : 1),
-
-            maxTime: upT ? entry.t : oldMaxT,
-            killsAtMaxTime: upT ? entry.kills : (o ? (o.killsAtMaxTime || o.kills || 0) : 0),
-            dexAtMaxTime: upT ? entry.dex : (o ? (o.dexAtMaxTime || o.dex || entry.dex) : entry.dex),
-            shinyAtMaxTime: upT ? entry.shiny : (o ? (o.shinyAtMaxTime || o.shiny || entry.shiny) : entry.shiny),
-            lvAtMaxTime: upT ? entry.lv : (o ? (o.lvAtMaxTime || o.lv || 1) : 1),
-
-            uids: entry.uids,
-            names: entry.names,
-            at: firebase.firestore.FieldValue.serverTimestamp()
-          };
-
-          let ev_k = '', ev_t = '';
-          let inK = false, inT = false;
-
-          // Cập nhật Top 50 Diệt Quái
-          if (upK) {
-            if (id in ktop || Object.keys(ktop).length < TOP) inK = true;
-            else {
-              const low = sortedKills(ktop).pop();
-              if (low.kills < newDoc.maxKills || (low.kills === newDoc.maxKills && low.t < newDoc.timeAtMaxKills)) {
-                ev_k = low.id;
-                delete ktop[ev_k];
-                inK = true;
-              }
-            }
-            if (inK) ktop[id] = rowK(newDoc);
-          }
-
-          // Cập nhật Top 50 Sinh Tồn
-          if (upT) {
-            if (id in ttop || Object.keys(ttop).length < TOP) inT = true;
-            else {
-              const low = sortedTime(ttop).pop();
-              if (low.t < newDoc.maxTime || (low.t === newDoc.maxTime && low.kills < newDoc.killsAtMaxTime)) {
-                ev_t = low.id;
-                delete ttop[ev_t];
-                inT = true;
-              }
-            }
-            if (inT) ttop[id] = rowT(newDoc);
-          }
-
-          if (!inK && !inT && topOnly) return;
-
-          tx.set(col(b).doc(id), newDoc);
-          tx.set(sumRef(b), {
-            ktop,
-            ttop,
-            me_k: inK ? id : '',
-            ev_k,
-            me_t: inT ? id : '',
-            ev_t
-          });
-          newSum = { ktop, ttop };
-          wrote = true;
-        });
-
-        if (newSum) {
-          cacheSet('S:' + b, newSum);
-          noteTop(b, newSum);
+        if (!isRealUpK && !isRealUpT && o) {
+          known[keyK] = oldMaxK;
+          known[keyT] = oldMaxT;
+          return;
         }
+
+        const newDoc = {
+          maxKills: isRealUpK ? entry.kills : oldMaxK,
+          timeAtMaxKills: isRealUpK ? entry.t : (o ? (o.timeAtMaxKills || o.t || 0) : 0),
+          dexAtMaxKills: isRealUpK ? entry.dex : (o ? (o.dexAtMaxKills || o.dex || entry.dex) : entry.dex),
+          shinyAtMaxKills: isRealUpK ? entry.shiny : (o ? (o.shinyAtMaxKills || o.shiny || entry.shiny) : entry.shiny),
+          lvAtMaxKills: isRealUpK ? entry.lv : (o ? (o.lvAtMaxKills || o.lv || 1) : 1),
+
+          maxTime: isRealUpT ? entry.t : oldMaxT,
+          killsAtMaxTime: isRealUpT ? entry.kills : (o ? (o.killsAtMaxTime || o.kills || 0) : 0),
+          dexAtMaxTime: isRealUpT ? entry.dex : (o ? (o.dexAtMaxTime || o.dex || entry.dex) : entry.dex),
+          shinyAtMaxTime: isRealUpT ? entry.shiny : (o ? (o.shinyAtMaxTime || o.shiny || entry.shiny) : entry.shiny),
+          lvAtMaxTime: isRealUpT ? entry.lv : (o ? (o.lvAtMaxTime || o.lv || 1) : 1),
+
+          kills: isRealUpK ? entry.kills : oldMaxK,
+          t: isRealUpT ? entry.t : oldMaxT,
+          lv: Math.max(entry.lv || 1, o ? (o.lv || 1) : 1),
+          dex: entry.dex,
+          shiny: entry.shiny,
+
+          uids: entry.uids,
+          names: entry.names,
+          at: (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue)
+            ? firebase.firestore.FieldValue.serverTimestamp()
+            : new Date().toISOString()
+        };
+
+        // Ghi trực tiếp vào document của chính mình (chỉ 1 document write, an toàn tuyệt đối)
+        await docRef.set(newDoc);
+        wrote = true;
+
+        known[keyK] = newDoc.maxKills;
+        known[keyT] = newDoc.maxTime;
+
+        // Cập nhật ngay vào cache hiển thị nếu bảng này đang mở
+        let cachedSum = cacheGet('S:' + b);
+        if (!cachedSum) cachedSum = { ktop: {}, ttop: {} };
+        if (isRealUpK) cachedSum.ktop[id] = rowK(newDoc);
+        if (isRealUpT) cachedSum.ttop[id] = rowT(newDoc);
+        cacheSet('S:' + b, cachedSum);
+        noteTop(b, cachedSum);
 
         known[keyK] = Math.max(known[keyK] || 0, entry.kills);
         known[keyT] = Math.max(known[keyT] || 0, entry.t);
@@ -368,7 +336,7 @@ G.Ranking = (() => {
     if (!better.length) return;
     const names = { d: 'hôm nay', w: 'tuần này', m: 'tháng này', a: 'mọi thời đại' };
     const best = PERIODS.map(p => p[0]).filter(p => better.includes(p)).pop();
-    G.UI.toast('🎉 Kỷ lục mới ' + (names[best] || '') + ' trên Bảng Xếp Hạng!', 3600);
+    if (G.UI && G.UI.toast) G.UI.toast('🎉 Kỷ lục mới ' + (names[best] || '') + ' trên Bảng Xếp Hạng!', 3600);
   }
 
   // ---------------- Ghi nhận điểm Solo & Nhóm ----------------
@@ -449,16 +417,61 @@ G.Ranking = (() => {
     const c = cacheGet('S:' + b);
     if (c !== undefined) return c;
     if (!inflight.has(b)) {
-      inflight.set(b, sumRef(b).get().then(s => {
-        const d = s.exists ? s.data() : {};
-        const sum = {
-          ktop: d.ktop || {},
-          ttop: d.ttop || d.top || {}
-        };
-        cacheSet('S:' + b, sum);
-        noteTop(b, sum);
-        return sum;
-      }).finally(() => inflight.delete(b)));
+      inflight.set(b, (async () => {
+        try {
+          const fb = fbx();
+          if (!fb) return { ktop: {}, ttop: {} };
+
+          // 1. Thử đọc từ tài liệu tổng hợp nếu có
+          let d = null;
+          try {
+            const s = await sumRef(b).get();
+            if (s.exists) d = s.data();
+          } catch (e) {}
+
+          if (d && (d.ktop || d.ttop || d.top)) {
+            const sum = {
+              ktop: d.ktop || {},
+              ttop: d.ttop || d.top || {}
+            };
+            cacheSet('S:' + b, sum);
+            noteTop(b, sum);
+            return sum;
+          }
+
+          // 2. Truy vấn trực tiếp từ bảng cá nhân col(b).doc(id)
+          const [snapK, snapT] = await Promise.all([
+            col(b).orderBy('maxKills', 'desc').limit(TOP).get().catch(() => null),
+            col(b).orderBy('maxTime', 'desc').limit(TOP).get().catch(() => null)
+          ]);
+
+          const ktop = {};
+          if (snapK && snapK.docs) {
+            snapK.docs.forEach(doc => {
+              const row = rowK(doc.data());
+              row.id = doc.id;
+              ktop[doc.id] = row;
+            });
+          }
+
+          const ttop = {};
+          if (snapT && snapT.docs) {
+            snapT.docs.forEach(doc => {
+              const row = rowT(doc.data());
+              row.id = doc.id;
+              ttop[doc.id] = row;
+            });
+          }
+
+          const sum = { ktop, ttop };
+          cacheSet('S:' + b, sum);
+          noteTop(b, sum);
+          return sum;
+        } catch (err) {
+          console.warn('[Ranking] Lỗi khi nạp dữ liệu bảng', b, err.code || err.message);
+          return { ktop: {}, ttop: {} };
+        }
+      })().finally(() => inflight.delete(b)));
     }
     return inflight.get(b);
   }

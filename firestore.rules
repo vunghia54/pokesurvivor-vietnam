@@ -188,19 +188,10 @@ service cloud.firestore {
       allow delete: if signedIn() && (me() in resource.data.uids || admin());
     }
 
-    // Resumen Top 50 Diệt Quái (ktop) & Top 50 Sinh Tồn (ttop) trong 1 tài liệu duy nhất (lbs/{board})
-    function validTop(board) {
-      let d = request.resource.data;
-      let knew = d.get('ktop', {});
-      let tnew = d.get('ttop', d.get('top', {}));
-      return d.keys().hasOnly(['ktop', 'ttop', 'me_k', 'ev_k', 'me_t', 'ev_t', 'top', 'me', 'ev', 'dtop', 'dev'])
-        && knew is map && knew.size() <= 50
-        && tnew is map && tnew.size() <= 50;
-    }
-
+    // Tài liệu tổng hợp lbs/{board}: chỉ cho phép đọc, KHÔNG cho client tự ý sửa
     match /lbs/{board} {
-      allow read: if true; // Cho phép khách xem bảng xếp hạng công khai
-      allow create, update: if signedIn() && validTop(board);
+      allow read: if true; // Cho phép xem bảng xếp hạng công khai
+      allow write: if admin(); // Chỉ admin mới có quyền ghi, chống giả mạo toàn bộ bảng Top 50
     }
 
     // Presencia aproximada: "en línea" si at es de hace menos de unos minutos.
