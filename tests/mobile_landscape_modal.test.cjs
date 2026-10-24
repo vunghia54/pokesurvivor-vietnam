@@ -24,18 +24,26 @@ test('Landscape & Modal: CSS includes multi-factor landscape & coarse-pointer br
   );
 });
 
-test('Landscape & Modal: Topbar hides standalone logout and prevents horizontal overflow', () => {
+test('Landscape & Modal: Topbar hides standalone logout and anchors cleanly to safe-area', () => {
   assert.ok(
     styleCss.includes('.topbar-actions #btn-logout {\n    display: none !important;'),
     'Hides logout button from topbar in mobile & landscape'
   );
   assert.ok(
-    styleCss.includes('max-width: calc(100vw - 12px)'),
-    'Restricts topbar max-width to avoid viewport overflow'
+    styleCss.includes('left: max(8px, env(safe-area-inset-left, 8px));'),
+    'Anchors topbar to left safe area to prevent left info from being pushed offscreen'
   );
   assert.ok(
-    styleCss.includes('left: auto;'),
-    'Positions topbar neatly on the right'
+    styleCss.includes('right: max(8px, env(safe-area-inset-right, 8px));'),
+    'Anchors topbar to right safe area'
+  );
+  assert.ok(
+    styleCss.includes('.topbar-info {\n    order: 1;\n    justify-content: flex-start;'),
+    'Aligns player info row to the left safe-area so online, coins, tickets are never clipped'
+  );
+  assert.ok(
+    styleCss.includes('.topbar-actions {\n    order: 2;\n    justify-content: flex-end;'),
+    'Aligns action buttons row to the right safe-area'
   );
 });
 
