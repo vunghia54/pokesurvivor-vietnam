@@ -1,49 +1,60 @@
-/* ============ ranking-ui.js — pantalla del ranking ============
- * Pestañas Solo / Grupo, periodo (diario ... histórico), todos o sólo amigos,
- * filtro por Pokémon (sólo en el histórico) y tu puesto abajo aunque no salgas
- * en el top. Lo leído se guarda 2 h (ver ranking.js).
- * Dos mitades (23-10-2026): a la izquierda el daño a Arceus y a la derecha el
- * tiempo aguantado. Salen de la misma lectura (el mismo resumen).
+/* ============ ranking-ui.js — Giao diện Bảng Xếp Hạng Diệt Quái & Sinh Tồn ============
+ * PokéSurvivor Việt Nam v1.2:
+ *   - Hai bảng xếp hạng chính hiển thị song song: DIỆT QUÁI & SINH TỒN
+ *   - Bộ lọc: Chế độ (Solo Thường / Solo 8 Chiêu / Nhóm), Kỳ (Hôm nay / Tuần này / Tháng này / Mọi thời đại)
+ *   - Lọc theo Pokémon trong mục Mọi thời đại
+ *   - Xem được ở chế độ Khách (Guest Read-Only), nhắc đăng nhập Google để lưu điểm
  */
 G.RankingUI = (() => {
   const $ = G.UI.$;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  let mode = 's', period = 'w', scope = 'all', dex = null;
+  let mode = 's';       // 's' | 'sm' | 'g' | 'gm'
+  let period = 'd';     // 'd' | 'w' | 'm' | 'a'
+  let scope = 'all';    // 'all' | 'friends'
+  let view = 'both';    // 'both' | 'kills' | 'time'
+  let dex = null;
   let token = 0;
 
   function init() {
     const dl = $('rk-dl');
-    dl.innerHTML = G.DEX.map(p => `<option value="${esc(G.T(p.name))}">`).join('');
-    $('rk-poke').onchange = () => {
-      const v = $('rk-poke').value.trim().toLowerCase();
-      const p = G.DEX.find(x => (x.name.toLowerCase() === v || G.T(x.name).toLowerCase() === v));
-      if (!v) { setDex(null); return; }
-      if (!p) { G.UI.toast('No hay ningún Pokémon con ese nombre'); return; }
-      setDex(p.dex);
-    };
-    $('rk-clear').onclick = () => { $('rk-poke').value = ''; setDex(null); };
-    $('rk-mod').onclick = () => G.ModUI.open();
+    if (dl) dl.innerHTML = G.DEX.map(p => `<option value="${esc(G.T(p.name))}">`).join('');
+    const pokeInp = $('rk-poke');
+    if (pokeInp) {
+      pokeInp.onchange = () => {
+        const v = pokeInp.value.trim().toLowerCase();
+        const p = G.DEX.find(x => (x.name.toLowerCase() === v || G.T(x.name).toLowerCase() === v));
+        if (!v) { setDex(null); return; }
+        if (!p) { G.UI.toast('Không tìm thấy Pokémon này'); return; }
+        setDex(p.dex);
+      };
+    }
+    const clearBtn = $('rk-clear');
+    if (clearBtn) clearBtn.onclick = () => { if (pokeInp) pokeInp.value = ''; setDex(null); };
+    const modBtn = $('rk-mod');
+    if (modBtn) modBtn.onclick = () => G.ModUI.open();
   }
 
-  /** El filtro por Pokémon sólo existe en el histórico: al elegir uno se pasa a esa pestaña. */
   function setDex(d) {
     dex = d;
     if (d && period !== 'a') period = 'a';
-    $('rk-clear').classList.toggle('hidden', !d);
-    tabs(); load();
+    const clearBtn = $('rk-clear');
+    if (clearBtn) clearBtn.classList.toggle('hidden', !d);
+    tabs();
+    load();
   }
 
   function open() {
-    if (!G.SocialUI.needOnline()) return;
     G.UI.show('scr-rank', true);
-    if (!G.Social.started) G.Social.start();
-    $('rk-mod').classList.toggle('hidden', !G.Ranking.isAdmin());
+    if (G.Social && !G.Social.started && G.Social.start) G.Social.start();
+    const modBtn = $('rk-mod');
+    if (modBtn) modBtn.classList.toggle('hidden', !(G.Ranking && G.Ranking.isAdmin && G.Ranking.isAdmin()));
     tabs();
     load();
   }
 
   function tabs() {
     const mk = (box, items, cur, set, cls) => {
+      if (!box) return;
       box.innerHTML = '';
       for (const [k, label] of items) {
         const b = document.createElement('button');
@@ -53,113 +64,231 @@ G.RankingUI = (() => {
         box.appendChild(b);
       }
     };
-    mk($('rk-mode'), [['s', `<b>${G.Icons.html('user', 16)} Solo</b>`], ['g', `<b>${G.Icons.html('friends', 16)} Grupo</b>`]],
-       mode, k => { mode = k; }, 'gen-tab');
-    mk($('rk-period'), G.Ranking.PERIODS, period, k => {
+
+    // Chế độ chơi: Solo Thường, Solo 8 Chiêu, Nhóm Thường, Nhóm 8 Chiêu
+    mk($('rk-mode'), [
+      ['s', `<b>${G.Icons.html('user', 16)} Solo Thường</b>`],
+      ['sm', `<b>${G.Icons.html('user', 16)} ⚡ Solo 8 Chiêu</b>`],
+      ['g', `<b>${G.Icons.html('friends', 16)} Nhóm Thường</b>`],
+      ['gm', `<b>${G.Icons.html('friends', 16)} ⚡ Nhóm 8 Chiêu</b>`]
+    ], mode, k => { mode = k; }, 'gen-tab');
+
+    // Kỳ thời gian: Hôm nay, Tuần này, Tháng này, Mọi thời đại
+    mk($('rk-period'), [
+      ['d', 'Hôm nay'],
+      ['w', 'Tuần này'],
+      ['m', 'Tháng này'],
+      ['a', 'Mọi thời đại']
+    ], period, k => {
       period = k;
-      if (k !== 'a' && dex) { dex = null; $('rk-poke').value = ''; $('rk-clear').classList.add('hidden'); }
+      if (k !== 'a' && dex) {
+        dex = null;
+        if ($('rk-poke')) $('rk-poke').value = '';
+        if ($('rk-clear')) $('rk-clear').classList.add('hidden');
+      }
     }, 'chip');
-    mk($('rk-scope'), [['all', 'Todos'], ['friends', 'Sólo amigos']], scope, k => { scope = k; }, 'chip');
+
+    // Phạm vi: Tất cả, Bạn bè
+    mk($('rk-scope'), [
+      ['all', 'Tất cả'],
+      ['friends', 'Bạn bè']
+    ], scope, k => { scope = k; }, 'chip');
+
+    // Bộ lọc hiển thị cột: Cả hai, Chỉ Diệt Quái, Chỉ Sinh Tồn
+    mk($('rk-view'), [
+      ['both', 'Cả hai bảng'],
+      ['kills', 'Chỉ Diệt Quái'],
+      ['time', 'Chỉ Sinh Tồn']
+    ], view, k => {
+      view = k;
+      applyView();
+    }, 'chip');
+
+    applyView();
   }
 
-  const fmt = t => t >= 3600 ? Math.floor(t / 3600) + ':' + G.U.mmss(t % 3600).padStart(5, '0') : G.U.mmss(t);
+  function applyView() {
+    const colK = $('rk-col-kills');
+    const colT = $('rk-col-time');
+    const split = document.querySelector('.rk-split');
+    if (!colK || !colT) return;
+
+    if (view === 'kills') {
+      colK.classList.remove('hidden');
+      colT.classList.add('hidden');
+      if (split) split.style.gridTemplateColumns = '1fr';
+    } else if (view === 'time') {
+      colK.classList.add('hidden');
+      colT.classList.remove('hidden');
+      if (split) split.style.gridTemplateColumns = '1fr';
+    } else {
+      colK.classList.remove('hidden');
+      colT.classList.remove('hidden');
+      if (split) split.style.gridTemplateColumns = '';
+    }
+  }
+
+  const fmt = t => (t >= 3600 ? Math.floor(t / 3600) + ':' + G.U.mmss(t % 3600).padStart(5, '0') : G.U.mmss(t));
+  const num = n => (n || 0).toLocaleString(G.I18n.locale);
 
   async function load() {
     const my = ++token;
-    const list = $('rk-list'), dlist = $('rk-dlist');
-    list.innerHTML = dlist.innerHTML = '<p class="sub">Cargando…</p>';
-    $('rk-me').innerHTML = $('rk-dme').innerHTML = '';
-    let rows = [], me = null, dmg = { rows: [], me: null };
+    const klist = $('rk-klist');
+    const tlist = $('rk-tlist');
+    const kme = $('rk-kme');
+    const tme = $('rk-tme');
+
+    if (klist) klist.innerHTML = '<p class="sub">Đang tải bảng Diệt Quái…</p>';
+    if (tlist) tlist.innerHTML = '<p class="sub">Đang tải bảng Sinh Tồn…</p>';
+    if (kme) kme.innerHTML = '';
+    if (tme) tme.innerHTML = '';
+
+    let kRows = [], tRows = [];
+    let meK = null, meT = null;
+
     try {
-      [rows, me, dmg] = await Promise.all([
-        G.Ranking.top(mode, period, dex, scope === 'friends'),
-        G.Social.me ? G.Ranking.myRank(mode, period, dex) : Promise.resolve(null),
-        dex ? Promise.resolve(dmg) : G.Ranking.topDmg(mode, period, scope === 'friends')
+      [kRows, tRows, meK, meT] = await Promise.all([
+        G.Ranking.topKills(mode, period, dex, scope === 'friends'),
+        G.Ranking.topTime(mode, period, dex, scope === 'friends'),
+        G.Social && G.Social.me ? G.Ranking.myRankKills(mode, period, dex) : Promise.resolve(null),
+        G.Social && G.Social.me ? G.Ranking.myRankTime(mode, period, dex) : Promise.resolve(null)
       ]);
     } catch (e) {
       if (my !== token) return;
-      list.innerHTML = dlist.innerHTML = '<p class="sub">No se pudo cargar el ranking (' + esc(e.code || e.message) + ').</p>';
+      const errMsg = '<p class="sub">Không thể tải bảng xếp hạng (' + esc(e.code || e.message) + ').</p>';
+      if (klist) klist.innerHTML = errMsg;
+      if (tlist) tlist.innerHTML = errMsg;
       return;
     }
+
     if (my !== token) return;
-    list.innerHTML = dlist.innerHTML = '';
-    if (!rows.length) {
-      list.innerHTML = '<p class="sub">Todavía no hay marcas aquí. ¡Sé el primero!</p>';
-    }
-    const uid = G.Social.uid;
-    const b = G.Ranking.board(mode, period, dex), done = G.Ranking.reported();
-    rows.forEach((r, i) => list.appendChild(rowEl(r, i + 1, r.uids.includes(uid), b, done)));
+    if (klist) klist.innerHTML = '';
+    if (tlist) tlist.innerHTML = '';
 
-    // Daño a Arceus (no hay por Pokémon).
-    if (dex) dlist.innerHTML = '<p class="sub">El daño a Arceus no tiene ranking por Pokémon.</p>';
-    else if (!dmg.rows.length) dlist.innerHTML = '<p class="sub">Todavía nadie le ha hecho daño a Arceus aquí. ¡Llega al minuto 30 y pégale!</p>';
-    const db = G.Ranking.board(mode, period);
-    dmg.rows.forEach((r, i) => dlist.appendChild(rowEl(r, i + 1, r.uids.includes(uid), db, done, true)));
-    const dme = $('rk-dme');
-    dme.setAttribute('translate', 'no');
-    dme.textContent = dex || !dmg.me ? '' : dmg.me.out ? G.T('Aún no estás en el top 50 de daño.')
-      : G.I18n.f('Tu puesto: {x}', '#' + dmg.me.pos) + ' · ' + num(dmg.me.d);
-    dme.classList.toggle('hidden', !dme.textContent);
+    const uid = G.Social ? G.Social.uid : null;
+    const b = G.Ranking.board(mode, period, dex);
+    const done = G.Ranking.reported ? G.Ranking.reported() : new Set();
 
-    // La frase se monta en cada idioma (traducirla por trozos sale rara).
-    const lang = G.I18n.lang, en = lang === 'en', pos = '#' + (me && me.capped ? '1000+' : me && me.pos);
-    if (lang !== 'es' && !en) {
-      // Otros idiomas: frases enteras sin periodo ni Pokémon (ya se ven en los filtros).
-      const rk = $('rk-me');
-      rk.setAttribute('translate', 'no');
-      rk.textContent = !G.Social.me ? G.T('Elige un apodo (en Amigos) para salir en el ranking.')
-        : me && me.out ? G.T('Aún no estás en el top 50. Tu puesto está en Histórico.')
-        : me ? G.I18n.f('Tu mejor puesto: {x}', pos) + ' · ' + fmt(me.t)
-        : G.T('Aún no tienes marca.');
-      return;
+    // 1. Render Bảng Diệt Quái
+    if (!kRows.length) {
+      if (klist) klist.innerHTML = '<p class="sub">Chưa có thành tích diệt quái. Hãy là người đầu tiên ghi danh!</p>';
+    } else {
+      kRows.forEach((r, i) => {
+        if (klist) klist.appendChild(rowEl(r, i + 1, uid && r.uids.includes(uid), b, done, 'kills'));
+      });
     }
-    const pn = en ? { d: 'today', w: 'this week', m: 'this month', y: 'this year', a: 'of all time' }[period]
-                  : { d: 'de hoy', w: 'de esta semana', m: 'de este mes', y: 'de este año', a: 'de siempre' }[period];
-    const mon = dex ? G.DEX_BY[dex].name : '';
-    const where = en ? (mode === 's' ? 'solo' : 'group') + (dex ? ' with ' + mon : '')
-                     : (mode === 's' ? 'en solitario' : 'en grupo') + (dex ? ' con ' + mon : '');
-    $('rk-me').removeAttribute('translate');
-    $('rk-me').innerHTML = !G.Social.me ? 'Elige un apodo (en Amigos) para salir en el ranking.'
-      : me && me.out ? (en ? `<span translate="no">You're not in the top 50 ${where} ${pn} yet. Your rank is in All-time.</span>`
-                           : `Aún no estás en el top 50 ${pn} ${where}. Tu puesto está en Histórico.`)
-      : me ? (en ? `<span translate="no">Your best ${where} rank ${pn}: <b class="gold">${pos}</b> · ${fmt(me.t)}</span>`
-                 : `Tu mejor puesto ${pn} ${where}: <b class="gold">${pos}</b> · ${fmt(me.t)}`)
-      : (en ? `<span translate="no">You don't have a ${where} record ${pn} yet.</span>` : `Aún no tienes marca ${pn} ${where}.`);
+
+    // 2. Render Bảng Sinh Tồn
+    if (!tRows.length) {
+      if (tlist) tlist.innerHTML = '<p class="sub">Chưa có thành tích sinh tồn. Hãy là người đầu tiên ghi danh!</p>';
+    } else {
+      tRows.forEach((r, i) => {
+        if (tlist) tlist.appendChild(rowEl(r, i + 1, uid && r.uids.includes(uid), b, done, 'time'));
+      });
+    }
+
+    // 3. Render Footer Hạng Cá Nhân
+    renderMe(kme, meK, 'kills');
+    renderMe(tme, meT, 'time');
   }
 
-  const num = n => (n || 0).toLocaleString(G.I18n.locale);
+  function renderMe(el, me, type) {
+    if (!el) return;
+    if (!G.Social || !G.Social.me) {
+      el.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
+        '<span style="color:var(--muted)">Chế độ khách (chưa liên kết tài khoản).</span>' +
+        '<button class="btn small gold" style="white-space:nowrap" onclick="G.LoginUI.open()">Đăng nhập Google</button>' +
+        '</div>';
+      return;
+    }
 
-  /** Una fila: de tiempo o, con dmg, de daño a Arceus. */
-  function rowEl(r, pos, mine, b, done, dmg = false) {
+    if (!me) {
+      el.innerHTML = '<span style="color:var(--muted)">Chưa có dữ liệu xếp hạng trong kỳ này.</span>';
+      return;
+    }
+
+    if (me.out) {
+      if ((type === 'kills' && me.kills > 0) || (type === 'time' && me.t > 0)) {
+        if (type === 'kills') {
+          el.innerHTML = `Kỷ lục cá nhân: <b style="color:var(--gold)">${num(me.kills)} quái</b> <small style="color:var(--muted)">(Sống sót ${fmt(me.t)} · Ngoài Top 50)</small>`;
+        } else {
+          el.innerHTML = `Kỷ lục cá nhân: <b style="color:var(--gold)">${fmt(me.t)}</b> <small style="color:var(--muted)">(${num(me.kills)} quái · Ngoài Top 50)</small>`;
+        }
+      } else {
+        el.innerHTML = '<span style="color:var(--muted)">Bạn chưa lọt vào Top 50 trong kỳ này. Hãy nỗ lực phá vỡ kỷ lục!</span>';
+      }
+      return;
+    }
+
+    const pos = '#' + me.pos;
+    if (type === 'kills') {
+      el.innerHTML = `Thành tích của bạn: <b class="gold">${pos}</b> · <b style="color:var(--gold)">${num(me.kills)} quái</b> <small style="color:var(--muted)">(Sống sót ${fmt(me.t)})</small>`;
+    } else {
+      el.innerHTML = `Thành tích của bạn: <b class="gold">${pos}</b> · <b style="color:var(--gold)">${fmt(me.t)}</b> <small style="color:var(--muted)">(${num(me.kills)} quái)</small>`;
+    }
+  }
+
+  function rowEl(r, pos, mine, b, done, type) {
     const el = document.createElement('div');
     el.className = 'rk-row' + (mine ? ' mine' : '') + (pos <= 3 ? ' top' + pos : '');
     el.insertAdjacentHTML('beforeend', `<span class="pos">${pos <= 3 ? G.Icons.html('trophy', 20) : ''}${pos}</span>`);
+
     const mons = document.createElement('span');
     mons.className = 'mons';
-    r.dex.forEach((d, i) => { if (G.DEX_BY[d]) mons.appendChild(G.UI.spriteCanvas(d, 44, 40, { scale: 1, shiny: !!r.shiny[i] })); });
+    if (r.dex && r.dex.length) {
+      r.dex.forEach((d, i) => {
+        if (G.DEX_BY && G.DEX_BY[d]) {
+          mons.appendChild(G.UI.spriteCanvas(d, 44, 40, { scale: 1, shiny: !!(r.shiny && r.shiny[i]) }));
+        }
+      });
+    }
     el.appendChild(mons);
-    el.insertAdjacentHTML('beforeend',
-      `<span class="who"><b translate="no">${r.names.map((n, i) => `<a href="#" class="plink" data-u="${esc(r.uids[i] || '')}">${esc(n)}</a>`).join(' · ')}</b>${dmg ? '' : `<small>Nv. ${r.lv || 1} · ${num(r.kills)} derrotados</small>`}</span>
-       <span class="time">${dmg ? num(r.d) : fmt(r.t)}</span>`);
-    el.querySelectorAll('.plink').forEach(a => { a.onclick = e => { e.preventDefault(); G.ProfileUI.show(a.dataset.u); }; });
-    // Reportar una marca sospechosa (no la tuya). Lo revisa el admin (mod-ui.js).
-    if (!mine && G.Social.me) {
+
+    const namesHtml = r.names.map((n, i) =>
+      `<a href="#" class="plink" data-u="${esc((r.uids && r.uids[i]) || '')}">${esc(n)}</a>`
+    ).join(' · ');
+
+    if (type === 'kills') {
+      el.insertAdjacentHTML('beforeend',
+        `<span class="who"><b translate="no">${namesHtml}</b><small>Thời gian: ${fmt(r.t)} · Cấp ${r.lv || 1}</small></span>
+         <span class="time" style="color:var(--gold);font-weight:bold">${num(r.kills)}<small style="font-size:12px;margin-left:3px;font-weight:normal">quái</small></span>`
+      );
+    } else {
+      el.insertAdjacentHTML('beforeend',
+        `<span class="who"><b translate="no">${namesHtml}</b><small>${num(r.kills)} quái · Cấp ${r.lv || 1}</small></span>
+         <span class="time" style="color:var(--gold);font-weight:bold">${fmt(r.t)}</span>`
+      );
+    }
+
+    el.querySelectorAll('.plink').forEach(a => {
+      a.onclick = e => {
+        e.preventDefault();
+        if (G.ProfileUI && G.ProfileUI.show) G.ProfileUI.show(a.dataset.u);
+      };
+    });
+
+    // Nút báo cáo gian lận
+    if (!mine && G.Social && G.Social.me) {
       const rep = document.createElement('button');
       const sent = done.has(b + '__' + r.id);
       rep.className = 'rk-rep' + (sent ? ' sent' : '');
-      rep.title = sent ? 'Ya la has reportado' : 'Reportar marca sospechosa';
+      rep.title = sent ? 'Đã báo cáo' : 'Báo cáo điểm nghi vấn';
       rep.innerHTML = G.Icons.html('flag', 16);
       rep.onclick = async () => {
-        if (rep.classList.contains('sent')) { G.UI.toast('Ya has reportado esta marca'); return; }
-        if (!confirm('¿Reportar la marca de ' + r.names.join(', ') + ' como trampa?')) return;
-        rep.classList.add('sent'); rep.title = 'Ya la has reportado';
+        if (rep.classList.contains('sent')) { G.UI.toast('Bạn đã báo cáo bản ghi này'); return; }
+        if (!confirm('Báo cáo điểm số của ' + r.names.join(', ') + ' là gian lận?')) return;
+        rep.classList.add('sent');
+        rep.title = 'Đã báo cáo';
         await G.Ranking.report(b, r);
-        G.UI.toast('Gracias: la revisaremos');
+        G.UI.toast('Cảm ơn bạn: ban quản trị sẽ kiểm tra');
       };
       el.appendChild(rep);
-    } else el.appendChild(document.createElement('span'));
+    } else {
+      el.appendChild(document.createElement('span'));
+    }
+
     return el;
   }
 
-  return { init, open };
+  return { init, open, setDex };
 })();

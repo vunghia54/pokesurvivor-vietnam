@@ -147,103 +147,59 @@ service cloud.firestore {
       allow create, update: if false;
     }
 
-    // Una entrada sólo se puede mejorar, nunca empeorar: el tiempo (t) o el
-    // daño a Arceus (dmg, desde el 23-10-2026), sin bajar el otro. Anti-trampas:
-    //   - (el tope de 45 min se quitó el 23-10-2026: en el minuto 35 Arceus
-    //     rompe los objetos; sólo queda el de un día, por si acaso)
-    //   - nivel y derrotados con margen de sobra (un grupo de 4 muy bueno)
-    //   - la cuenta no puede estar baneada por el admin (saves/{uid}.ban; si aún
-    //     no ha guardado nunca en la nube, no tiene documento y no está baneada)
+    // PokéSurvivor Việt Nam v1.2:
+    // Hai bảng xếp hạng chính: DIỆT QUÁI (maxKills) & SINH TỒN (maxTime).
+    // Người chơi không cần đánh Arceus hay sống đến phút 30 để ghi nhận điểm.
     function validEntry(board, id) {
       let d = request.resource.data;
       let sv = /databases/$(database)/documents/saves/$(me());
-      let dmg = d.get('dmg', 0);
-      return d.keys().hasOnly(['t', 'uids', 'names', 'dex', 'shiny', 'lv', 'kills', 'dmg', 'at'])
-        && d.t is int && d.t > 0 && d.t <= 86400
-        && dmg is int && dmg >= 0
-        && d.lv is int && d.lv >= 1 && d.lv <= 10 + d.t / 4
-        && d.kills is int && d.kills >= 0 && d.kills <= 100 + d.t * 12
+      let maxK = d.get('maxKills', d.get('kills', 0));
+      let maxT = d.get('maxTime', d.get('t', 0));
+      let tAtK = d.get('timeAtMaxKills', d.get('t', 0));
+      let kAtT = d.get('killsAtMaxTime', d.get('kills', 0));
+      return d.keys().hasOnly([
+          'maxKills', 'timeAtMaxKills', 'dexAtMaxKills', 'shinyAtMaxKills', 'lvAtMaxKills',
+          'maxTime', 'killsAtMaxTime', 'dexAtMaxTime', 'shinyAtMaxTime', 'lvAtMaxTime',
+          't', 'kills', 'lv', 'dex', 'shiny', 'dmg',
+          'uids', 'names', 'at'
+        ])
+        && maxK is int && maxK >= 0 && maxK <= 100 + tAtK * 25
+        && maxT is int && maxT >= 0 && maxT <= 86400
+        && tAtK is int && tAtK >= 0 && tAtK <= 86400
+        && kAtT is int && kAtT >= 0 && kAtT <= 100 + maxT * 25
         && (!exists(sv) || get(sv).data.get('ban', false) == false)
         && d.uids is list && me() in d.uids
         && d.names is list && d.names.size() == d.uids.size()
-        && d.dex is list && d.dex.size() == d.uids.size()
-        && d.shiny is list && d.shiny.size() == d.uids.size()
         && d.at == request.time
-        && (board.matches('s_.*')
+        && ((board.matches('s_.*') || board.matches('sm_.*'))
               ? (d.uids.size() == 1 && id == me())
               : (d.uids.size() >= 2 && d.uids.size() <= 4 && id == d.uids.join('_')))
-        && (resource == null || (d.t >= resource.data.t && dmg >= resource.data.get('dmg', 0)
-              && (d.t > resource.data.t || dmg > resource.data.get('dmg', 0))));
+        && (resource == null || (
+              maxK >= resource.data.get('maxKills', resource.data.get('kills', 0))
+              && maxT >= resource.data.get('maxTime', resource.data.get('t', 0))
+              && (maxK > resource.data.get('maxKills', resource.data.get('kills', 0))
+                  || maxT > resource.data.get('maxTime', resource.data.get('t', 0)))
+            ));
     }
 
     match /lb/{board}/e/{id} {
-      allow read: if signedIn();
+      allow read: if true; // Cho phép khách xem bảng xếp hạng công khai
       allow create, update: if signedIn() && validEntry(board, id);
       allow delete: if signedIn() && (me() in resource.data.uids || admin());
     }
 
-    // Resumen con los dos top 50 de cada tabla (lo que se lee al mirar el ranking).
-    //   top:  { id: { t, uids, names, dex, shiny, lv, kills } }   tiempo aguantado
-    //   dtop: { id: { d, uids, names, dex, shiny } }              daño a Arceus (desde el 23-10-2026)
-    //   me:   la fila que añades o mejoras (debe coincidir con tu marca validada,
-    //         escrita en la misma transacción)
-    //   ev / dev: la fila que sale del top / del dtop (sólo si es peor que la tuya)
-    // Al borrar la cuenta: me = '' y ev (o dev) = una fila tuya que se quita.
+    // Resumen Top 50 Diệt Quái (ktop) & Top 50 Sinh Tồn (ttop) trong 1 tài liệu duy nhất (lbs/{board})
     function validTop(board) {
       let d = request.resource.data;
-      let old = resource == null ? {} : resource.data.top;
-      let dold = resource == null ? {} : resource.data.get('dtop', {});
-      let dnew = d.get('dtop', {});
-      let dev = d.get('dev', '');
-      let changed = d.top.diff(old).affectedKeys();
-      return d.keys().hasOnly(['top', 'me', 'ev', 'dtop', 'dev'])
-        && d.top is map && d.top.size() <= 50
-        && dnew is map && dnew.size() <= 50
-        && d.me is string && d.ev is string && dev is string
-        && (d.me == ''
-              ? (removeMine(d, old, changed, dold, dnew, dev) || adminRemove(d, old, dold, dnew))
-              : addMine(board, d, old, changed, dold, dnew, dev));
-    }
-    // Moderación: el admin sólo puede QUITAR filas de los dos top.
-    function adminRemove(d, old, dold, dnew) {
-      return admin() && old.keys().hasAll(d.top.keys()) && d.top.diff(old).changedKeys().size() == 0
-        && dold.keys().hasAll(dnew.keys()) && dnew.diff(dold).changedKeys().size() == 0;
-    }
-    // (Como mucho 7 argumentos por función: dchanged se calcula dentro.)
-    function addMine(board, d, old, changed, dold, dnew, dev) {
-      let e = getAfter(/databases/$(database)/documents/lb/$(board)/e/$(d.me)).data;
-      let dchanged = dnew.diff(dold).affectedKeys();
-      return me() in e.uids
-        && changed.hasOnly([d.me, d.ev])
-        && dchanged.hasOnly([d.me, dev])
-        && (!(d.me in changed) || (d.me in d.top && rowOk(d.top[d.me], e)))
-        && (!(d.me in dchanged) || (d.me in dnew && drowOk(dnew[d.me], e)))
-        && (d.ev == '' || (d.me in d.top && !(d.ev in d.top) && d.ev in old && old[d.ev].t <= e.t))
-        && (dev == '' || (d.me in dnew && !(dev in dnew) && dev in dold && dold[dev].d <= e.get('dmg', 0)));
-    }
-    // La fila del resumen es una COPIA exacta de la marca ya validada (validEntry):
-    // también nivel, derrotados y shiny (18-10-2026: sin esto se podía meter
-    // texto con código en el "nivel" y se ejecutaba en quien abría el ranking).
-    // shiny es opcional: si no hay ninguno, no se pone.
-    function rowOk(row, e) {
-      return row.keys().hasOnly(['t', 'uids', 'names', 'dex', 'shiny', 'lv', 'kills'])
-        && row.t == e.t && row.uids == e.uids && row.names == e.names && row.dex == e.dex
-        && row.lv == e.lv && row.kills == e.kills
-        && (!('shiny' in row) || row.shiny == e.shiny);
-    }
-    function drowOk(row, e) {
-      return row.keys().hasOnly(['d', 'uids', 'names', 'dex', 'shiny'])
-        && row.d == e.get('dmg', 0) && row.d > 0 && row.uids == e.uids && row.names == e.names && row.dex == e.dex
-        && (!('shiny' in row) || row.shiny == e.shiny);
-    }
-    function removeMine(d, old, changed, dold, dnew, dev) {
-      let dchanged = dnew.diff(dold).affectedKeys();
-      return (d.ev in old && me() in old[d.ev].uids && !(d.ev in d.top) && changed.hasOnly([d.ev]) && dchanged.size() == 0)
-        || (dev in dold && me() in dold[dev].uids && !(dev in dnew) && dchanged.hasOnly([dev]) && changed.size() == 0);
+      let knew = d.get('ktop', {});
+      let tnew = d.get('ttop', d.get('top', {}));
+      return d.keys().hasOnly(['ktop', 'ttop', 'me_k', 'ev_k', 'me_t', 'ev_t', 'top', 'me', 'ev', 'dtop', 'dev'])
+        && knew is map && knew.size() <= 50
+        && tnew is map && tnew.size() <= 50;
     }
 
     match /lbs/{board} {
-      allow read: if signedIn();
+      allow read: if true; // Cho phép khách xem bảng xếp hạng công khai
       allow create, update: if signedIn() && validTop(board);
     }
 

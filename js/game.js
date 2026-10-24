@@ -17,7 +17,7 @@
 G.Game = (() => {
   let cv, ctx, dpr = 1, w = 0, h = 0;
   let state = 'ui';
-  let time = 0, last = 0, pendingLevels = 0;
+  let time = 0, last = 0, pendingLevels = 0, lastCheckpoint = 0;
   let pl = null;
   let caught = [];          // shinies conseguidos en esta run
   let biome = -1;
@@ -159,8 +159,10 @@ G.Game = (() => {
     G.Sprites.preload([mon.dex], 8000, pl.shiny);
     G.Audio.music(G.BIOME_MUSIC[0]);
     // Para el ranking: el servidor apunta cuándo empieza la partida (anti-trampas).
-    if (!coop || G.Coop.isHost) G.Ranking.runStarted(coop ? 'g' : 's');
-    deathT = 0;
+    const autoModeInit = G.Settings ? (G.Settings.get('autoSkillMode') || 'simultaneous') : 'simultaneous';
+    const isMultiInit = autoModeInit === 'simultaneous';
+    if (!coop || G.Coop.isHost) G.Ranking.runStarted(coop ? (isMultiInit ? 'gm' : 'g') : (isMultiInit ? 'sm' : 's'));
+    deathT = 0; lastCheckpoint = 0;
 
     state = 'playing';
   }
@@ -360,12 +362,14 @@ G.Game = (() => {
     if (G.Social.me) G.Social.publishProfile();
 
     // Ranking: en solitario cada uno lo suyo; en grupo lo sube el anfitrión.
-    const mark = { t: Math.floor(time), lv: pl.level, kills: pl.kills, dmg: judge ? judge.dmg : 0 };   // dmg: a Arceus
-    // Chế độ Đồng thời (Multi-Cast) bảo vệ tính công bằng bảng xếp hạng gốc
     const autoMode = G.Settings ? (G.Settings.get('autoSkillMode') || 'simultaneous') : 'simultaneous';
     const isMultiCast = autoMode === 'simultaneous';
     const has8Slots = pl.maxMoves > 4 || (pl.slots && pl.slots.length > 4);
-    const ok = clean() && !isMultiCast && !has8Slots;
+    const isMulti = isMultiCast || has8Slots;
+    const mode = coop ? (isMulti ? 'gm' : 'g') : (isMulti ? 'sm' : 's');
+
+    const mark = { t: Math.floor(time), lv: pl.level, kills: pl.kills, mode, dmg: judge ? judge.dmg : 0 };
+    const ok = clean();
     const sent = ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.dex, shiny: pl.shiny }))
                : ok && wasHost ? G.Ranking.submitGroup(Object.assign(mark, { members: team })) : null;
     if (sent) sent.then(b => { if (b && b.some(p => p !== 'a')) G.DB.commit(true); }).catch(() => {});
@@ -707,6 +711,23 @@ G.Game = (() => {
       return;
     }
     time += dt;
+    if (time - lastCheckpoint >= 180 && clean()) {
+      lastCheckpoint = time;
+      if (!coop && G.Ranking && G.Ranking.checkpoint) {
+        const autoModeChk = G.Settings ? (G.Settings.get('autoSkillMode') || 'simultaneous') : 'simultaneous';
+        const isMultiCastChk = autoModeChk === 'simultaneous';
+        const has8SlotsChk = pl.maxMoves > 4 || (pl.slots && pl.slots.length > 4);
+        const modeChk = (isMultiCastChk || has8SlotsChk) ? 'sm' : 's';
+        G.Ranking.checkpoint({
+          t: Math.floor(time),
+          kills: pl.kills,
+          lv: pl.level,
+          mode: modeChk,
+          dex: pl.dex,
+          shiny: pl.shiny
+        });
+      }
+    }
 
     const b = Math.floor(time / 240);
     if (b !== biome && !G.Rift.inArena && !G.Judgment.active) {
