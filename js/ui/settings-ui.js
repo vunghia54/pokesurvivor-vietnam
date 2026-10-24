@@ -212,24 +212,34 @@ G.SettingsUI = (() => {
     wire(box);
   }
 
+  function isVN() {
+    return (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
+  }
+
   function renderAccount(box) {
+    const vn = isVN();
     const st = G.DB.guest ? 'guest' : G.DB.syncState;
-    const SYNC = { ok: 'Guardado en la nube', syncing: 'Guardando…', pending: 'Pendiente de subir (se sube al salir del juego)',
-                   offline: 'Sin conexión: se subirá al volver', local: 'Guardado sólo en este navegador', guest: 'Invitado: no se guarda' };
+    const SYNC = vn
+      ? { ok: 'Đã lưu trên đám mây', syncing: 'Đang lưu…', pending: 'Chờ tải lên (sẽ tải khi đóng game)',
+          offline: 'Mất kết nối: sẽ tải lên khi có mạng', local: 'Chỉ lưu trong trình duyệt này', guest: 'Khách: không lưu' }
+      : { ok: 'Guardado en la nube', syncing: 'Guardando…', pending: 'Pendiente de subir (se sube al salir del juego)',
+          offline: 'Sin conexión: se subirá al volver', local: 'Guardado sólo en este navegador', guest: 'Invitado: no se guarda' };
     if (G.DB.guest) {
-      box.innerHTML = section('Cuenta', 'Estás jugando como <b>invitado</b>: tu progreso no se guarda al salir.')
-        + `<button class="btn gold" id="set-login">Crear cuenta o entrar</button>`;
+      box.innerHTML = section(vn ? 'Tài khoản' : 'Cuenta', vn ? 'Bạn đang chơi với tư cách <b>Khách</b>: tiến trình không lưu khi thoát.' : 'Estás jugando como <b>invitado</b>: tu progreso no se guarda al salir.')
+        + `<button class="btn gold" id="set-login">${vn ? 'Tạo tài khoản hoặc đăng nhập' : 'Crear cuenta o entrar'}</button>`;
       return;
     }
     const nick = G.Social.me ? G.Social.me.name : (G.DB.user || '');
-    const kind = G.DB.mode === 'local' ? 'Cuenta de este navegador' : G.DB.nameAccount ? 'Nombre y contraseña' : 'Google';
-    box.innerHTML = section('Cuenta')
-      + `<div class="set-row"><div class="grow"><b>Apodo</b><small>Es único y no se puede cambiar.</small></div><span class="gold" translate="no">${esc(nick)}</span></div>`
-      + `<div class="set-row"><div class="grow"><b>Tipo de cuenta</b></div><span>${esc(kind)}</span></div>`
-      + `<div class="set-row"><div class="grow"><b>Partida</b></div><span>${esc(SYNC[st] || st)}</span></div>`
+    const kind = vn
+      ? (G.DB.mode === 'local' ? 'Tài khoản trình duyệt này' : G.DB.nameAccount ? 'Tên đăng nhập & mật khẩu' : 'Google')
+      : (G.DB.mode === 'local' ? 'Cuenta de este navegador' : G.DB.nameAccount ? 'Nombre y contraseña' : 'Google');
+    box.innerHTML = section(vn ? 'Tài khoản' : 'Cuenta')
+      + `<div class="set-row"><div class="grow"><b>${vn ? 'Biệt danh' : 'Apodo'}</b><small>${vn ? 'Tên duy nhất hiển thị cho bạn bè.' : 'Es único y no se puede cambiar.'}</small></div><span class="gold" translate="no">${esc(nick)}</span></div>`
+      + `<div class="set-row"><div class="grow"><b>${vn ? 'Loại tài khoản' : 'Tipo de cuenta'}</b></div><span>${esc(kind)}</span></div>`
+      + `<div class="set-row"><div class="grow"><b>${vn ? 'Trạng thái dữ liệu' : 'Partida'}</b></div><span>${esc(SYNC[st] || st)}</span></div>`
       + `<div class="row wrap" style="gap:8px;margin-top:12px">
-           <button class="btn" id="set-logout">Cerrar sesión</button>
-           <button class="btn danger" id="set-delete">Borrar cuenta</button>
+           <button class="btn" id="set-logout">${vn ? 'Đăng xuất' : 'Cerrar sesión'}</button>
+           <button class="btn danger" id="set-delete">${vn ? 'Xóa tài khoản' : 'Borrar cuenta'}</button>
          </div><p class="note" id="set-msg"></p>`;
   }
 

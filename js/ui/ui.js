@@ -35,11 +35,15 @@ G.UI = (() => {
     // Punto de sincronización: verde = guardado en la nube, amarillo = hay cambios
     // sin subir (sólo se suben con Guardar, desde el 20-10-2026), rojo = sin conexión.
     const st = G.DB.guest ? 'guest' : G.DB.syncState;
-    const TIP = { ok: 'Guardado en la nube', syncing: 'Guardando…', pending: 'Sin guardar en la nube: pulsa Guardar',
-                  offline: 'Sin conexión: pulsa Guardar cuando vuelva', local: 'Guardado sólo en este navegador', guest: 'Invitado: no se guarda' };
+    const vn = isVN();
+    const TIP = vn
+      ? { ok: 'Đã lưu trên đám mây', syncing: 'Đang lưu…', pending: 'Chưa lưu đám mây: bấm Lưu',
+          offline: 'Mất kết nối: bấm Lưu khi có mạng', local: 'Chỉ lưu trong trình duyệt này', guest: 'Khách: không lưu' }
+      : { ok: 'Guardado en la nube', syncing: 'Guardando…', pending: 'Sin guardar en la nube: pulsa Guardar',
+          offline: 'Sin conexión: pulsa Guardar cuando vuelva', local: 'Guardado sólo en este navegador', guest: 'Invitado: no se guarda' };
     $('user-pill').innerHTML = G.Icons.html(G.DB.guest ? 'user' : 'crown', 18) + ' <span translate="no">' + (G.DB.guest ? G.T('Invitado') : (G.DB.user || '')) + '</span>' +
       `<i class="sync ${st}" title="${TIP[st] || ''}"></i>`;
-    $('user-pill').title = TIP[st] || '';
+    $('user-pill').title = TIP[st] || (vn ? 'Tài khoản & Đồng bộ' : 'Cuenta y sincronización');
     // Botón Guardar: sólo con cuenta en la nube (en local ya se guarda al momento).
     const sb = $('btn-save');
     sb.classList.toggle('hidden', G.DB.guest || G.DB.mode !== 'cloud');  }
@@ -195,6 +199,11 @@ G.UI = (() => {
     };
     wireSounds();
     refreshSoundIcon();
+    const up = $('user-pill');
+    if (up) {
+      up.onclick = () => { if (G.SettingsUI && G.SettingsUI.open) G.SettingsUI.open('acc'); };
+      up.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (G.SettingsUI && G.SettingsUI.open) G.SettingsUI.open('acc'); } };
+    }
     $('btn-sound').onclick = () => {
       const p = $('sound-panel');
       p.classList.toggle('hidden');

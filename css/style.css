@@ -324,6 +324,9 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
   right: max(16px, env(safe-area-inset-right, 16px));
   display: flex; gap: 8px; align-items: center;
 }
+.topbar-row {
+  display: flex; gap: 8px; align-items: center;
+}
 #online-pill {
   cursor: default;
   user-select: none;
@@ -558,10 +561,19 @@ kbd {
 }
 
 .toast {
-  position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 60;
+  position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom, 24px)); transform: translateX(-50%); z-index: 90;
+  max-width: min(92vw, 420px);
   padding: 10px 18px; border-radius: 10px;
-  background: rgba(10,20,50,.95); border: 2px solid var(--edge);
-  text-shadow: 2px 2px 0 var(--shadow); animation: pop .2s ease-out;
+  background: rgba(10,20,50,.96); border: 2px solid var(--edge);
+  box-shadow: 0 4px 16px rgba(0,0,0,.6);
+  text-shadow: 2px 2px 0 var(--shadow);
+  text-align: center;
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
+  animation: pop .2s ease-out;
+  pointer-events: none;
 }
 
 ::-webkit-scrollbar { width: 10px; }
@@ -671,8 +683,11 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 
 .lob-card.empty { border-style: dashed; border-color: rgba(244,248,255,.18); color: var(--muted); }
 
 .invite-pop {
-  position: fixed; right: 18px; bottom: 54px; z-index: 70; width: min(340px, calc(100% - 32px));
-  padding: 14px 16px; animation: pop .2s ease-out;
+  position: fixed; right: max(14px, env(safe-area-inset-right, 14px)); bottom: max(50px, env(safe-area-inset-bottom, 50px)); z-index: 70;
+  width: min(340px, calc(100vw - 28px));
+  padding: 12px 14px; border-radius: 12px;
+  word-break: normal; overflow-wrap: break-word;
+  animation: pop .2s ease-out;
 }
 .invite-pop img { vertical-align: middle; }
 
@@ -991,7 +1006,7 @@ a.btn { text-decoration: none; display: inline-block; color: var(--ink); }
 @keyframes yt-rec { 50% { opacity: .25; } }
 @media (max-width: 760px) { .yt-btn:not(.live) span { display: none; } }
 /* Botón Guardar (barra de arriba). */
-.save-btn { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; }
+.save-btn { white-space: nowrap !important; flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-weight: 700; }
 #savenote-body p { line-height: 1.4; }
 .sup-tab { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 15px; }
 .sup-tab td { padding: 5px 4px; border-bottom: 1px solid rgba(255,255,255,.1); }
@@ -1041,7 +1056,8 @@ html:lang(zh) .btn, html:lang(zh) .chip { letter-spacing: 0; }
 /* Vietnamese: complete diacritics in DOM and enough height for stacked accents. */
 html:lang(vi) { --font: Arial, 'Segoe UI', system-ui, sans-serif; }
 html:lang(vi) body { line-height: 1.45; -webkit-font-smoothing: antialiased; }
-html:lang(vi) .btn, html:lang(vi) .chip, html:lang(vi) .tab { white-space: normal; overflow-wrap: anywhere; line-height: 1.35; letter-spacing: 0; }
+html:lang(vi) .btn, html:lang(vi) .chip, html:lang(vi) .tab { word-break: normal; overflow-wrap: break-word; line-height: 1.35; letter-spacing: 0; }
+html:lang(vi) .topbar .btn, html:lang(vi) .save-btn, html:lang(vi) .yt-btn, html:lang(vi) #btn-logout { white-space: nowrap !important; }
 html:lang(vi) .tabs { flex-wrap: wrap; }
 html:lang(vi) .row > * { min-width: 0; }
 html:lang(vi) .btn { max-width: 100%; }
@@ -1066,3 +1082,277 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
   .online-dot { width: 6px; height: 6px; }
   #user-pill { max-width: 90px; }
 }
+
+
+/* ============ TỐI ƯU TOÀN DIỆN GIAO DIỆN MOBILE V1.3.1 ============ */
+@media (max-width: 768px) {
+  /* Topbar 2 hàng gọn gàng, không đè menu hay logo */
+  .topbar {
+    top: max(6px, env(safe-area-inset-top, 6px));
+    right: max(8px, env(safe-area-inset-right, 8px));
+    left: max(8px, env(safe-area-inset-left, 8px));
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    pointer-events: none;
+  }
+  .topbar > * {
+    pointer-events: auto;
+  }
+  .topbar-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    justify-content: flex-end;
+    max-width: 100%;
+  }
+  .topbar-info {
+    order: 1;
+    flex-wrap: wrap;
+  }
+  .topbar-actions {
+    order: 2;
+    flex-wrap: nowrap;
+  }
+  .topbar-actions #btn-logout {
+    display: none; /* Đăng xuất được chuyển vào menu tài khoản */
+  }
+  .pill {
+    padding: 3px 8px;
+    font-size: 12px;
+    gap: 4px;
+    min-height: 28px;
+  }
+  #online-pill {
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+  .online-icon {
+    width: 14px;
+    height: 14px;
+  }
+  .online-dot {
+    width: 6px;
+    height: 6px;
+  }
+  #user-pill {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform .08s, border-color .15s;
+  }
+  #user-pill:hover, #user-pill:focus-visible {
+    border-color: var(--gold);
+  }
+  #user-pill:active {
+    transform: scale(0.96);
+  }
+  .topbar-actions .btn.small {
+    padding: 5px 8px;
+    min-width: 38px;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    flex-shrink: 0;
+  }
+  .save-btn {
+    padding: 5px 10px !important;
+    white-space: nowrap !important;
+    font-size: 13px !important;
+    min-width: auto;
+  }
+
+  /* Menu chính Mobile: Grid 2 cột ngón tay dễ bấm, không che Logo & Partner */
+  #scr-menu {
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: max(72px, calc(env(safe-area-inset-top, 0px) + 68px)) 10px max(16px, env(safe-area-inset-bottom, 16px)) !important;
+    gap: 6px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .menu-left {
+    padding: 4px 8px 2px !important;
+    min-height: auto !important;
+    flex: 0 0 auto !important;
+  }
+  .menu-left .logo {
+    margin-bottom: 2px !important;
+  }
+  .menu-left .logo .t1 {
+    font-size: clamp(24px, 6.5vw, 34px) !important;
+  }
+  .menu-left .logo .t2 {
+    font-size: clamp(11px, 3vw, 14px) !important;
+  }
+  .menu-left .splash {
+    top: 76% !important;
+    font-size: 10px !important;
+    transform: translateX(40%) rotate(-12deg) !important;
+  }
+  .partner-card {
+    margin-top: 2px !important;
+  }
+  #menu-partner {
+    height: clamp(80px, 14vh, 130px) !important;
+    width: auto !important;
+  }
+  .partner-card .nm {
+    font-size: 17px !important;
+  }
+  .partner-card .lv {
+    font-size: 11px !important;
+  }
+  .menu-right {
+    width: 100% !important;
+    background: transparent !important;
+    padding: 0 !important;
+    gap: 6px !important;
+    margin-top: 0 !important;
+    overflow: visible !important;
+  }
+  .menu-right > :first-child {
+    margin-top: 0 !important;
+  }
+  .menu-right > :last-child {
+    margin-bottom: 0 !important;
+  }
+  .menu-right .box {
+    padding: 8px 10px !important;
+  }
+  .menu-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+  .menu-item {
+    font-size: 14px !important;
+    padding: 6px 8px !important;
+    min-height: 44px !important;
+    display: grid !important;
+    grid-template-columns: 26px 1fr !important;
+    column-gap: 6px !important;
+    align-items: center !important;
+    border-radius: 8px !important;
+    background: rgba(10, 20, 50, 0.5) !important;
+    border: 1px solid rgba(244, 248, 255, 0.14) !important;
+  }
+  .menu-item:hover, .menu-item:focus-visible {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: var(--edge) !important;
+  }
+  .menu-item::before {
+    display: none !important;
+  }
+  .menu-item .mi-ico {
+    grid-row: span 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .menu-item .mi-ico img {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .menu-item small {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .menu-item.play {
+    grid-column: span 2 !important;
+    font-size: 20px !important;
+    padding: 8px 12px !important;
+    min-height: 48px !important;
+    background: linear-gradient(135deg, rgba(255, 210, 63, 0.22), rgba(255, 75, 75, 0.22)) !important;
+    border: 2px solid var(--gold) !important;
+    box-shadow: 0 0 10px rgba(255, 210, 63, 0.25) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+  .menu-item.play .mi-ico img {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  .menu-item.play small {
+    display: inline !important;
+    font-size: 11px !important;
+    color: #ffe37a !important;
+  }
+  #menu-stats {
+    font-size: 11.5px !important;
+    line-height: 1.35 !important;
+  }
+
+  /* Modals & Safe Area */
+  .scr:not(#scr-menu) {
+    padding: max(78px, calc(env(safe-area-inset-top, 0px) + 72px)) max(8px, env(safe-area-inset-right, 8px)) max(12px, env(safe-area-inset-bottom, 12px)) max(8px, env(safe-area-inset-left, 8px)) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start !important;
+  }
+  .sound-panel {
+    top: max(76px, calc(env(safe-area-inset-top, 0px) + 70px)) !important;
+    right: max(8px, env(safe-area-inset-right, 8px)) !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+  .btn.small {
+    min-height: 40px;
+    padding: 6px 12px;
+  }
+  .gen-tab {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    gap: 3px !important;
+  }
+  .topbar-row {
+    gap: 3px !important;
+  }
+  .pill {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+    min-height: 26px !important;
+  }
+  #online-pill {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+  }
+  .online-icon {
+    width: 13px !important;
+    height: 13px !important;
+  }
+  .online-dot {
+    width: 5px !important;
+    height: 5px !important;
+  }
+  #user-pill {
+    max-width: 95px !important;
+  }
+  .topbar-actions .btn.small {
+    padding: 4px 6px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+  }
+  .save-btn {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+  }
+}
+

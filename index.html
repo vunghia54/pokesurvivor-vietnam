@@ -81,7 +81,7 @@
 }
 </script>
 
-<link rel="stylesheet" href="css/style.css?v=221845349a">
+<link rel="stylesheet" href="css/style.css?v=c1bf532270">
 <script src="js/core/locales.js?v=ef7663e270"></script>
 <script src="js/noframe.js"></script>
 </head>
@@ -203,18 +203,22 @@
 </section>
 
 <div id="topbar" class="topbar hidden">
-  <div class="pill" id="online-pill" title="Người chơi trực tuyến"><span class="online-dot offline"></span><span class="online-icon"></span><span id="online-count">Online: —</span></div>
-  <div class="pill" id="coins-pill"><span class="coin"></span><span id="coins">0</span></div>
-  <div class="pill" id="tickets-pill" title="Tickets del gacha"></div>
-  <div class="pill" id="user-pill"></div>
-  <button id="btn-save" class="btn small gold save-btn hidden" title="Guardar la partida en la nube"></button>
-  <button id="btn-news" class="btn small ghost news-btn" title="Novedades"></button>
-  <button id="btn-yt" class="btn small ghost yt-btn" title="Mi canal de YouTube"></button>
-  <button id="btn-support" class="btn small gold hidden" title="Apoyar el proyecto"></button>
-  <button id="btn-sound" class="btn small ghost" title="Sonido"></button>
-  <button id="btn-full" class="btn small ghost hidden" title="Pantalla completa"></button>
-  <button id="btn-settings" class="btn small ghost" title="Ajustes"></button>
-  <button id="btn-logout" class="btn small ghost">Salir</button>
+  <div class="topbar-row topbar-info">
+    <div class="pill" id="online-pill" title="Người chơi trực tuyến"><span class="online-dot offline"></span><span class="online-icon"></span><span id="online-count">Online: —</span></div>
+    <div class="pill" id="coins-pill"><span class="coin"></span><span id="coins">0</span></div>
+    <div class="pill" id="tickets-pill" title="Tickets del gacha"></div>
+    <div class="pill" id="user-pill" role="button" tabindex="0" title="Tài khoản &amp; Đồng bộ"></div>
+  </div>
+  <div class="topbar-row topbar-actions">
+    <button id="btn-save" class="btn small gold save-btn hidden" title="Guardar la partida en la nube"></button>
+    <button id="btn-news" class="btn small ghost news-btn" title="Novedades"></button>
+    <button id="btn-yt" class="btn small ghost yt-btn" title="Facebook Vũ Trung Nghĩa"></button>
+    <button id="btn-support" class="btn small gold hidden" title="Apoyar el proyecto"></button>
+    <button id="btn-sound" class="btn small ghost" title="Sonido"></button>
+    <button id="btn-full" class="btn small ghost hidden" title="Pantalla completa"></button>
+    <button id="btn-settings" class="btn small ghost" title="Ajustes"></button>
+    <button id="btn-logout" class="btn small ghost">Salir</button>
+  </div>
 </div>
 <div id="sound-panel" class="box sound-panel hidden"></div>
 <div id="credits-line" class="credits-line hidden">Proyecto de fan sin ánimo de lucro · Sprites: SpriteCollab (CC BY-NC 4.0) · Pokémon © Nintendo/Creatures/GAME FREAK · <a href="#" class="legal-link" data-legal>Aviso legal</a></div>
@@ -631,6 +635,6 @@
 </section>
 
 <!-- datos generados -->
-<script defer src="js/app.min.js?v=b07b544081"></script>
+<script defer src="js/app.min.js?v=0d362fe491"></script>
 </body>
 </html>
