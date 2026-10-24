@@ -4,8 +4,14 @@
   "private": true,
   "description": "PokéSurvivor",
   "scripts": {
-    "test": "node --test tests/i18n.test.cjs tests/net.test.cjs",
-    "build": "node tools/build.js"
+    "test": "node tools/test.cjs unit",
+    "build": "node tools/build.js",
+    "test:all": "node tools/test.cjs all",
+    "test:rules": "node tools/test.cjs rules",
+    "test:emulators": "node tools/run_emulator_test.cjs",
+    "audit:production": "node tools/audit_production_rules.cjs",
+    "start": "node tools/server.mjs",
+    "test:coop": "node tools/test_coop_smoke.mjs"
   },
   "devDependencies": {
     "javascript-obfuscator": "4.1.1",

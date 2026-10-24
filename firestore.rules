@@ -169,11 +169,12 @@ service cloud.firestore {
         && kAtT is int && kAtT >= 0 && kAtT <= 100 + maxT * 25
         && (!exists(sv) || get(sv).data.get('ban', false) == false)
         && d.uids is list && me() in d.uids
+        && d.uids.toSet().size() == d.uids.size()
         && d.names is list && d.names.size() == d.uids.size()
         && d.at == request.time
         && ((board.matches('s_.*') || board.matches('sm_.*'))
               ? (d.uids.size() == 1 && id == me())
-              : (d.uids.size() >= 2 && d.uids.size() <= 4 && id == d.uids.join('_')))
+              : ((board.matches('g_.*') || board.matches('gm_.*')) && d.uids.size() >= 2 && d.uids.size() <= 4 && id == d.uids.join('_')))
         && (resource == null || (
               maxK >= resource.data.get('maxKills', resource.data.get('kills', 0))
               && maxT >= resource.data.get('maxTime', resource.data.get('t', 0))

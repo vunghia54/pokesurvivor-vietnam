@@ -63,7 +63,7 @@ test('bounded deterministic random numeric payloads round-trip', () => {
 
 function network() {
   const pcs = [], relay = [], G = { NetCodec: codec(), DB: { fb: { uid: 'host', rtdb: {
-    ref: p => ({ on() {}, off() {}, push: s => { relay.push([p, s]); return Promise.resolve(); } })
+    ref: p => ({ on() {}, off() {}, push: () => ({ key: 'test-id' }), child: key => ({ set: s => { relay.push([p + '/' + key, s]); return Promise.resolve(); } }) })
   } } } };
   class PC {
     constructor() { pcs.push(this); }
@@ -151,9 +151,9 @@ test('real Coop.tick frames pass through the codec without changing gameplay fie
   }
 });
 
-function turnNetwork(respond, { user = { uid: 'host', getIdToken: async () => 'token' }, host = true } = {}) {
-  const pcs = [], calls = [], signals = [], timers = [], G = { NetCodec: codec(), DB: { fb: { uid: host ? 'host' : 'guest', auth: { currentUser: user }, rtdb: {
-    ref: p => ({ on(ev, fn) { this.fn = fn; G.listen = fn; }, off() {}, push: s => { signals.push([p, JSON.parse(s)]); return Promise.resolve(); } })
+function turnNetwork(respond, { user = { uid: 'host', getIdToken: async () => 'token' }, host = true, turnApi = 'https://ice.pokesurvivor.com/v1/ice' } = {}) {
+  const pcs = [], calls = [], signals = [], timers = [], G = { TURN_API: turnApi, NetCodec: codec(), DB: { fb: { uid: host ? 'host' : 'guest', auth: { currentUser: user }, rtdb: {
+    ref: p => ({ on(ev, fn) { this.fn = fn; G.listen = fn; }, off() {}, push: () => ({ key: 'test-id' }), child: key => ({ set: s => { signals.push([p + '/' + key, JSON.parse(s)]); return Promise.resolve(); } }) })
   } } } };
   class PC {
     constructor(cfg) { this.cfg = cfg; pcs.push(this); }
@@ -169,8 +169,8 @@ function turnNetwork(respond, { user = { uid: 'host', getIdToken: async () => 't
   const setTimeout = (fn, ms) => { timers.push(ms); if (ms === 0) Promise.resolve().then(fn); return timers.length; };
   const fetch = async (url, opt) => { calls.push([url, opt]); return respond(); };
   new Function('G', 'RTCPeerConnection', 'setTimeout', 'clearTimeout', 'fetch', source('js/net/net.js'))(G, PC, setTimeout, () => {}, fetch);
-  const offer = (t) => G.listen({ val: () => JSON.stringify({ f: 'host', sig: t ? { sdp: { type: 'offer' }, t: 1 } : { sdp: { type: 'offer' } } }), ref: { remove: () => Promise.resolve() } });
-  return { N: G.Net, pcs, calls, signals, timers, offer };
+  const offer = (t) => G.listen({ key: 'host~test-id', val: () => JSON.stringify({ f: 'host', sig: t ? { sdp: { type: 'offer' }, t: 1 } : { sdp: { type: 'offer' } } }), ref: { remove: () => Promise.resolve() } });
+  return { N: G.Net, pcs, calls, signals, timers, offer, receive: s => G.listen(s) };
 }
 const settle = async () => { for (let i = 0; i < 5; i++) await new Promise(r => setImmediate(r)); };
 const turnReply = (body, status = 200) => ({ ok: status === 200, status, json: async () => body });
@@ -192,7 +192,7 @@ test('own TURN: first try is direct only; a failed pair retries at once with cle
   const retry = pcs[2];
   assert.equal(retry.cfg.iceServers[0].urls[0], 'stun:stun.l.google.com:19302');
   assert.deepEqual(retry.cfg.iceServers.slice(1), [{ urls: ['turn:turn.pokesurvivor.com:3478?transport=udp'], username: 'u', credential: 'c' }]);
-  const offers = signals.filter(([p, m]) => p.endsWith('/a') && m.sig.sdp);
+  const offers = signals.filter(([p, m]) => p.includes('/a/host~') && m.sig.sdp);
   assert.equal(offers.at(-1)[1].sig.t, 1);
   assert.equal(pcs.length, 3, 'only the failed pair reserves TURN');
 });
@@ -339,4 +339,23 @@ test('co-op orbs: the host applies a guest orb only if the guest really has it, 
   assert.ok(G.Orbs.canTake(guest, 'blowback'));      // (las dos Rapidosferas ya se gastaron: queda 1 hueco)
   G.Orbs.add(guest, 'quick');
   assert.ok(!G.Orbs.canTake(guest, 'blowback'));     // y 4 huecos
+});
+
+test('Vietnam default never fetches upstream TURN credentials or reads an ID token', async () => {
+  let tokens = 0;
+  const x = turnNetwork(goodTurn, { turnApi: null, user: { uid: 'host', getIdToken: async () => { tokens++; return 'private'; } } });
+  x.N.open('room', true, 'host'); x.N.syncMembers(['host', 'guest']);
+  await settle(); x.pcs[0].connectionState = 'failed'; x.pcs[0].onconnectionstatechange();
+  await settle(); assert.equal(tokens, 0); assert.equal(x.calls.length, 0); x.N.close();
+});
+test('signaling rejects forged sender, unknown peer and arbitrary relay gameplay', async () => {
+  const x = turnNetwork(goodTurn, { host: false, turnApi: null });
+  x.N.open('room', false, 'host'); const got=[]; x.N.on((u,m)=>got.push(m));
+  for (const [key, body] of [
+    ['evil~1', {f:'host',sig:{sdp:{type:'offer'}}}],
+    ['evil~2', {f:'evil',sig:{sdp:{type:'offer'}}}],
+    ['host~3', {f:'host',d:{k:'snapshot'}}]
+  ]) x.receive({key,val:()=>JSON.stringify(body),ref:{remove:()=>Promise.resolve()}});
+  await settle(); assert.equal(x.pcs.length,0); assert.equal(got.length,0);
+  x.offer(false); await settle(); assert.equal(x.pcs.length,1); x.N.close();
 });

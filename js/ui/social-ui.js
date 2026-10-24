@@ -247,7 +247,7 @@
           G.Net.open(room.id, room.isHost, room.host);
           // En partida la lista de la sala no echa a nadie (puede faltar alguien un
           // momento por un corte con la base de datos): manda el canal directo.
-          if (!G.Coop.active && !room.lost) G.Net.syncMembers(room.members.map(m => m.uid));
+          if (!G.Coop.active && !room.lost && room.members && room.members.length) G.Net.syncMembers(room.members.map(m => m.uid));
         } else if (G.Net.open_) G.Net.close();
         if (what === 'room-closed') {
           G.UI.toast('La sala se ha cerrado', 2600);

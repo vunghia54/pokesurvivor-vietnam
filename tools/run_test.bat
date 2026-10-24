@@ -1,2 +1,3 @@
 @echo off
-node tests/emulator_integration.test.cjs
+node tools/test.cjs rules
+exit /b %errorlevel%

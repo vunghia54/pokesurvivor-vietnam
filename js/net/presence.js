@@ -70,155 +70,112 @@ G.Presence = (() => {
     return !!(window.firebase && window.firebase.database && window.firebase.auth);
   }
 
+  let generation = 0;
+  let subscriptions = [];
+  let initPromise = null;
+
+  function detach() {
+    generation++;
+    for (const [ref, fn] of subscriptions) ref.off('value', fn);
+    subscriptions = [];
+    const old = userConnRef;
+    userConnRef = null;
+    const cleanup = old ? old.remove().then(() => old.onDisconnect().cancel()).catch(() => {}) : Promise.resolve();
+    const guestDb = app && rtdb;
+    let timeout;
+    const done = Promise.race([cleanup, new Promise(resolve => { timeout = setTimeout(resolve, 2000); })]).finally(() => clearTimeout(timeout));
+    if (guestDb) done.then(() => guestDb.goOffline()); // Only the separate guest app.
+    isConnected = false; onlineCount = null; onlineUids = new Set();
+    updateUI(null, false);
+    presenceListeners.forEach(fn => { try { fn(onlineUids); } catch (_) {} });
+    return done;
+  }
+
   async function init() {
+    if (initPromise) return initPromise;
     if (initialized) return;
     initialized = true;
-
-    updateUI(null, false);
-
-    const cfg = G.FIREBASE_CONFIG || G.FIREBASE_CONFIG_READY;
-    if (!cfg || !cfg.databaseURL) {
-      updateUI(null, false);
-      return;
-    }
-
-    const hasSdk = await ensureSdk();
-    if (!hasSdk) {
-      updateUI(null, false);
-      return;
-    }
-
-    try {
-      // Khởi tạo app Firebase riêng cho Presence để không xung đột với Cloud Save / Google Auth chính
-      if (window.firebase.apps && window.firebase.apps.some(a => a.name === 'presence')) {
-        app = window.firebase.app('presence');
-      } else {
-        app = window.firebase.initializeApp(cfg, 'presence');
-      }
-
-      auth = app.auth();
-      rtdb = app.database();
-      if (cfg.emulator) {
-        auth.useEmulator('http://127.0.0.1:9099');
-        if (rtdb) rtdb.useEmulator('127.0.0.1', 9000);
-      }
-
-      // Thiết lập persistence LOCAL
+    const cfg = G.FIREBASE_CONFIG; // Respect the host allowlist and disabled cloud mode.
+    if (!cfg || !cfg.databaseURL) return;
+    initPromise = (async () => {
+      if (!await ensureSdk()) { initialized = false; return; }
       try {
-        await auth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
-      } catch (e) {}
-
-      // Lấy UID hoặc đăng nhập ẩn danh an toàn
-      let user = auth.currentUser;
-      if (!user) {
-        // Kiểm tra xem G.DB có UID của Google đăng nhập không
-        const mainUid = G.DB && G.DB.fb && G.DB.fb.uid;
-        if (!mainUid) {
-          try {
-            const cred = await auth.signInAnonymously();
-            user = cred.user;
-          } catch (authErr) {
-            console.info('[OnlinePresence] Anonymous Auth chưa kích hoạt trong Firebase Console:', authErr.code || authErr.message);
-            updateUI(null, false);
-            return;
+        const fb = G.DB && G.DB.fb;
+        if (fb && fb.rtdb && fb.auth && fb.auth.currentUser && fb.auth.currentUser.uid === fb.uid) {
+          app = null; auth = fb.auth; rtdb = fb.rtdb; currentUid = fb.uid;
+        } else {
+          const existing = window.firebase.apps && window.firebase.apps.some(a => a.name === 'presence');
+          app = existing ? window.firebase.app('presence') : window.firebase.initializeApp(cfg, 'presence');
+          auth = app.auth(); rtdb = app.database();
+          if (cfg.emulator && !existing) {
+            auth.useEmulator('http://127.0.0.1:9099');
+            rtdb.useEmulator('127.0.0.1', 9000);
           }
+          await auth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
+          const user = auth.currentUser || (await auth.signInAnonymously()).user;
+          currentUid = user.uid;
         }
+        rtdb.goOnline();
+        setupPresence();
+      } catch (e) {
+        initialized = false;
+        console.warn('[OnlinePresence] init:', e.code || e.message);
+        updateUI(null, false);
       }
-
-      currentUid = (G.DB && G.DB.fb && G.DB.fb.uid) || (user && user.uid) || ('anon_' + Math.random().toString(36).slice(2, 10));
-      setupPresence();
-    } catch (err) {
-      console.warn('[OnlinePresence] Lỗi khởi tạo:', err.message);
-      updateUI(null, false);
-    }
+    })();
+    try { await initPromise; } finally { initPromise = null; }
   }
 
   function setupPresence() {
-    if (!rtdb || !currentUid) return;
-
-    // Tạo ID kết nối riêng cho mỗi tab
+    if (!rtdb || !currentUid || !auth.currentUser || auth.currentUser.uid !== currentUid) return;
+    const epoch = generation;
     connId = 'tab_' + Math.random().toString(36).slice(2, 9) + '_' + Date.now().toString(36);
-    userConnRef = rtdb.ref('/presence/' + currentUid + '/' + connId);
-
-    // Dọn dẹp listener cũ nếu có
-    if (connectedRef) connectedRef.off();
-    if (presenceRef) presenceRef.off();
-
-    // 1. Lắng nghe trạng thái kết nối .info/connected
-    connectedRef = rtdb.ref('.info/connected');
-    connectedRef.on('value', snap => {
-      if (snap.val() === true) {
-        // Đăng ký onDisconnect trước khi ghi dữ liệu
-        userConnRef.onDisconnect().remove().then(() => {
-          userConnRef.set({ at: window.firebase.database.ServerValue.TIMESTAMP });
-          isConnected = true;
-          updateUI(onlineCount, true);
-        }).catch(err => {
-          console.warn('[OnlinePresence] onDisconnect error:', err.message);
-        });
-      } else {
-        isConnected = false;
-        updateUI(null, false);
-      }
+    const mine = userConnRef = rtdb.ref('/presence/' + currentUid + '/' + connId);
+    function listen(ref, fn, error) { subscriptions.push([ref, fn]); ref.on('value', fn, error); }
+    listen(rtdb.ref('.info/connected'), snap => {
+      if (snap.val() !== true) { isConnected = false; updateUI(null, false); return; }
+      mine.onDisconnect().remove().then(async () => {
+        if (epoch !== generation) return;
+        await mine.set({ at: window.firebase.database.ServerValue.TIMESTAMP });
+        if (epoch !== generation) return;
+        isConnected = true;
+        updateUI(onlineCount, true);
+        presenceListeners.forEach(fn => { try { fn(onlineUids); } catch (_) {} });
+      }).catch(e => { if (epoch === generation) { isConnected = false; updateUI(null, false); } console.warn('[OnlinePresence] write:', e.code || e.message); });
     });
-
-    // 2. Lắng nghe tổng số người online qua danh sách /presence
-    presenceRef = rtdb.ref('/presence');
-    presenceRef.on('value', snap => {
-      const data = snap.val() || {};
-      // Đếm số lượng UID duy nhất (mỗi UID là 1 người chơi)
-      onlineUids = new Set(Object.keys(data));
-      const uniqueUsers = onlineUids.size;
-      onlineCount = uniqueUsers;
-      if (isConnected) {
-        updateUI(uniqueUsers, true);
-        presenceListeners.forEach(fn => { try { fn(onlineUids); } catch (e) {} });
-      }
-    }, err => {
-      console.warn('[OnlinePresence] Lỗi đọc presence:', err.message);
-      updateUI(null, false);
-    });
-
-    // 3. Xử lý khi đóng tab (beforeunload) để dọn dẹp ngay lập tức
-    if (typeof window !== 'undefined') {
-      window.addEventListener('beforeunload', () => {
-        if (userConnRef) {
-          userConnRef.remove();
-        }
-      });
-    }
+    listen(rtdb.ref('/presence'), snap => {
+      onlineUids = new Set(Object.keys(snap.val() || {}));
+      onlineCount = onlineUids.size;
+      if (isConnected) updateUI(onlineCount, true);
+      presenceListeners.forEach(fn => { try { fn(onlineUids); } catch (_) {} });
+    }, () => { onlineUids = new Set(); onlineCount = null; updateUI(null, false); });
   }
 
-  function setUid(newUid) {
-    if (!newUid || newUid === currentUid) return;
-    if (userConnRef) {
-      try { userConnRef.remove(); } catch (e) {}
-    }
-    currentUid = newUid;
-    if (rtdb) {
-      setupPresence();
-    }
+  async function setUid(newUid) {
+    if (initPromise) await initPromise;
+    const fb = G.DB && G.DB.fb;
+    if (!newUid || !fb || !fb.auth || !fb.auth.currentUser || fb.auth.currentUser.uid !== newUid) return;
+    if (currentUid === newUid && rtdb === fb.rtdb && initialized) return;
+    await detach(); initialized = false;
+    await init();
   }
 
-  function onLogout() {
-    if (userConnRef) {
-      try { userConnRef.remove(); } catch (e) {}
-    }
-    if (auth) {
-      auth.signInAnonymously().then(cred => {
-        currentUid = cred.user.uid;
-        setupPresence();
-      }).catch(() => {
-        currentUid = 'anon_' + Math.random().toString(36).slice(2, 10);
-        setupPresence();
-      });
-    }
+  async function onLogout() {
+    if (initPromise) await initPromise;
+    detach(); initialized = false;
+    await init();
   }
+
+  if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('beforeunload', () => {
+    if (userConnRef) userConnRef.remove().catch(() => {});
+  });
 
   return {
     init,
+    usesDatabase(db) { return initialized && !app && rtdb === db; },
     setUid,
     onLogout,
+    async beforeLogout() { if (initPromise) await initPromise; await detach(); initialized = false; },
     updateUI,
     isOnline(u) { return !!(u && onlineUids.has(u)); },
     onPresenceChange(fn) { presenceListeners.add(fn); return () => presenceListeners.delete(fn); },

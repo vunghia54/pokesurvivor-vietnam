@@ -36,20 +36,20 @@ const tmp = path.join(ROOT, 'tools', 'cache', 'app.js');
 fs.mkdirSync(path.dirname(tmp), { recursive: true });
 fs.writeFileSync(tmp, joined);
 const outJs = path.join(ROOT, 'js', 'app.min.js');
-const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-const shell = process.platform === 'win32';
-execFileSync(npx, ['--yes', 'terser@5', tmp, '--compress', 'passes=1', '--mangle', '--comments', 'false', '--ecma', '2020', '-o', outJs],
-  { stdio: 'inherit', shell });
+const terserBin = require.resolve('terser/bin/terser');
+const obfuscatorBin = path.join(path.dirname(require.resolve('javascript-obfuscator/package.json')), 'bin/javascript-obfuscator');
+execFileSync(process.execPath, [terserBin, tmp, '--compress', 'passes=1', '--mangle', '--comments', 'false', '--ecma', '2020', '-o', outJs],
+  { stdio: 'inherit' });
 // Y ofuscado: el código queda ilegible y se rompe solo si lo reformatean para
 // tocarlo. Las cadenas, en una tabla codificada (sólo una parte, para no frenar
 // el juego). Semilla fija: el mismo código da siempre el mismo archivo.
 if (!EXPOSE) {
-  execFileSync(npx, ['--yes', 'javascript-obfuscator@4.1.1', outJs, '--output', outJs,
+  execFileSync(process.execPath, [obfuscatorBin, outJs, '--output', outJs,
     '--compact', 'true', '--self-defending', 'true', '--seed', '7',
     '--string-array', 'true', '--string-array-encoding', 'base64', '--string-array-threshold', '0.1',
     '--identifier-names-generator', 'hexadecimal', '--rename-globals', 'false', '--transform-object-keys', 'false',
     '--split-strings', 'false', '--control-flow-flattening', 'false', '--dead-code-injection', 'false',
-    '--unicode-escape-sequence', 'false', '--target', 'browser'], { stdio: 'inherit', shell });
+    '--unicode-escape-sequence', 'false', '--target', 'browser'], { stdio: 'inherit' });
 }
 const min = fs.readFileSync(outJs);
 // La huella cuenta también el CSS: un cambio sólo de estilos es versión nueva (version.json).

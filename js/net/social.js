@@ -137,7 +137,7 @@ G.Social = (() => {
   function online() {
     if (beatT) return;                        // ya estaba en marcha
     beatT = 1;
-    if (fb.rtdb) fb.rtdb.goOffline();         // se conecta sólo al entrar en una sala
+    if (fb.rtdb && !(G.Presence && G.Presence.usesDatabase(fb.rtdb))) fb.rtdb.goOffline();         // se conecta sólo al entrar en una sala
     let known = false;
     try { known = localStorage.getItem(hasFrKey()) === '1'; } catch (e) { /* nada */ }
     if (known) listenInvites();
@@ -174,6 +174,7 @@ G.Social = (() => {
   function writeStatus() {}
   function setPlaying(p) {
     playing = !!p;
+    if (room) watchRoomDisconnect();
     // Al acabar la partida, la sala se vuelve a comprobar (los que se fueron, fuera).
     if (!playing && room) { if (room.lost) room.tries = 0; emit('room'); }
   }
@@ -314,9 +315,10 @@ G.Social = (() => {
 
   // ---------------- salas ----------------
 
-  function memberInfo() {
-    const s = G.DB.save;
-    return { name: me.name, dex: s.partner, shiny: !!s.partnerShiny && G.DB.ownsShiny(s.partner), at: ts() };
+  function memberInfo(slot) {
+    const s = G.DB.save || {};
+    const dex = typeof s.partner === 'number' ? s.partner : 25;
+    return { slot, name: (me && me.name) || 'Trainer', dex, shiny: !!s.partnerShiny && G.DB.ownsShiny(dex), at: ts() };
   }
 
   /**
@@ -326,14 +328,14 @@ G.Social = (() => {
    * conectada; se quitó por eso.)
    */
   function rtOn() { if (fb.rtdb) fb.rtdb.goOnline(); }
-  function rtOff() { if (fb && fb.rtdb && !room) fb.rtdb.goOffline(); }
+  function rtOff() { if (fb && fb.rtdb && !room && !(G.Presence && G.Presence.usesDatabase(fb.rtdb))) fb.rtdb.goOffline(); }
 
   async function createRoom() {
     if (room) return room;
     rtOn();
     const id = fb.rtdb.ref('rooms').push().key;
-    await fb.rtdb.ref('rooms/' + id).set({ host: uid, open: true, at: ts(), m: { [uid]: memberInfo() } });
-    enterRoom(id, uid);
+    await fb.rtdb.ref('rooms/' + id).set({ host: uid, open: true, at: ts(), m: { [uid]: memberInfo('0') }, slots: { 0: uid } });
+    enterRoom(id, uid, '0');
     return room;
   }
 
@@ -348,20 +350,38 @@ G.Social = (() => {
     } catch (e) { /* sala borrada */ }
     if (!host) { rtOff(); return { ok: false, error: isVN() ? 'Phòng đó không còn tồn tại.' : 'Esa sala ya no existe.' }; }
     if (open !== true) { rtOff(); return { ok: false, error: isVN() ? 'Phòng đó đã bắt đầu trận.' : 'La partida de esa sala ya ha empezado.' }; }
-    try { await fb.rtdb.ref('rooms/' + id + '/m/' + uid).set(memberInfo()); }
-    catch (e) { rtOff(); return { ok: false, error: isVN() ? 'Không vào được phòng.' : 'No se pudo entrar en la sala.' }; }
-    const n = (await fb.rtdb.ref('rooms/' + id + '/m').get()).numChildren();
-    if (n > MAX_PLAYERS) {
-      await fb.rtdb.ref('rooms/' + id + '/m/' + uid).remove();
-      rtOff();
-      return { ok: false, error: isVN() ? ('Phòng đã đầy (tối đa ' + MAX_PLAYERS + ').') : ('La sala está llena (máximo ' + MAX_PLAYERS + ').') };
-    }
-    enterRoom(id, host);
+    const slot = await claimSlot(id);
+    if (slot === null) { rtOff(); return { ok: false, error: isVN() ? 'Phòng đã đầy hoặc không thể kết nối.' : 'Sala llena o sin conexión.' }; }
+    enterRoom(id, host, slot);
     return { ok: true };
   }
 
-  function enterRoom(id, host) {
-    room = { id, host, isHost: host === uid, members: [], open: true, lost: false };
+  // Atomic, server-validated reservations: concurrent joins cannot exceed four seats.
+  async function claimSlot(id, preferred) {
+    const base = fb.rtdb.ref('rooms/' + id);
+    let slots;
+    try { slots = (await base.child('slots').get()).val() || {}; } catch (_) { return null; }
+    const candidates = preferred !== undefined ? [String(preferred)] : ['0', '1', '2', '3'];
+    for (const slot of candidates) {
+      if (slots[slot] && slots[slot] !== uid) continue;
+      try {
+        await base.update({ ['m/' + uid]: memberInfo(slot), ['slots/' + slot]: uid });
+        return slot;
+      } catch (_) { /* Another player may have claimed this seat first. */ }
+    }
+    return null;
+  }
+
+  async function releaseMember(id, memberUid) {
+    const base = fb.rtdb.ref('rooms/' + id);
+    const slots = (await base.child('slots').get()).val() || {};
+    const patch = { ['m/' + memberUid]: null };
+    for (const slot of Object.keys(slots)) if (slots[slot] === memberUid) patch['slots/' + slot] = null;
+    await base.update(patch);
+  }
+
+  function enterRoom(id, host, slot) {
+    room = { id, host, slot, isHost: host === uid, members: [], open: true, lost: false };
     watchRoom(id);
     writeStatus();
     emit('room');
@@ -374,11 +394,9 @@ G.Social = (() => {
       if (!room || room.id !== id) return;
       const m = s.val() || {};
       if (!m[uid]) { lostRoom(id); return; }          // tu plaza ya no está (corte)
-      const prev = room.members;
       // El anfitrión siempre primero; el resto por orden de llegada.
-      room.members = Object.keys(m).map(k => Object.assign({ uid: k }, m[k]))
+      room.members = Object.keys(m).map(k => Object.assign({}, m[k], { uid: k }))
         .sort((a, b) => (a.uid === room.host ? -1 : b.uid === room.host ? 1 : (a.at || 0) - (b.at || 0)));
-      if (room.isHost && playing) keepMates(id, prev);
       emit('room');
     }, () => lostRoom(id));
     const href = fb.rtdb.ref('rooms/' + id + '/host');
@@ -387,15 +405,17 @@ G.Social = (() => {
     oref.on('value', s => { if (room && room.id === id) { room.open = s.val() === true; emit('room'); } }, () => {});
     // Tras un corte el servidor ya ha hecho el onDisconnect: hay que volver a dejarlo puesto.
     const cref = fb.rtdb.ref('.info/connected');
-    cref.on('value', s => { if (s.val() === true && room && room.id === id) watchRoomDisconnect(); });
-    roomRefs = [mref, href, oref, cref];
+    const connected = s => { if (s.val() === true && room && room.id === id) watchRoomDisconnect(); };
+    cref.on('value', connected);
+    roomRefs = [mref, href, oref, { off: () => cref.off('value', connected) }];
   }
 
   /** Si se cierra el navegador, la sala (anfitrión) o tu plaza (invitado) se borran solas. */
   function watchRoomDisconnect() {
     if (!room) return;
     const ref = room.isHost ? fb.rtdb.ref('rooms/' + room.id) : fb.rtdb.ref('rooms/' + room.id + '/m/' + uid);
-    ref.onDisconnect().remove();
+    if (room.isHost && playing) ref.onDisconnect().cancel().catch(() => {});
+    else ref.onDisconnect().remove().catch(() => {});
   }
 
   function detachRoom() {
@@ -411,7 +431,7 @@ G.Social = (() => {
    * si es el anfitrión. Antes eso era «La sala se ha cerrado» y fuera de la
    * partida, aunque el canal directo con los demás siguiera bien.
    * Ahora la sala no se da por cerrada a la primera: se recupera (el anfitrión
-   * la vuelve a escribir con los que había; el invitado vuelve a poner su plaza)
+   * recupera sólo su propia plaza; cada invitado recupera su reserva autenticada)
    * y, durante una partida, nunca se cierra: la partida va por el canal directo.
    */
   const REJOIN_MS = 4000, REJOIN_TRIES = 3;
@@ -436,17 +456,15 @@ G.Social = (() => {
         // El servidor borró tu sala: se vuelve a escribir igual (misma id) con los que había.
         if (host !== uid) {
           if (host) throw Error('otra');
-          const m = {};
-          for (const x of room.members) m[x.uid] = { name: x.name, dex: x.dex, shiny: !!x.shiny, at: x.at || 0 };
-          m[uid] = Object.assign(memberInfo(), m[uid] ? { at: m[uid].at } : {});
-          await within(base.set({ host: uid, open: playing ? false : room.open, at: ts(), m }), 5000);
+          // Recreate only our own record; guests must authenticate and rejoin themselves.
+          if (playing) throw Error('room missing during match');
+          room.slot = '0';
+          await within(base.set({ host: uid, open: room.open, at: ts(), m: { [uid]: memberInfo('0') }, slots: { 0: uid } }), 5000);
         }
       } else {
         if (!host) throw Error('sin anfitrión');
-        const mine = room.members.find(x => x.uid === uid);
-        // Si no deja, los demás siguen jugando (la sala no admite a nadie hasta que acaben): a esperar.
-        await within(base.child('m/' + uid).set(Object.assign(memberInfo(), mine && mine.at ? { at: mine.at } : {})), 5000)
-          .catch(e => { throw Object.assign(e, { wait: e.message !== 'timeout' }); });
+        const slot = await within(claimSlot(id, room.slot), 5000);
+        if (slot === null) throw Error('seat unavailable');
       }
     } catch (e) {
       if (!room || room.id !== id) return;
@@ -462,26 +480,10 @@ G.Social = (() => {
     watchRoomDisconnect();
   }
 
-  /**
-   * Anfitrión en partida: si la plaza de un invitado desaparece pero sigue en
-   * la partida (aunque se esté reconectando, ver coop.js), ha sido un corte suyo
-   * con la base de datos: se le vuelve a poner. Sin plaza no podría ni leer la
-   * sala ni contestar al anfitrión para volver a conectar.
-   */
-  function keepMates(id, prev) {
-    for (const x of prev) {
-      if (x.uid === uid || room.members.some(m => m.uid === x.uid)) continue;
-      setTimeout(() => {
-        if (!room || room.id !== id || !playing || room.members.some(m => m.uid === x.uid)) return;
-        if (!G.Coop.keeps(x.uid)) return;
-        fb.rtdb.ref('rooms/' + id + '/m/' + x.uid).set({ name: x.name, dex: x.dex, shiny: !!x.shiny, at: x.at || 0 }).catch(() => {});
-      }, 3000);
-    }
-  }
 
   /** Anfitrión: quita a alguien de la sala (se cortó en partida y no volvió). */
   function dropMember(u) {
-    if (room && room.isHost && u !== uid) fb.rtdb.ref('rooms/' + room.id + '/m/' + u).remove().catch(() => {});
+    if (room && room.isHost && u !== uid) releaseMember(room.id, u).catch(() => {});
   }
 
   function closedRoom() {
@@ -501,7 +503,7 @@ G.Social = (() => {
     room = null;
     const ref = r.isHost ? fb.rtdb.ref('rooms/' + r.id) : fb.rtdb.ref('rooms/' + r.id + '/m/' + uid);
     ref.onDisconnect().cancel().catch(() => {});
-    await ref.remove().catch(() => {});
+    await (r.isHost ? ref.remove() : releaseMember(r.id, uid)).catch(() => {});
     retractInvites();
     writeStatus();
     rtOff();

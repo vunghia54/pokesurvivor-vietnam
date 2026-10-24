@@ -21,8 +21,7 @@ G.FIREBASE_CONFIG_READY = {
 const isAllowedHost = typeof location !== 'undefined' && (
   location.hostname === 'vunghia54.github.io' ||
   location.hostname === 'localhost' ||
-  location.hostname === '127.0.0.1' ||
-  location.hostname === ''
+  location.hostname === '127.0.0.1'
 );
 
 const isLocalHost = typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1');

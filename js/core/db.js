@@ -927,6 +927,7 @@ G.DB = (() => {
     if (mode === 'cloud' && !guest && save) {
       if (pending) { try { await pushNow(); } catch (e) { /* queda la copia local */ } }
       stopListening();
+      if (G.Presence && G.Presence.beforeLogout) await G.Presence.beforeLogout();
       try { await auth.signOut();
       if (G.Presence && G.Presence.onLogout) G.Presence.onLogout(); } catch (e) { /* nada */ }
     } else if (mode === 'local' && !guest) {

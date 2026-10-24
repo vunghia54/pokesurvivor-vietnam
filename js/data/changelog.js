@@ -6,6 +6,9 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-25', title: ['Salas cooperativas y estado en línea', 'Co-op rooms and online status'], fix: [
+    ['Corregidos los conflictos al entrar y reconectar en salas cooperativas y el estado en línea al cambiar de cuenta.', 'Fixed co-op room entry and reconnection conflicts, and online status when switching accounts.']
+  ] },
   { d: '2026-10-24', title: ['Versión en vietnamita', 'Vietnamese localization'], new: [
     ['Añadido vietnamita como idioma predeterminado para jugadores nuevos, con nombres, textos y fuentes adaptados. Las partidas guardadas y las reglas del juego no cambian.', 'Added Vietnamese as the default for new players, with localized names, text and fonts. Saved games and gameplay rules are unchanged.']
   ] },

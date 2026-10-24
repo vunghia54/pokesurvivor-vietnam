@@ -106,7 +106,8 @@ G.Game = (() => {
     holdBy = []; awayBy = null;
     const save = G.DB.save;
     // Con su naturaleza aplicada (una copia: ver systems/mons.js).
-    const mon = G.Mons.monFor(save.partner);
+    const partnerDex = (save && typeof save.partner === 'number') ? save.partner : 25;
+    const mon = G.Mons.monFor(partnerDex);
     const perks = G.Upgrades.perks(G.DB.upgradesOf(mon.dex));
 
     G.UI.hideAll();

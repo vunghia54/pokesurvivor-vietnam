@@ -1,0 +1,12 @@
+'use strict';
+const {spawnSync}=require('node:child_process');
+const fs=require('node:fs'),path=require('node:path');
+const root=path.join(__dirname,'..');
+const mode=process.argv[2]||'unit';
+if(!['unit','rules','all'].includes(mode))throw Error('Use unit, rules, or all');
+const integration=new Set(['compat_v1.2.test.cjs','emulator_integration.test.cjs','rules_v1.3_coop.test.cjs']);
+const files=fs.readdirSync(path.join(root,'tests')).filter(f=>f.endsWith('.test.cjs')).filter(f=>mode==='all'||integration.has(f)===(mode==='rules')).sort().map(f=>'tests/'+f);
+console.log(`Running ${mode}: ${files.length} test files. Unit mocks do not validate deployed Firebase Rules.`);
+const r=spawnSync(process.execPath,['--test','--test-concurrency=1',...files],{cwd:root,stdio:'inherit'});
+if(r.error)console.error(r.error.message);
+process.exitCode=r.status===null?1:r.status;

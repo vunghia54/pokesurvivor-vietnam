@@ -77,8 +77,8 @@
   ]
 }
 </script>
-<link rel="stylesheet" href="css/style.css?v=a658648e0e">
-<script src="js/core/locales.js?v=fd3d083020"></script>
+<link rel="stylesheet" href="css/style.css?v=221845349a">
+<script src="js/core/locales.js?v=ef7663e270"></script>
 <script src="js/noframe.js"></script>
 </head>
 <body>
@@ -364,8 +364,16 @@
       <input id="fr-name" class="field grow" maxlength="16" spellcheck="false" placeholder="Apodo de tu amigo">
       <button class="btn gold" type="submit" data-sfx="confirm">Añadir amigo</button>
     </form>
+    <div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap">
+      <button id="fr-create-room" class="btn small gold" type="button">Tạo phòng Co-op</button>
+      <form id="fr-join-form" class="row grow" style="gap:6px" autocomplete="off">
+        <input id="fr-room-code" class="field grow" maxlength="40" spellcheck="false" placeholder="Nhập mã phòng Co-op">
+        <button class="btn small" type="submit">Vào phòng</button>
+      </form>
+    </div>
     <p id="fr-msg" class="note"></p>
     <div id="fr-list" class="fr-list"></div>
+    <div id="fr-blocks" class="fr-blocks" style="margin-top:10px"></div>
   </div>
 </section>
 
@@ -375,6 +383,11 @@
     <div class="row between"><h2>Sala</h2>
       <div class="row"><button id="lobby-menu" class="btn small ghost">Menú</button><button id="lobby-leave" class="btn small ghost">Salir de la sala</button></div></div>
     <p class="sub" id="lobby-sub"></p>
+    <div class="row" style="margin: 6px 0 10px; gap: 8px; align-items: center;">
+      <span class="sub" style="margin:0">Mã phòng:</span>
+      <b class="gold" id="lobby-code-display" style="font-size: 16px; letter-spacing: 1px; user-select: all;"></b>
+      <button class="btn small ghost" id="lobby-copy-code" type="button">Sao chép mã</button>
+    </div>
     <div id="lobby-members" class="lobby-members"></div>
     <h3 id="lobby-inv-title" style="margin:14px 0 6px">Invitar amigos</h3>
     <div id="lobby-invite" class="fr-list"></div>
@@ -613,6 +626,6 @@
 </section>
 
 <!-- datos generados -->
-<script defer src="js/app.min.js?v=58b9470582"></script>
+<script defer src="js/app.min.js?v=b09f3683ae"></script>
 </body>
 </html>

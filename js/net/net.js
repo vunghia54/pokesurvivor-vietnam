@@ -23,7 +23,8 @@
  */
 G.Net = (() => {
   const ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
-  const TURN_API = 'https://ice.pokesurvivor.com/v1/ice';
+  // No Vietnam-owned TURN service is configured. Never send its Firebase token upstream.
+  const TURN_API = G.TURN_API || null;
   // Primero se intenta sin TURN (lo normal es conectar directo) y sólo si falla se
   // reintenta al momento con él: el navegador reserva un hueco en el TURN por cada
   // conexión que lo lleve, aunque luego vaya directa, y así los huecos llegan para todos.
@@ -68,7 +69,7 @@ G.Net = (() => {
 
   function turnUser() {
     const fb = G.DB.fb, user = fb && !fb.emulator && fb.auth && fb.auth.currentUser;
-    return user && !user.isAnonymous ? user : null;
+    return TURN_API && user && !user.isAnonymous ? user : null;
   }
 
   /** Lo que ya se sabe sin preguntar: la lista (puede ir vacía) o null si hay que pedirla. */
@@ -132,9 +133,10 @@ G.Net = (() => {
       s.ref.remove().catch(() => {});
       let m;
       try { m = JSON.parse(raw); } catch (e) { return; }
-      if (!m || !m.f) return;
+      const sender = typeof s.key === 'string' ? s.key.split('~')[0] : null;
+      if (!m || !sender || m.f !== sender || (!isHost && sender !== hostUid) || (isHost && !peers.has(sender))) return;
       if (m.sig) onSignal(m.f, m.sig);
-      else deliver(m.f, m.d);
+      else if (ALLOW_RELAY || (m.d && m.d.k === 'start' && m.f === hostUid)) deliver(m.f, m.d);
     });
     // Invitado: hueco para el anfitrión desde ya (se sustituye al llegar su
     // oferta). Así, si no llega nunca, se sigue por el relé y se sabe cuándo se va.
@@ -159,7 +161,7 @@ G.Net = (() => {
     if (isHost) {
       for (const u of uids) if (u !== uid && !peers.has(u)) connect(u);
       for (const u of [...peers.keys()]) if (!uids.includes(u)) drop(u);
-    } else if (!uids.includes(hostUid)) {
+    } else if (uids && uids.length > 0 && !uids.includes(hostUid)) {
       drop(hostUid);
     }
   }
@@ -304,7 +306,8 @@ G.Net = (() => {
 
   function relayPush(to, env) {
     if (!rtdb || !roomId) return;
-    rtdb.ref('rooms/' + roomId + '/q/' + to).push(JSON.stringify(env)).catch(e => console.warn('[Net] relé:', e.code || e.message));
+    const ref = rtdb.ref('rooms/' + roomId + '/q/' + to);
+    ref.child(uid + '~' + ref.push().key).set(JSON.stringify(env)).catch(e => console.warn('[Net] relé:', e.code || e.message));
   }
 
   function send(to, msg) {

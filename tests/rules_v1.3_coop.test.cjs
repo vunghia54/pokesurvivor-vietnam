@@ -118,10 +118,11 @@ test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Iso
       headers: { 'Content-Type': 'application/json' }
     }, {
       host: userA.uid,
+      slots: { 0: userA.uid },
       open: true,
       at: Date.now(),
       m: {
-        [userA.uid]: { name: 'PlayerA', dex: 25, at: Date.now() }
+        [userA.uid]: { name: 'PlayerA', dex: 25, at: Date.now(), slot: '0' }
       }
     });
     assert.strictEqual(res.status, 200, `Host failed to create room: ${JSON.stringify(res.body)}`);
@@ -132,14 +133,10 @@ test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Iso
     const res = await httpRequest({
       hostname: '127.0.0.1',
       port: RTDB_PORT,
-      path: `/rooms/${roomId}/m/${userB.uid}.json?auth=${userB.idToken}&ns=${RTDB_NS}`,
-      method: 'PUT',
+      path: `/rooms/${roomId}.json?auth=${userB.idToken}&ns=${RTDB_NS}`,
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' }
-    }, {
-      name: 'PlayerB',
-      dex: 6,
-      at: Date.now()
-    });
+    }, { ['m/' + userB.uid]: { name: 'Player1', dex: 6, at: Date.now(), slot: '1' }, ['slots/1']: userB.uid });
     assert.strictEqual(res.status, 200);
   });
 
@@ -148,19 +145,15 @@ test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Iso
     const res = await httpRequest({
       hostname: '127.0.0.1',
       port: RTDB_PORT,
-      path: `/rooms/${roomId}/m/${userC.uid}.json?auth=${userC.idToken}&ns=${RTDB_NS}`,
-      method: 'PUT',
+      path: `/rooms/${roomId}.json?auth=${userC.idToken}&ns=${RTDB_NS}`,
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' }
-    }, {
-      name: 'PlayerC',
-      dex: 1,
-      at: Date.now()
-    });
+    }, { ['m/' + userC.uid]: { name: 'Player2', dex: 1, at: Date.now(), slot: '2' }, ['slots/2']: userC.uid });
     assert.strictEqual(res.status, 200);
   });
 
   // 4. Host A gửi WebRTC signal cho Guest B
-  const msgIdB = `msg_b_${Date.now()}`;
+  const msgIdB = `${userA.uid}~msg_b_${Date.now()}`;
   await t.test('4. Host A gửi tín hiệu WebRTC cho Guest B (q/uidB)', async () => {
     const res = await httpRequest({
       hostname: '127.0.0.1',
@@ -267,7 +260,7 @@ test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Iso
   // 13. Thành viên C CỐ TÌNH xóa tin nhắn của B -> PHẢI BỊ CHẶN 401
   await t.test('13. Thành viên C cố tình xóa tin nhắn của B -> BỊ TỪ CHỐI (401/403)', async () => {
     // Tạo tin nhắn mới cho B
-    const tempMsg = `msg_temp_${Date.now()}`;
+    const tempMsg = `${userA.uid}~msg_temp_${Date.now()}`;
     await httpRequest({
       hostname: '127.0.0.1',
       port: RTDB_PORT,
@@ -345,11 +338,12 @@ test('Firebase Security Rules v1.3: Chống tấn công chèn dữ liệu con gi
       headers: { 'Content-Type': 'application/json' }
     }, {
       host: host.uid,
+      slots: { 0: host.uid, 1: victim.uid },
       open: true,
       at: Date.now(),
       m: {
-        [host.uid]: { name: 'Host', dex: 25 },
-        [victim.uid]: { name: 'ForgedVictim', dex: 6 }
+        [host.uid]: { name: 'Host', dex: 25, slot: '0' },
+        [victim.uid]: { name: 'ForgedVictim', dex: 6, slot: '1' }
       }
     });
     assert.ok(res.status === 401 || res.status === 403, `Chèn thành viên mạo danh thành công bất ngờ: status ${res.status}`);
@@ -364,10 +358,11 @@ test('Firebase Security Rules v1.3: Chống tấn công chèn dữ liệu con gi
       headers: { 'Content-Type': 'application/json' }
     }, {
       host: host.uid,
+      slots: { 0: host.uid },
       open: true,
       at: Date.now(),
       m: {
-        [host.uid]: { name: 'Host', dex: 25 }
+        [host.uid]: { name: 'Host', dex: 25, slot: '0' }
       },
       q: {
         [victim.uid]: { 'fake_msg': 'forged_sdp' }
@@ -386,10 +381,11 @@ test('Firebase Security Rules v1.3: Chống tấn công chèn dữ liệu con gi
       headers: { 'Content-Type': 'application/json' }
     }, {
       host: host.uid,
+      slots: { 0: host.uid },
       open: true,
       at: Date.now(),
       m: {
-        [host.uid]: { name: 'Host', dex: 25 }
+        [host.uid]: { name: 'Host', dex: 25, slot: '0' }
       }
     });
     assert.strictEqual(res.status, 200, `Tạo phòng hợp lệ thất bại: ${JSON.stringify(res.body)}`);
@@ -516,4 +512,67 @@ test('Firebase Security Rules v1.3: Firestore Group Leaderboard Protection (g an
     const res = await commitGroupScore(boardId, groupId, docData, user1.idToken);
     assert.strictEqual(res.status, 403, `Impossible kill rate was unexpectedly accepted: status ${res.status}`);
   });
+});
+
+test('RTDB server enforcement: four reservations, adversarial writes and reconnect', async t => {
+  const users = await Promise.all(Array.from({length:6},(_,i)=>createAuthUser(`seat_${i}_${Date.now()}@test.vn`,'Pass123456!')));
+  const [host,b,c,d,fifth,sixth]=users;
+  const id='capacity_'+Date.now();
+  const ref=(user,method,suffix='',body)=>httpRequest({hostname:'127.0.0.1',port:RTDB_PORT,path:`/rooms/${id}${suffix}.json?auth=${user.idToken}&ns=${RTDB_NS}`,method,headers:{'Content-Type':'application/json'}},body===undefined?null:JSON.stringify(body));
+  const member=(slot)=>({name:'Trainer',dex:25,slot:String(slot),at:Date.now(),shiny:false});
+  const join=(u,slot)=>ref(u,'PATCH','',{['m/'+u.uid]:member(slot),['slots/'+slot]:u.uid});
+  const allow=res=>assert.equal(res.status,200,JSON.stringify(res.body));
+  const deny=res=>assert.ok([401,403].includes(res.status),`Expected Rules denial, got ${res.status}: ${JSON.stringify(res.body)}`);
+  allow(await ref(host,'PUT','',{host:host.uid,open:true,at:Date.now(),m:{[host.uid]:member(0)},slots:{0:host.uid}}));
+  try {
+    await t.test('2nd, 3rd and 4th authenticated players join atomically',async()=>{allow(await join(b,1));allow(await join(c,2));allow(await join(d,3));});
+    await t.test('5th direct membership PUT denied for every existing seat',async()=>{for(let i=0;i<4;i++)deny(await ref(fifth,'PUT','/m/'+fifth.uid,member(i)));});
+    await t.test('5th cannot create seat 4 using room multipath PATCH',async()=>deny(await join(fifth,4)));
+    await t.test('5th cannot overwrite an occupied seat',async()=>{for(let i=0;i<4;i++)deny(await join(fifth,i));});
+    await t.test('5th cannot omit the seat field',async()=>deny(await ref(fifth,'PUT','/m/'+fifth.uid,{name:'NoSeat',dex:25})));
+    await t.test('UID field injection and unbounded member properties denied',async()=>deny(await ref(b,'PATCH','/m/'+b.uid,{uid:host.uid})));
+    await t.test('host cannot change a member through root multipath PATCH',async()=>deny(await ref(host,'PATCH','',{['m/'+b.uid+'/name']:'Forged'})));
+    await t.test('host cannot replace existing room with forged roster',async()=>deny(await ref(host,'PUT','',{host:host.uid,open:true,at:Date.now(),m:{[host.uid]:member(0),[b.uid]:member(1)},slots:{0:host.uid,1:b.uid}})));
+    await t.test('outsider and host cannot read recipient signaling or ancestor room',async()=>{
+      for(const u of [host,fifth]) {deny(await ref(u,'GET','/q/'+b.uid));deny(await ref(u,'GET'));}
+    });
+    const signalPath='/q/'+b.uid+'/'+host.uid+'~offer';
+    await t.test('host signal accepted once and cannot be overwritten',async()=>{allow(await ref(host,'PUT',signalPath,JSON.stringify({f:host.uid,sig:{sdp:{type:'offer'}}})));deny(await ref(host,'PUT',signalPath,'replacement'));});
+    await t.test('guest cannot forge host sender key or signal another guest',async()=>{deny(await ref(c,'PUT','/q/'+b.uid+'/'+host.uid+'~forged','forged'));deny(await ref(c,'PUT','/q/'+b.uid+'/'+c.uid+'~forged','forged'));});
+    await t.test('member cannot send to an outsider',async()=>deny(await ref(host,'PUT','/q/'+fifth.uid+'/'+host.uid+'~offer','offer')));
+    await t.test('recipient may read and remove own signal',async()=>{allow(await ref(b,'GET','/q/'+b.uid));allow(await ref(b,'DELETE',signalPath));});
+    await t.test('cannot release reservation while membership remains',async()=>deny(await ref(b,'DELETE','/slots/1')));
+    await t.test('guest reconnects with own reserved seat in a closed room',async()=>{
+      allow(await ref(host,'PUT','/open',false));allow(await ref(b,'DELETE','/m/'+b.uid));
+      deny(await join(fifth,1));allow(await join(b,1));
+    });
+    await t.test('host kicks atomically; kicked player cannot rejoin a closed room',async()=>{
+      allow(await ref(host,'PATCH','',{['m/'+b.uid]:null,'slots/1':null}));deny(await join(b,1));
+    });
+    await t.test('two concurrent claims for the last seat: exactly one succeeds',async()=>{
+      allow(await ref(host,'PUT','/open',true));
+      const results=await Promise.all([join(fifth,1),join(sixth,1)]);
+      assert.equal(results.filter(r=>r.status===200).length,1);deny(results.find(r=>r.status!==200));
+      const roster=await ref(host,'GET','/m');allow(roster);assert.equal(Object.keys(roster.body).length,4);
+    });
+  } finally {allow(await ref(host,'DELETE'));}
+});
+
+test('Firestore compatibility: friend consent, invitations, unique group participants', async t => {
+  const [a,b,x]=await Promise.all(['a','b','x'].map(n=>createAuthUser(`friend_${n}_${Date.now()}@test.vn`,'Pass123456!')));
+  const pair=[a.uid,b.uid].sort().join('_');
+  const doc=(p)=>`projects/${PROJECT_ID}/databases/(default)/documents/${p}`;
+  async function put(u,p,data){return httpRequest({hostname:'127.0.0.1',port:FIRESTORE_PORT,path:`/v1/projects/${PROJECT_ID}/databases/(default)/documents:commit`,method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+u.idToken}},{writes:[{update:{name:doc(p),fields:toFirestoreFields(data)},updateTransforms:[{fieldPath:'at',setToServerValue:'REQUEST_TIME'}]}]});}
+  const friendship={users:[a.uid,b.uid].sort(),from:a.uid,to:b.uid,status:'pending',names:{[a.uid]:'Alice',[b.uid]:'Bobby'}};
+  await t.test('sender creates pending request',async()=>assert.equal((await put(a,'friendships/'+pair,friendship)).status,200));
+  await t.test('sender cannot accept own request',async()=>assert.equal((await put(a,'friendships/'+pair,{...friendship,status:'ok'})).status,403));
+  await t.test('outsider cannot accept request',async()=>assert.equal((await put(x,'friendships/'+pair,{...friendship,status:'ok'})).status,403));
+  const invitation={from:a.uid,to:b.uid,name:'Alice',room:'compat_room'};
+  await t.test('pending friendship cannot invite',async()=>assert.equal((await put(a,'inv/'+b.uid+'_'+a.uid,invitation)).status,403));
+  await t.test('recipient accepts request',async()=>assert.equal((await put(b,'friendships/'+pair,{...friendship,status:'ok'})).status,200));
+  await t.test('confirmed friend invitation remains supported',async()=>assert.equal((await put(a,'inv/'+b.uid+'_'+a.uid,invitation)).status,200));
+  const record={kills:20,t:100,lv:5,uids:[a.uid,a.uid],names:['Alice','Alice']};
+  await t.test('one UID repeated cannot impersonate a group',async()=>assert.equal((await commitGroupScore('gm_audit',record.uids.join('_'),record,a.idToken)).status,403));
+  await t.test('arbitrary leaderboard mode rejected',async()=>assert.equal((await commitGroupScore('unknown_audit',pair,{...record,uids:[a.uid,b.uid].sort()},a.idToken)).status,403));
+  for(const mode of ['g','gm'])await t.test(`${mode} leaderboard accepts valid legacy-shaped group score`,async()=>assert.equal((await commitGroupScore(mode+'_audit_'+Date.now(),pair,{...record,uids:[a.uid,b.uid].sort()},a.idToken)).status,200));
 });
