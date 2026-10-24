@@ -1014,7 +1014,7 @@ G.Flow = {
     G.SocialUI.init(); G.RankingUI.init(); G.ModUI.init(); G.GoalsUI.init(); G.ProfileUI.init(); G.SettingsUI.init(); G.SupportUI.init(); G.NewsUI.init(); G.LiveUI.init(); G.Updater.init();
     if (G.Presence && G.Presence.init) G.Presence.init();
     // Tu nombre arriba a la derecha abre tu perfil.
-    document.getElementById('user-pill').onclick = () => G.GoalsUI.open('profile');
+    document.getElementById('user-pill').onclick = () => G.SettingsUI.open('acc');
     G.Audio.music('village');     // suena tras el primer clic (lo exige el navegador)
     G.Game.init();
     // La base de datos (nube o local) recupera la sesión anterior.
