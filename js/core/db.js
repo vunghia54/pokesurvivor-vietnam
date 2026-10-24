@@ -586,6 +586,7 @@ G.DB = (() => {
       setRev(snap.data().rev);
       write(K_CLOUD + uid, save);
       if (G.UI && G.UI.refreshCoins) G.UI.refreshCoins();
+      if (G.Presence && G.Presence.setUid && uid) G.Presence.setUid(uid);
     }).catch(e => console.warn('[DB] no se pudo bajar la partida:', e.code || e.message));
   }
 
@@ -909,7 +910,8 @@ G.DB = (() => {
     if (mode === 'cloud' && !guest && save) {
       if (pending) { try { await pushNow(); } catch (e) { /* queda la copia local */ } }
       stopListening();
-      try { await auth.signOut(); } catch (e) { /* nada */ }
+      try { await auth.signOut();
+      if (G.Presence && G.Presence.onLogout) G.Presence.onLogout(); } catch (e) { /* nada */ }
     } else if (mode === 'local' && !guest) {
       commit();
       remove(K_SES);

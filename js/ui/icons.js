@@ -472,6 +472,7 @@ G.Icons = (() => {
     const r = document.documentElement.style;
     r.setProperty('--ico-coin', `url("${url('coin')}")`);
     r.setProperty('--ico-cursor', `url("${url('cursor')}")`);
+    r.setProperty('--ico-friends', `url("${url('friends')}")`);
   }
 
   return { canvas, url, html, draw, twinkle, rarity, RARITY_BALL, installCss, UI, TYPE_GLYPH };

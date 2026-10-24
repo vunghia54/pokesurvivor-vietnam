@@ -2,6 +2,16 @@
   "rules": {
     ".read": false,
     ".write": false,
+    "presence": {
+      ".read": "auth != null",
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid",
+        "$connId": {
+          ".validate": "newData.hasChildren(['at']) && newData.child('at').isNumber() && !newData.hasChildren(['name', 'email', 'ip', 'token'])"
+        }
+      }
+    },
     "rooms": {
       "$room": {
         ".read": "auth != null && data.child('m').child(auth.uid).exists()",

@@ -204,7 +204,8 @@
 </section>
 
 <div id="topbar" class="topbar hidden">
-  <div class="pill"><span class="coin"></span><span id="coins">0</span></div>
+  <div class="pill" id="online-pill" title="Người chơi trực tuyến"><span class="online-dot offline"></span><span class="online-icon"></span><span id="online-count">Online: —</span></div>
+  <div class="pill" id="coins-pill"><span class="coin"></span><span id="coins">0</span></div>
   <div class="pill" id="tickets-pill" title="Tickets del gacha"></div>
   <div class="pill" id="user-pill"></div>
   <button id="btn-save" class="btn small gold save-btn hidden" title="Guardar la partida en la nube"></button>
@@ -674,6 +675,7 @@
 <script defer src="js/net/net.js"></script>
 <script defer src="js/net/coop.js"></script>
 <script defer src="js/net/ranking.js"></script>
+<script defer src="js/net/presence.js"></script>
 <!-- interfaz -->
 <script defer src="js/ui/icons.js"></script>
 <script defer src="js/ui/ui.js"></script>
