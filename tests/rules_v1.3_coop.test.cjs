@@ -332,6 +332,78 @@ test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Iso
   });
 });
 
+test('Firebase Security Rules v1.3: Chống tấn công chèn dữ liệu con giả mạo lúc tạo phòng mới', async (t) => {
+  const host = await createAuthUser(`atk_host_${Date.now()}@test.vn`, 'Pass123456!');
+  const victim = await createAuthUser(`atk_vic_${Date.now()}@test.vn`, 'Pass123456!');
+
+  await t.test('1. Chặn tạo phòng có chèn thành viên giả mạo trong m (Anti-Forged Members)', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/room_forged_m_${Date.now()}.json?auth=${host.idToken}&ns=${RTDB_NS}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    }, {
+      host: host.uid,
+      open: true,
+      at: Date.now(),
+      m: {
+        [host.uid]: { name: 'Host', dex: 25 },
+        [victim.uid]: { name: 'ForgedVictim', dex: 6 }
+      }
+    });
+    assert.ok(res.status === 401 || res.status === 403, `Chèn thành viên mạo danh thành công bất ngờ: status ${res.status}`);
+  });
+
+  await t.test('2. Chặn tạo phòng có chèn sẵn hàng đợi q (Anti-Injected Queue)', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/room_forged_q_${Date.now()}.json?auth=${host.idToken}&ns=${RTDB_NS}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    }, {
+      host: host.uid,
+      open: true,
+      at: Date.now(),
+      m: {
+        [host.uid]: { name: 'Host', dex: 25 }
+      },
+      q: {
+        [victim.uid]: { 'fake_msg': 'forged_sdp' }
+      }
+    });
+    assert.ok(res.status === 401 || res.status === 403, `Chèn hàng đợi q lúc tạo phòng thành công bất ngờ: status ${res.status}`);
+  });
+
+  await t.test('3. Tạo phòng hợp lệ chỉ chứa đúng Host trong m và không có q', async () => {
+    const validRoomId = `room_valid_${Date.now()}`;
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${validRoomId}.json?auth=${host.idToken}&ns=${RTDB_NS}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    }, {
+      host: host.uid,
+      open: true,
+      at: Date.now(),
+      m: {
+        [host.uid]: { name: 'Host', dex: 25 }
+      }
+    });
+    assert.strictEqual(res.status, 200, `Tạo phòng hợp lệ thất bại: ${JSON.stringify(res.body)}`);
+
+    // Dọn dẹp
+    await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${validRoomId}.json?auth=${host.idToken}&ns=${RTDB_NS}`,
+      method: 'DELETE'
+    });
+  });
+});
+
 test('Firebase Security Rules v1.3: Firestore Group Leaderboard Protection (g and gm)', async (t) => {
   const user1 = await createAuthUser(`p1_${Date.now()}@test.vn`, 'Pass123456!');
   const user2 = await createAuthUser(`p2_${Date.now()}@test.vn`, 'Pass123456!');
