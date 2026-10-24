@@ -26,8 +26,14 @@ G.SettingsUI = (() => {
     // Pantalla completa (si el navegador la permite; en iPhone, cómo conseguirla).
     if (canFull() || iosTip()) {
       $('btn-full').classList.remove('hidden');
-      $('btn-full').innerHTML = G.Icons.html('full', 20);
+      updateFullBtn();
       $('btn-full').onclick = toggleFull;
+      for (const ev of ['fullscreenchange', 'webkitfullscreenchange']) {
+        document.addEventListener(ev, () => {
+          updateFullBtn();
+          if (isOpen()) render();
+        });
+      }
     }
   }
 
@@ -48,16 +54,62 @@ G.SettingsUI = (() => {
   const standalone = () => !!navigator.standalone || (window.matchMedia && matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches);
   function iosTip() { return IOS && !canFull() && !standalone(); }
   const IOS_TIP = 'En iPhone, Safari no deja poner las webs a pantalla completa. Pulsa Compartir y luego "Añadir a pantalla de inicio": abriendo el juego desde ese icono se juega a pantalla completa.';
+
+  function updateFullBtn() {
+    const btn = $('btn-full');
+    if (!btn) return;
+    const full = isFull();
+    btn.innerHTML = G.Icons.html('full', 20);
+    btn.classList.toggle('active', full);
+    const vn = isVN();
+    const isEn = G.I18n && G.I18n.lang === 'en';
+    const title = full
+      ? (vn ? 'Thoát toàn màn hình' : (isEn ? 'Exit Fullscreen' : 'Salir de pantalla completa'))
+      : (vn ? 'Toàn màn hình' : (isEn ? 'Fullscreen' : 'Pantalla completa'));
+    btn.title = title;
+    btn.setAttribute('aria-label', title);
+  }
+
+  let fullPending = false;
   function toggleFull() {
+    if (fullPending) return;
     if (!canFull()) { if (iosTip()) G.UI.toast(IOS_TIP, 9000); return; }
-    if (isFull()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-    else {
-      const el = document.documentElement;
-      const p = (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
-      // En móvil, además se intenta fijar la pantalla en horizontal.
-      if (p && p.then) p.then(() => { try { screen.orientation.lock('landscape').catch(() => {}); } catch (e) { /* nada */ } }).catch(() => {});
+    fullPending = true;
+    try {
+      if (isFull()) {
+        const exit = (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        if (exit && exit.then) {
+          exit.catch(() => {}).finally(() => { fullPending = false; updateFullBtn(); });
+        } else {
+          fullPending = false;
+          updateFullBtn();
+        }
+      } else {
+        const el = document.documentElement;
+        const p = (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+        if (p && p.then) {
+          p.then(() => {
+            try {
+              if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {});
+              }
+            } catch (e) { /* nada */ }
+          }).catch(() => {
+            // Fullscreen bị từ chối hoặc không có quyền trong môi trường hiện tại
+          }).finally(() => {
+            fullPending = false;
+            updateFullBtn();
+          });
+        } else {
+          fullPending = false;
+          updateFullBtn();
+        }
+      }
+    } catch (e) {
+      fullPending = false;
+      updateFullBtn();
     }
-    setTimeout(() => { if (isOpen()) render(); }, 300);
+    setTimeout(() => { updateFullBtn(); if (isOpen()) render(); }, 300);
   }
 
   // ---------------- piezas ----------------

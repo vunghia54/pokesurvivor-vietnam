@@ -71,6 +71,7 @@ input { font: inherit; }
 /* ---------- caja PMD ---------- */
 .box {
   position: relative;
+  box-sizing: border-box;
   background: linear-gradient(180deg, var(--box1), var(--box2));
   border: 3px solid var(--edge);
   border-radius: 12px;
@@ -80,6 +81,21 @@ input { font: inherit; }
   animation: pop .22s ease-out;
   max-height: 100%;
   overflow: auto;
+}
+.scr:not(#scr-menu) {
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.scr:not(#scr-menu) .box {
+  box-sizing: border-box;
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  max-height: calc(100dvh - max(16px, calc(env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 12px)));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .box h1, .box h2, .box h3 { margin: 0 0 6px; font-weight: 700; letter-spacing: .5px; }
 .box h2 { font-size: 26px; }
@@ -905,7 +921,8 @@ a.btn { text-decoration: none; display: inline-block; color: var(--ink); }
   .note { margin-top: 8px; font-size: 12px; }
   .btn { padding: 7px 14px; }
   .btn.small { padding: 4px 9px; font-size: 13px; }
-  .topbar { top: max(5px, env(safe-area-inset-top, 5px)); right: max(6px, env(safe-area-inset-right, 6px)); gap: 6px; }
+  .topbar { top: max(4px, env(safe-area-inset-top, 4px)); right: max(6px, env(safe-area-inset-right, 6px)); left: auto; gap: 3px; max-width: calc(100vw - 12px); }
+  .topbar-actions #btn-logout { display: none !important; }
   #online-pill { gap: 5px; }
   .online-icon { width: 15px; height: 15px; }
   .online-dot { width: 7px; height: 7px; }
@@ -1084,24 +1101,29 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
 }
 
 
-/* ============ TỐI ƯU TOÀN DIỆN GIAO DIỆN MOBILE V1.3.1 ============ */
-@media (max-width: 768px) {
-  /* Topbar 2 hàng gọn gàng, không đè menu hay logo */
+/* ============ TỐI ƯU TOÀN DIỆN GIAO DIỆN MOBILE & LANDSCAPE V1.3.2 ============ */
+@media (max-width: 768px),
+       (orientation: landscape) and (max-height: 540px),
+       (hover: none) and (pointer: coarse) and (max-height: 600px),
+       (max-height: 520px) and (max-width: 1024px) {
+  /* Topbar 2 hàng gọn gàng, neo góc phải an toàn */
   .topbar {
-    top: max(6px, env(safe-area-inset-top, 6px));
-    right: max(8px, env(safe-area-inset-right, 8px));
-    left: max(8px, env(safe-area-inset-left, 8px));
+    top: max(4px, env(safe-area-inset-top, 4px));
+    right: max(6px, env(safe-area-inset-right, 6px));
+    left: auto;
+    max-width: calc(100vw - 12px);
     flex-direction: column;
     align-items: flex-end;
-    gap: 5px;
+    gap: 3px;
     pointer-events: none;
+    z-index: 25;
   }
   .topbar > * {
     pointer-events: auto;
   }
   .topbar-row {
-    display: flex;
-    gap: 4px;
+    display: inline-flex;
+    gap: 3px;
     align-items: center;
     justify-content: flex-end;
     max-width: 100%;
@@ -1115,28 +1137,33 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     flex-wrap: nowrap;
   }
   .topbar-actions #btn-logout {
-    display: none; /* Đăng xuất được chuyển vào menu tài khoản */
+    display: none !important; /* Đăng xuất được chuyển vào menu tài khoản */
   }
   .pill {
-    padding: 3px 8px;
-    font-size: 12px;
-    gap: 4px;
-    min-height: 28px;
+    padding: 2px 6px;
+    font-size: 11px;
+    gap: 3px;
+    min-height: 25px;
+    height: 25px;
+    box-sizing: border-box;
   }
   #online-pill {
-    padding: 3px 8px;
-    font-size: 12px;
+    padding: 2px 6px;
+    font-size: 11px;
+    min-height: 25px;
+    height: 25px;
+    box-sizing: border-box;
   }
   .online-icon {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
   }
   .online-dot {
     width: 6px;
     height: 6px;
   }
   #user-pill {
-    max-width: 120px;
+    max-width: 105px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1150,9 +1177,10 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     transform: scale(0.96);
   }
   .topbar-actions .btn.small {
-    padding: 5px 8px;
-    min-width: 38px;
-    min-height: 38px;
+    padding: 4px 6px;
+    min-width: 32px;
+    min-height: 32px;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1162,20 +1190,97 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     flex-shrink: 0;
   }
   .save-btn {
-    padding: 5px 10px !important;
+    padding: 4px 8px !important;
     white-space: nowrap !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     min-width: auto;
   }
 
-  /* Menu chính Mobile: Grid 2 cột ngón tay dễ bấm, không che Logo & Partner */
+  /* Grid danh sách menu 2 cột */
+  .menu-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 4px 6px !important;
+  }
+  .menu-item {
+    font-size: 13.5px !important;
+    padding: 5px 7px !important;
+    min-height: 40px !important;
+    display: grid !important;
+    grid-template-columns: 24px 1fr !important;
+    column-gap: 5px !important;
+    align-items: center !important;
+    border-radius: 8px !important;
+    background: rgba(10, 20, 50, 0.5) !important;
+    border: 1px solid rgba(244, 248, 255, 0.14) !important;
+  }
+  .menu-item:hover, .menu-item:focus-visible {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: var(--edge) !important;
+  }
+  .menu-item::before {
+    display: none !important;
+  }
+  .menu-item .mi-ico {
+    grid-row: span 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .menu-item .mi-ico img {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .menu-item small {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .menu-item.play {
+    grid-column: span 2 !important;
+    font-size: 19px !important;
+    padding: 7px 12px !important;
+    min-height: 46px !important;
+    background: linear-gradient(135deg, rgba(255, 210, 63, 0.22), rgba(255, 75, 75, 0.22)) !important;
+    border: 2px solid var(--gold) !important;
+    box-shadow: 0 0 10px rgba(255, 210, 63, 0.25) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+  .menu-item.play .mi-ico img {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .menu-item.play small {
+    display: inline !important;
+    font-size: 11px !important;
+    color: #ffe37a !important;
+  }
+  #menu-stats {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  .sound-panel {
+    top: max(58px, calc(env(safe-area-inset-top, 0px) + 54px)) !important;
+    right: max(6px, env(safe-area-inset-right, 6px)) !important;
+    max-width: calc(100vw - 12px) !important;
+  }
+}
+
+/* ============ RIÊNG BIỆT: MOBILE PORTRAIT (MÀN HÌNH DỌC) ============ */
+@media (max-width: 768px) and (orientation: portrait), (max-aspect-ratio: 1/1) and (max-width: 768px) {
   #scr-menu {
     flex-direction: column !important;
     justify-content: flex-start !important;
     align-items: stretch !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding: max(72px, calc(env(safe-area-inset-top, 0px) + 68px)) 10px max(16px, env(safe-area-inset-bottom, 16px)) !important;
+    padding: max(68px, calc(env(safe-area-inset-top, 0px) + 64px)) 10px max(16px, env(safe-area-inset-bottom, 16px)) !important;
     gap: 6px !important;
     -webkit-overflow-scrolling: touch;
   }
@@ -1228,131 +1333,177 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
   .menu-right .box {
     padding: 8px 10px !important;
   }
-  .menu-list {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 6px !important;
-  }
-  .menu-item {
-    font-size: 14px !important;
-    padding: 6px 8px !important;
-    min-height: 44px !important;
-    display: grid !important;
-    grid-template-columns: 26px 1fr !important;
-    column-gap: 6px !important;
-    align-items: center !important;
-    border-radius: 8px !important;
-    background: rgba(10, 20, 50, 0.5) !important;
-    border: 1px solid rgba(244, 248, 255, 0.14) !important;
-  }
-  .menu-item:hover, .menu-item:focus-visible {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border-color: var(--edge) !important;
-  }
-  .menu-item::before {
-    display: none !important;
-  }
-  .menu-item .mi-ico {
-    grid-row: span 2 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  .menu-item .mi-ico img {
-    width: 20px !important;
-    height: 20px !important;
-  }
-  .menu-item small {
-    font-size: 10px !important;
-    line-height: 1.2 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-  .menu-item.play {
-    grid-column: span 2 !important;
-    font-size: 20px !important;
-    padding: 8px 12px !important;
-    min-height: 48px !important;
-    background: linear-gradient(135deg, rgba(255, 210, 63, 0.22), rgba(255, 75, 75, 0.22)) !important;
-    border: 2px solid var(--gold) !important;
-    box-shadow: 0 0 10px rgba(255, 210, 63, 0.25) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-  }
-  .menu-item.play .mi-ico img {
-    width: 24px !important;
-    height: 24px !important;
-  }
-  .menu-item.play small {
-    display: inline !important;
-    font-size: 11px !important;
-    color: #ffe37a !important;
-  }
-  #menu-stats {
-    font-size: 11.5px !important;
-    line-height: 1.35 !important;
-  }
 
-  /* Modals & Safe Area */
+  /* Modals trên màn hình dọc */
   .scr:not(#scr-menu) {
-    padding: max(78px, calc(env(safe-area-inset-top, 0px) + 72px)) max(8px, env(safe-area-inset-right, 8px)) max(12px, env(safe-area-inset-bottom, 12px)) max(8px, env(safe-area-inset-left, 8px)) !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    padding: max(72px, calc(env(safe-area-inset-top, 0px) + 68px)) max(8px, env(safe-area-inset-right, 8px)) max(12px, env(safe-area-inset-bottom, 12px)) max(8px, env(safe-area-inset-left, 8px)) !important;
     align-items: flex-start !important;
   }
-  .sound-panel {
-    top: max(76px, calc(env(safe-area-inset-top, 0px) + 70px)) !important;
-    right: max(8px, env(safe-area-inset-right, 8px)) !important;
-    max-width: calc(100vw - 16px) !important;
-  }
-  .btn.small {
-    min-height: 40px;
-    padding: 6px 12px;
-  }
-  .gen-tab {
-    min-height: 44px;
+  .scr:not(#scr-menu) .box {
+    max-height: calc(100vh - 84px) !important;
+    max-height: calc(100dvh - 84px) !important;
   }
 }
 
-@media (max-width: 480px) {
+/* ============ RIÊNG BIỆT: MOBILE LANDSCAPE (MÀN HÌNH NGANG) ============ */
+@media (orientation: landscape) and (max-height: 540px), (max-height: 520px) and (max-width: 1024px) {
+  #scr-menu {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+  .menu-left {
+    padding: max(16px, env(safe-area-inset-top, 16px)) 8px 6px max(12px, env(safe-area-inset-left, 12px)) !important;
+    flex: 0 0 min(42vw, 360px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 0 !important;
+  }
+  .menu-left .logo {
+    margin-bottom: 2px !important;
+  }
+  .menu-left .logo .t1 {
+    font-size: clamp(22px, 4.5vw, 30px) !important;
+  }
+  .menu-left .logo .t2 {
+    font-size: 10px !important;
+    margin-top: 2px !important;
+  }
+  .menu-left .splash {
+    top: 50% !important;
+    font-size: 9px !important;
+  }
+  .partner-card {
+    margin-top: 2px !important;
+  }
+  #menu-partner {
+    height: min(28vh, 120px) !important;
+    width: auto !important;
+  }
+  .partner-card .nm {
+    font-size: 16px !important;
+  }
+  .partner-card .lv {
+    font-size: 11px !important;
+  }
+  .menu-right {
+    width: min(56vw, 450px) !important;
+    flex: 1 1 auto !important;
+    padding: max(58px, calc(env(safe-area-inset-top, 0px) + 54px)) max(10px, env(safe-area-inset-right, 10px)) 6px 8px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    gap: 4px !important;
+    margin-top: 0 !important;
+  }
+  .menu-right .box {
+    padding: 6px 8px !important;
+  }
+  .menu-right > .box:last-child {
+    display: none !important;
+  }
+  .menu-right > :first-child {
+    margin-top: 0 !important;
+  }
+
+  /* Modals trên màn hình ngang: căn giữa hoàn hảo, cuộn nội bộ, không bao giờ bị cắt đáy */
+  .scr:not(#scr-menu) {
+    padding: max(6px, env(safe-area-inset-top, 6px)) max(10px, env(safe-area-inset-right, 10px)) max(6px, env(safe-area-inset-bottom, 6px)) max(10px, env(safe-area-inset-left, 10px)) !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .scr:not(#scr-menu) .box {
+    max-height: calc(100vh - 12px) !important;
+    max-height: calc(100dvh - 12px) !important;
+    max-height: calc(100dvh - max(12px, calc(env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 8px))) !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .scr:not(#scr-menu) .box h2 {
+    font-size: 18px !important;
+    margin: 0 0 4px !important;
+    line-height: 1.25 !important;
+  }
+  .scr:not(#scr-menu) .box h3 {
+    font-size: 15px !important;
+    margin: 4px 0 !important;
+  }
+  .scr:not(#scr-menu) .box p {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    margin: 3px 0 !important;
+  }
+  .scr:not(#scr-menu) .box .row {
+    margin-top: 6px !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+  .scr:not(#scr-menu) .box .btn {
+    padding: 5px 10px !important;
+    font-size: 13px !important;
+    min-height: 36px !important;
+  }
+  .scr:not(#scr-menu) .box input.field {
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+  }
+  .scr:not(#scr-menu) .box .tabs {
+    gap: 4px !important;
+    margin-bottom: 6px !important;
+  }
+  .scr:not(#scr-menu) .box .tab, .scr:not(#scr-menu) .box .gen-tab {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    min-height: 32px !important;
+  }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
   .topbar {
-    gap: 3px !important;
+    gap: 2px !important;
   }
   .topbar-row {
-    gap: 3px !important;
+    gap: 2px !important;
   }
   .pill {
-    padding: 2px 6px !important;
-    font-size: 11px !important;
-    gap: 3px !important;
-    min-height: 26px !important;
+    padding: 2px 5px !important;
+    font-size: 10.5px !important;
+    gap: 2px !important;
+    min-height: 24px !important;
+    height: 24px !important;
   }
   #online-pill {
-    padding: 2px 6px !important;
-    font-size: 11px !important;
+    padding: 2px 5px !important;
+    font-size: 10.5px !important;
+    min-height: 24px !important;
+    height: 24px !important;
   }
   .online-icon {
-    width: 13px !important;
-    height: 13px !important;
+    width: 12px !important;
+    height: 12px !important;
   }
   .online-dot {
     width: 5px !important;
     height: 5px !important;
   }
   #user-pill {
-    max-width: 95px !important;
+    max-width: 90px !important;
   }
   .topbar-actions .btn.small {
-    padding: 4px 6px !important;
-    min-width: 34px !important;
-    min-height: 34px !important;
+    padding: 3px 5px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    height: 30px !important;
   }
   .save-btn {
-    padding: 4px 8px !important;
-    font-size: 12px !important;
+    padding: 3px 6px !important;
+    font-size: 11px !important;
   }
 }
-
