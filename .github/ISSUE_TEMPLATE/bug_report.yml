@@ -1,0 +1,52 @@
+name: "Báo lỗi game (Bug Report)"
+description: "Báo cáo lỗi phát sinh trong quá trình chơi PokéSurvivor tiếng Việt"
+title: "[Lỗi]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cảm ơn bạn đã hỗ trợ báo lỗi cho PokéSurvivor Việt Nam!
+        **Lưu ý:** Vui lòng **không** cung cấp mật khẩu, thông tin cá nhân hoặc dữ liệu nhạy cảm.
+  - type: textarea
+    id: description
+    attributes:
+      label: Mô tả lỗi
+      description: Hãy miêu tả rõ ràng và ngắn gọn lỗi bạn gặp phải.
+      placeholder: "Ví dụ: Sau khi chọn chiêu tiến hóa Puño Meteoro +, game bị đứng hình..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Các bước tái hiện lỗi
+      description: Hãy liệt kê các bước cụ thể để tái hiện lại lỗi này.
+      placeholder: |
+        1. Vào trận đấu với Pokémon Pikachu
+        2. Lên cấp 5 và chọn chiêu...
+        3. Nhấn nút...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Kết quả mong đợi
+      description: Bạn mong đợi điều gì xảy ra thay vì lỗi trên?
+      placeholder: "Ví dụ: Chiêu thức tấn công bình thường và không bị treo giao diện."
+    validations:
+      required: true
+  - type: input
+    id: device_browser
+    attributes:
+      label: Thiết bị & Trình duyệt
+      description: Cho biết thiết bị và trình duyệt bạn đang sử dụng.
+      placeholder: "Ví dụ: Windows 11 Chrome 130 / iPhone 14 iOS 18 Safari / Android 14 Chrome"
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Xác nhận an toàn
+      options:
+        - label: Tôi cam kết báo cáo này không chứa mật khẩu, token hay dữ liệu cá nhân nhạy cảm.
+          required: true

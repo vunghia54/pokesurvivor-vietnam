@@ -8,6 +8,9 @@ G.SettingsUI = (() => {
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const VERSION = '1.2 · 2026-10-09';
   const REPO = 'https://github.com/JPTER78/pokesurvivor';
+  const REPO_VN = 'https://github.com/vunghia54/pokesurvivor-vietnam';
+  const BUG_VN = 'https://github.com/vunghia54/pokesurvivor-vietnam/issues/new?template=bug_report.yml';
+  const FEAT_VN = 'https://github.com/vunghia54/pokesurvivor-vietnam/issues/new?template=feature_request.yml';
   let tab = 'sound';
 
   function init() {
@@ -136,11 +139,20 @@ G.SettingsUI = (() => {
              <li><b>Fuente:</b> Pixelify Sans (OFL).</li>
            </ul>`
         + `<div class="row wrap" style="justify-content:center;gap:8px">
+             ${G.I18n && G.I18n.lang === 'vi-VN' ? `
+             <a class="btn small" style="background:#e0533d;color:#fff" href="${BUG_VN}" target="_blank" rel="noopener noreferrer">Báo lỗi game</a>
+             <a class="btn small" style="background:#ffd23f;color:#0a1430;font-weight:700" href="${FEAT_VN}" target="_blank" rel="noopener noreferrer">Góp ý tính năng</a>
+             <a class="btn small" href="contacto/" target="_blank" rel="noopener">Liên hệ</a>
+             <a class="btn small" href="https://www.facebook.com/vunghiaaa" target="_blank" rel="noopener noreferrer" style="background:#1877f2;color:#fff">Facebook</a>
+             <a class="btn small" href="${REPO_VN}" target="_blank" rel="noopener noreferrer">Mã nguồn GitHub</a>
+             <button class="btn small" data-legal>Aviso legal y privacidad</button>
+             ` : `
              ${window.PS_PAGES ? `<a class="btn small" href="${G.I18n.lang === 'en' ? 'en/guide/' : 'guia/'}" target="_blank">Guía y preguntas</a>
              <a class="btn small" href="${G.I18n.lang === 'en' ? 'en/pokedex/' : 'pokedex/'}" target="_blank">Pokédex</a>` : ''}
              <button class="btn small" data-legal>Aviso legal y privacidad</button>
              <a class="btn small" href="contacto/" target="_blank" rel="noopener">Contacto</a>
              <a class="btn small" href="${REPO}" target="_blank" rel="noopener">Código (GitHub)</a>
+             `}
            </div>`;
     }
     wire(box);

@@ -15,24 +15,24 @@
   .contact .mail { font-size: 18px; word-break: break-all; }
   .contact .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
   .btn.small { font-size: 15px; padding: 6px 14px; }
-  #copied { color: #5fe08a; margin-left: 6px; }
+  #copied, #copied-vn { color: #5fe08a; margin-left: 6px; }
+  .disclaimer-box { background: rgba(255,210,63,.1); border: 1px solid rgba(255,210,63,.35); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 14px; line-height: 1.5; color: #ffd23f; }
   [data-l="en"], [data-l="vi"] { display: none; }
   html[lang="en"] [data-l="es"], html[lang="en"] [data-l="vi"] { display: none; }
   html[lang="en"] [data-l="en"] { display: initial; }
-  html[lang="en"] li[data-l="en"], html[lang="en"] p[data-l="en"], html[lang="en"] h1[data-l="en"] { display: block; }
+  html[lang="en"] li[data-l="en"], html[lang="en"] p[data-l="en"], html[lang="en"] h1[data-l="en"], html[lang="en"] div[data-l="en"] { display: block; }
   html[lang="vi"] [data-l="es"], html[lang="vi"] [data-l="en"] { display: none; }
   html[lang="vi"] [data-l="vi"] { display: initial; }
-  html[lang="vi"] li[data-l="vi"], html[lang="vi"] p[data-l="vi"], html[lang="vi"] h1[data-l="vi"] { display: block; }
+  html[lang="vi"] li[data-l="vi"], html[lang="vi"] p[data-l="vi"], html[lang="vi"] h1[data-l="vi"], html[lang="vi"] div[data-l="vi"] { display: block; }
 </style>
 <script>
-  // Mismo idioma que el juego (o el del navegador).
   (function () {
     var s = null; try { s = localStorage.getItem('ps.lang'); } catch (e) {}
     var n = ((navigator.languages && navigator.languages[0]) || navigator.language || 'es').toLowerCase();
     var l = (s === 'vi-VN' || s === 'vi') ? 'vi' : (s === 'es' || s === 'en' ? s : (n.indexOf('vi') === 0 ? 'vi' : (n.indexOf('es') === 0 ? 'es' : 'en')));
     document.documentElement.lang = l;
     if (l === 'en') document.title = 'Contact · PokéSurvivor';
-    else if (l === 'vi') document.title = 'Liên hệ · PokéSurvivor';
+    else if (l === 'vi') document.title = 'Liên hệ & Góp ý · PokéSurvivor Việt Nam';
   })();
 </script>
 </head>
@@ -45,47 +45,107 @@
 <article class="doc">
   <h1 data-l="es">Contacto</h1>
   <h1 data-l="en">Contact</h1>
-  <h1 data-l="vi">Liên hệ</h1>
+  <h1 data-l="vi">Liên hệ, Báo lỗi & Góp ý</h1>
+
+  <div class="disclaimer-box" data-l="vi">
+    <b>Thông báo:</b> Đây là <b>bản Việt hóa thử nghiệm không chính thức</b> do người hâm mộ thực hiện. Dự án gốc PokéSurvivor được sáng tạo và phát triển phi thương mại bởi tác giả <b>JPTER78</b>.
+  </div>
+
   <p class="lead" data-l="es">¿Has encontrado un fallo, tienes una idea o quieres decirnos algo? Escríbenos.</p>
   <p class="lead" data-l="en">Found a bug, have an idea or want to tell us something? Get in touch.</p>
-  <p class="lead" data-l="vi">Bạn phát hiện lỗi, có ý tưởng đóng góp hoặc muốn nhắn gửi điều gì? Hãy liên hệ với chúng tôi.</p>
+  <p class="lead" data-l="vi">Bạn phát hiện lỗi trong game, có ý tưởng cải tiến hoặc muốn liên hệ với nhóm Việt hóa? Vui lòng sử dụng các kênh bên dưới.</p>
+
   <ul class="contact">
-    <li>
-      <b><span data-l="es">Correo</span><span data-l="en">Email</span><span data-l="vi">Email</span></b>
-      <span class="mail" id="mail">jpieratorregrosa@gmail.com</span>
+    <!-- Mục tiếng Việt: Báo lỗi & Góp ý qua GitHub Issues -->
+    <li data-l="vi">
+      <b>Báo lỗi game & Đóng góp tính năng</b>
+      <p style="margin:4px 0 8px;font-size:14px;color:var(--muted)">Hệ thống theo dõi lỗi và tiếp nhận ý kiến đóng góp cho bản Việt Nam:</p>
       <div class="row">
-        <a class="btn small" href="mailto:jpieratorregrosa@gmail.com?subject=Pok%C3%A9Survivor"><span data-l="es">Escribir un correo</span><span data-l="en">Send an email</span><span data-l="vi">Gửi email</span></a>
-        <button class="btn small ghost" id="copy" type="button"><span data-l="es">Copiar</span><span data-l="en">Copy</span><span data-l="vi">Sao chép</span></button>
+        <a class="btn small" href="https://github.com/vunghia54/pokesurvivor-vietnam/issues/new?template=bug_report.yml" target="_blank" rel="noopener noreferrer" style="background:#e0533d;color:#fff;border-color:#e0533d">Báo lỗi game (Bug Report)</a>
+        <a class="btn small" href="https://github.com/vunghia54/pokesurvivor-vietnam/issues/new?template=feature_request.yml" target="_blank" rel="noopener noreferrer" style="background:#ffd23f;color:#0a1430;border-color:#ffd23f;font-weight:700">Góp ý tính năng (Feature Request)</a>
+        <a class="btn small ghost" href="https://github.com/vunghia54/pokesurvivor-vietnam" target="_blank" rel="noopener noreferrer">Kho mã nguồn GitHub</a>
+      </div>
+    </li>
+
+    <!-- Mục tiếng Việt: Quản lý bản Việt hóa -->
+    <li data-l="vi">
+      <b>Quản lý bản Việt hóa (Vũ Trung Nghĩa)</b>
+      <p style="margin:4px 0 8px;font-size:14px;color:var(--muted)">Liên hệ về bản dịch, hỗ trợ cộng đồng và các vấn đề liên quan:</p>
+      <span class="mail" id="mail-vn">vunghia546@gmail.com</span>
+      <div class="row">
+        <a class="btn small" href="mailto:vunghia546@gmail.com?subject=Pok%C3%A9Survivor%20Vi%E1%BB%87t%20Nam">Gửi email</a>
+        <button class="btn small ghost" id="copy-vn" type="button">Sao chép email</button>
+        <span id="copied-vn"></span>
+        <a class="btn small" href="https://www.facebook.com/vunghiaaa" target="_blank" rel="noopener noreferrer" style="background:#1877f2;color:#fff;border-color:#1877f2">Facebook</a>
+      </div>
+    </li>
+
+    <!-- Mục tiếng Tây Ban Nha / Tiếng Anh -->
+    <li data-l="es">
+      <b>Correo</b>
+      <span class="mail" id="mail-es">jpieratorregrosa@gmail.com</span>
+      <div class="row">
+        <a class="btn small" href="mailto:jpieratorregrosa@gmail.com?subject=Pok%C3%A9Survivor">Escribir un correo</a>
+        <button class="btn small ghost" id="copy-es" type="button">Copiar</button>
         <span id="copied"></span>
       </div>
-      <p data-l="es">Para cualquier cosa: dudas, problemas con tu cuenta, sugerencias o si eres titular de derechos y quieres que retiremos algo.</p>
-      <p data-l="en">For anything: questions, account problems, suggestions, or if you are a rights holder and want something removed.</p>
-      <p data-l="vi">Dành cho mọi vấn đề: giải đáp thắc mắc, sự cố tài khoản, đề xuất tính năng hoặc nếu bạn là chủ sở hữu quyền tác giả muốn yêu cầu gỡ bỏ nội dung.</p>
+      <p>Para cualquier cosa: dudas, problemas con tu cuenta, sugerencias o si eres titular de derechos y quieres que retiremos algo.</p>
     </li>
-    <li>
-      <b><span data-l="es">Fallos y sugerencias</span><span data-l="en">Bugs and suggestions</span><span data-l="vi">Báo lỗi và góp ý</span></b>
-      <p data-l="es">Si tienes cuenta de GitHub, puedes abrir un aviso en el repositorio del juego.</p>
-      <p data-l="en">If you have a GitHub account, you can open an issue in the game's repository.</p>
-      <p data-l="vi">Nếu bạn có tài khoản GitHub, bạn có thể tạo issue trong kho lưu trữ mã nguồn của trò chơi.</p>
+    <li data-l="en">
+      <b>Email</b>
+      <span class="mail" id="mail-en">jpieratorregrosa@gmail.com</span>
+      <div class="row">
+        <a class="btn small" href="mailto:jpieratorregrosa@gmail.com?subject=Pok%C3%A9Survivor">Send an email</a>
+        <button class="btn small ghost" id="copy-en" type="button">Copy</button>
+        <span id="copied"></span>
+      </div>
+      <p>For anything: questions, account problems, suggestions, or if you are a rights holder and want something removed.</p>
+    </li>
+
+    <!-- Mục tác giả gốc cho người chơi tiếng Việt biết nguồn -->
+    <li data-l="vi">
+      <b>Tác giả & Mã nguồn gốc (JPTER78)</b>
+      <p style="margin:4px 0 8px;font-size:14px;color:var(--muted)">Tác giả sáng tạo mã nguồn gốc PokéSurvivor:</p>
+      <div class="row">
+        <a class="btn small ghost" href="https://github.com/JPTER78/pokesurvivor" target="_blank" rel="noopener noreferrer">Kho gốc JPTER78</a>
+        <a class="btn small ghost" href="mailto:jpieratorregrosa@gmail.com?subject=Pok%C3%A9Survivor">Email tác giả gốc</a>
+      </div>
+    </li>
+
+    <li data-l="es">
+      <b>Fallos y sugerencias</b>
+      <p>Si tienes cuenta de GitHub, puedes abrir un aviso en el repositorio del juego.</p>
       <div class="row"><a class="btn small ghost" href="https://github.com/JPTER78/pokesurvivor/issues" target="_blank" rel="noopener">GitHub</a></div>
     </li>
+    <li data-l="en">
+      <b>Bugs and suggestions</b>
+      <p>If you have a GitHub account, you can open an issue in the game's repository.</p>
+      <div class="row"><a class="btn small ghost" href="https://github.com/JPTER78/pokesurvivor/issues" target="_blank" rel="noopener">GitHub</a></div>
+    </li>
+
     <li>
-      <b><span data-l="es">Criptomonedas</span><span data-l="en">Cryptocurrencies</span><span data-l="vi">Tiền mã hóa</span></b>
+      <b><span data-l="es">Criptomonedas</span><span data-l="en">Cryptocurrencies</span><span data-l="vi">Cảnh báo Tiền mã hóa</span></b>
       <p data-l="es">PokéSurvivor no tiene ninguna criptomoneda, token ni NFT oficial, y su autor no ha creado ninguno. Cualquier token que use el nombre del juego lo han creado terceros: no nos hacemos cargo de ninguna compra, venta o inversión que hagas con ellos, y nada de lo que hay aquí es una recomendación de inversión.</p>
       <p data-l="en">PokéSurvivor has no official cryptocurrency, token or NFT, and its author has not created any. Any token using the game's name was created by third parties: we take no responsibility for any purchase, sale or investment you make with them, and nothing here is investment advice.</p>
-      <p data-l="vi">PokéSurvivor không phát hành bất kỳ loại tiền mã hóa, token hay NFT chính thức nào. Bất kỳ token nào sử dụng tên trò chơi đều do bên thứ ba tạo ra: chúng tôi không chịu trách nhiệm đối với bất kỳ giao dịch mua bán hoặc đầu tư nào, và không nội dung nào ở đây cấu thành lời khuyên đầu tư.</p>
+      <p data-l="vi">PokéSurvivor là trò chơi hoàn toàn miễn phí, không phát hành bất kỳ loại tiền ảo, token hay NFT nào. Mọi token mạo danh đều là lừa đảo; chúng tôi không chịu trách nhiệm cho các giao dịch của bên thứ ba.</p>
     </li>
   </ul>
 </article>
 </main>
 <script>
-  document.getElementById('copy').onclick = function () {
-    var t = document.getElementById('mail').textContent;
-    var lang = document.documentElement.lang;
-    var ok = function () { document.getElementById('copied').textContent = lang === 'en' ? 'Copied!' : (lang === 'vi' ? 'Đã sao chép!' : '¡Copiado!'); };
-    if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok, function () {});
-    else { var r = document.createRange(); r.selectNodeContents(document.getElementById('mail')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy'); ok(); }
-  };
+  function setupCopy(btnId, textId, statusId, msg) {
+    var b = document.getElementById(btnId);
+    if (!b) return;
+    b.onclick = function () {
+      var t = document.getElementById(textId).textContent;
+      var ok = function () { document.getElementById(statusId).textContent = msg; };
+      if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok, function () {});
+      else { var r = document.createRange(); r.selectNodeContents(document.getElementById(textId)); var s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy'); ok(); }
+    };
+  }
+  setupCopy('copy-vn', 'mail-vn', 'copied-vn', 'Đã sao chép!');
+  setupCopy('copy-es', 'mail-es', 'copied', '¡Copiado!');
+  setupCopy('copy-en', 'mail-en', 'copied', 'Copied!');
 </script>
 </body>
 </html>

@@ -60,6 +60,10 @@ G.Icons = (() => {
     yt: { pal: { r: '#ff2a2a', s: '#b3121a', w: '#ffffff' }, rows: [
       '............', '............', '.kkkkkkkkkk.', 'krrrrrrrrrrk', 'krrrrwrrrrrk', 'krrrrwwrrrrk',
       'krrrrwwwrrrk', 'krrrrwwrrrsk', 'krrrrwrrrrsk', 'kssssssssssk', '.kkkkkkkkkk.', '............'] },
+    // Facebook (bản Việt hóa).
+    fb: { pal: { b: '#1877f2', d: '#0e5ec2', w: '#ffffff' }, rows: [
+      '............', '..kkkkkkkk..', '.kbbbbbbbbk.', 'kbbbbwwkbbbk', 'kbbbbwkkbbbk', 'kbbbbwkkbbbk',
+      'kbbwwwwwkbbk', 'kbbbbwkkbbdk', 'kbbbbwkkbbdk', 'kbbbbwkkbbdk', '.kbbddddddk.', '..kkkkkkkk..' ] },
     heart: { pal: { r: '#ff5f6d', s: '#c23a4b', w: '#ffd3d8' }, rows: [
       '............', '.kkk....kkk.', 'kwwrk..krrrk', 'kwrrrkkrrrsk', 'krrrrrrrrrsk', 'krrrrrrrrrsk',
       '.krrrrrrrsk.', '..krrrrrsk..', '...krrrsk...', '....krsk....', '.....kk.....', '............'] },

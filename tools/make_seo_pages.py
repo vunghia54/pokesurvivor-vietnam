@@ -620,12 +620,12 @@ def game_en():
 # ================= 404, robots y sitemap =================
 def extra():
     nf = '''<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><title>404 · PokéSurvivor</title><link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="48x48" href="/assets/icons/icon-48.png"><link rel="stylesheet" href="/css/pages.css"></head>
-<body><header class="top"><a class="brand" href="/">PokéSurvivor</a><nav><a href="/guia/">Guía</a><a href="/en/">English</a><a class="play" href="/">Jugar gratis</a></nav></header>
+<meta name="robots" content="noindex"><title>404 · PokéSurvivor</title><link rel="icon" href="favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="48x48" href="assets/icons/icon-48.png"><link rel="stylesheet" href="css/pages.css"></head>
+<body><header class="top"><a class="brand" href="./">PokéSurvivor</a><nav><a href="guia/">Guía</a><a href="en/">English</a><a class="play" href="./">Jugar gratis</a></nav></header>
 <main><article class="doc center"><h1>404 · Te has perdido en la mazmorra</h1><p class="lead">Esta página no existe. Pero las hordas siguen esperando…</p>
 <p class="lead" lang="en">This page doesn't exist. But the hordes are still waiting…</p>
 <p class="lead" lang="vi">Trang này không tồn tại. Nhưng các đợt quái vẫn đang chờ bạn…</p>
-<p class="cta"><a class="btn" href="/">Volver al juego</a> <a class="btn ghost" href="/en/">Play in English</a></p></article></main></body></html>
+<p class="cta"><a class="btn" href="./">Volver al juego</a> <a class="btn ghost" href="en/">Play in English</a></p></article></main></body></html>
 '''
     open(os.path.join(ROOT, '404.html'), 'w', encoding='utf-8').write(nf)
     open(os.path.join(ROOT, 'robots.txt'), 'w', encoding='utf-8').write(f'# PokéSurvivor\nUser-agent: *\nAllow: /\nDisallow: /tools/\nDisallow: /docs/\nDisallow: /dev.html\n\nSitemap: {SITE}sitemap.xml\n')

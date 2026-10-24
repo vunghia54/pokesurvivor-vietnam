@@ -16,6 +16,10 @@ backups/
 *.tar.gz
 *.7z
 
+# Ảnh QR cá nhân (chỉ dùng cục bộ, không xuất bản công khai)
+assets/ui/qr*
+*qr-ung-ho*
+
 # Firebase / emulador / logs
 .firebase/
 *-debug.log

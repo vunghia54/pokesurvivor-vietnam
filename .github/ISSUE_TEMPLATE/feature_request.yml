@@ -1,0 +1,38 @@
+name: "Góp ý tính năng (Feature Request)"
+description: "Đề xuất tính năng mới hoặc ý tưởng cải tiến cho bản PokéSurvivor Việt Nam"
+title: "[Góp ý]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Chúng tôi rất trân trọng mọi ý tưởng và đóng góp từ cộng đồng người chơi!
+  - type: input
+    id: feature_title
+    attributes:
+      label: Tên đề xuất tính năng
+      description: Tóm tắt ý tưởng của bạn bằng một câu ngắn gọn.
+      placeholder: "Ví dụ: Bổ sung âm thanh thông báo khi săn được Pokémon Shiny"
+    validations:
+      required: true
+  - type: textarea
+    id: feature_desc
+    attributes:
+      label: Mô tả chi tiết
+      description: Hãy giải thích tính năng hoạt động như thế nào và giao diện nên hiển thị ra sao.
+      placeholder: "Mô tả cụ thể trải nghiệm bạn mong muốn có trong game..."
+    validations:
+      required: true
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Lợi ích mang lại
+      description: Tính năng này giúp người chơi giải quyết vấn đề gì hoặc mang lại lợi ích gì cho game?
+      placeholder: "Giúp người chơi dễ nhận biết, tăng tính hấp dẫn..."
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Thông tin bổ sung (nếu có)
+      description: Hình ảnh phác thảo, ý tưởng tham khảo hoặc ghi chú thêm.
