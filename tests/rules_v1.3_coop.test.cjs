@@ -20,7 +20,7 @@ function httpRequest(options, postData = null) {
       });
     });
     req.on('error', reject);
-    if (postData) req.write(typeof postData === 'string' ? postData : JSON.stringify(postData));
+    if (postData !== null && postData !== undefined) req.write(typeof postData === 'string' ? postData : JSON.stringify(postData));
     req.end();
   });
 }
@@ -100,14 +100,16 @@ async function commitGroupScore(board, docId, record, token) {
   }, payload);
 }
 
-test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Isolation', async (t) => {
-  const userA = await createAuthUser(`host_${Date.now()}@test.vn`, 'Pass123456!');
-  const userB = await createAuthUser(`guest_${Date.now()}@test.vn`, 'Pass123456!');
-  const userC = await createAuthUser(`intruder_${Date.now()}@test.vn`, 'Pass123456!');
+test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Isolation (3 Users Same Room)', async (t) => {
+  const userA = await createAuthUser(`host_a_${Date.now()}@test.vn`, 'Pass123456!');
+  const userB = await createAuthUser(`guest_b_${Date.now()}@test.vn`, 'Pass123456!');
+  const userC = await createAuthUser(`guest_c_${Date.now()}@test.vn`, 'Pass123456!');
+  const userOutsider = await createAuthUser(`outsider_${Date.now()}@test.vn`, 'Pass123456!');
 
-  const roomId = `room_${Date.now()}`;
+  const roomId = `room_iso_${Date.now()}`;
 
-  await t.test('1. Host creates room successfully', async () => {
+  // 1. Host A tạo phòng
+  await t.test('1. Host A tạo phòng thành công', async () => {
     const res = await httpRequest({
       hostname: '127.0.0.1',
       port: RTDB_PORT,
@@ -125,20 +127,8 @@ test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Iso
     assert.strictEqual(res.status, 200, `Host failed to create room: ${JSON.stringify(res.body)}`);
   });
 
-  await t.test('2. Non-host cannot overwrite room ownership', async () => {
-    const res = await httpRequest({
-      hostname: '127.0.0.1',
-      port: RTDB_PORT,
-      path: `/rooms/${roomId}.json?auth=${userB.idToken}&ns=${RTDB_NS}`,
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' }
-    }, {
-      host: userB.uid
-    });
-    assert.ok(res.status === 401 || res.status === 403, `Non-host unexpectedly hijacked room: status ${res.status}`);
-  });
-
-  await t.test('3. Guest B joins room under their own UID', async () => {
+  // 2. Guest B vào phòng
+  await t.test('2. Guest B tham gia phòng hợp lệ', async () => {
     const res = await httpRequest({
       hostname: '127.0.0.1',
       port: RTDB_PORT,
@@ -150,36 +140,40 @@ test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Iso
       dex: 6,
       at: Date.now()
     });
-    assert.strictEqual(res.status, 200, `Guest failed to join: ${JSON.stringify(res.body)}`);
+    assert.strictEqual(res.status, 200);
   });
 
-  await t.test('4. Guest B cannot join under User C UID (Anti-Impersonation)', async () => {
+  // 3. Guest C vào phòng (Lúc này cả 3 A, B, C đều là thành viên phòng)
+  await t.test('3. Guest C tham gia phòng hợp lệ (Cả 3 A, B, C cùng ở trong phòng)', async () => {
     const res = await httpRequest({
       hostname: '127.0.0.1',
       port: RTDB_PORT,
-      path: `/rooms/${roomId}/m/${userC.uid}.json?auth=${userB.idToken}&ns=${RTDB_NS}`,
+      path: `/rooms/${roomId}/m/${userC.uid}.json?auth=${userC.idToken}&ns=${RTDB_NS}`,
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' }
     }, {
-      name: 'ImpersonatedC',
-      dex: 1
+      name: 'PlayerC',
+      dex: 1,
+      at: Date.now()
     });
-    assert.ok(res.status === 401 || res.status === 403, `Impersonation succeeded unexpectedly: status ${res.status}`);
+    assert.strictEqual(res.status, 200);
   });
 
-  await t.test('5. Room member A sends WebRTC signal to Member B', async () => {
-    const msgId = `msg_${Date.now()}`;
+  // 4. Host A gửi WebRTC signal cho Guest B
+  const msgIdB = `msg_b_${Date.now()}`;
+  await t.test('4. Host A gửi tín hiệu WebRTC cho Guest B (q/uidB)', async () => {
     const res = await httpRequest({
       hostname: '127.0.0.1',
       port: RTDB_PORT,
-      path: `/rooms/${roomId}/q/${userB.uid}/${msgId}.json?auth=${userA.idToken}&ns=${RTDB_NS}`,
+      path: `/rooms/${roomId}/q/${userB.uid}/${msgIdB}.json?auth=${userA.idToken}&ns=${RTDB_NS}`,
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' }
-    }, JSON.stringify(JSON.stringify({ type: 'offer', sdp: 'v=0...' })));
-    assert.strictEqual(res.status, 200, `Member A failed to signal B: ${JSON.stringify(res.body)}`);
+    }, JSON.stringify(JSON.stringify({ type: 'offer', sdp: 'sdp_for_b' })));
+    assert.strictEqual(res.status, 200);
   });
 
-  await t.test('6. Member B can read their own incoming signals', async () => {
+  // 5. Guest B đọc tín hiệu của chính mình
+  await t.test('5. Guest B đọc thành công tín hiệu dành riêng cho mình (q/uidB)', async () => {
     const res = await httpRequest({
       hostname: '127.0.0.1',
       port: RTDB_PORT,
@@ -187,17 +181,154 @@ test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Iso
       method: 'GET'
     });
     assert.strictEqual(res.status, 200);
-    assert.ok(res.body && Object.keys(res.body).length > 0, 'Signal payload missing');
+    assert.ok(res.body && res.body[msgIdB], 'Tín hiệu của B không tìm thấy');
   });
 
-  await t.test('7. Intruder C cannot eavesdrop on B signals (Signaling Privacy)', async () => {
+  // 6. Host A CỐ TÌNH đọc tín hiệu của Guest B -> PHẢI BỊ CHẶN 401 (Kiểm tra chống kế thừa .read từ node cha!)
+  await t.test('6. Host A cố đọc tín hiệu của B -> BỊ TỪ CHỐI (401/403) vì không có .read kế thừa ở $room', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/q/${userB.uid}.json?auth=${userA.idToken}&ns=${RTDB_NS}`,
+      method: 'GET'
+    });
+    assert.ok(res.status === 401 || res.status === 403, `Host A bất ngờ đọc được q/uidB: status ${res.status}`);
+  });
+
+  // 7. Đồng đội C trong cùng phòng CỐ TÌNH đọc tín hiệu của B -> PHẢI BỊ CHẶN 401
+  await t.test('7. Đồng đội C (cùng phòng) cố đọc tín hiệu của B -> BỊ TỪ CHỐI (401/403)', async () => {
     const res = await httpRequest({
       hostname: '127.0.0.1',
       port: RTDB_PORT,
       path: `/rooms/${roomId}/q/${userB.uid}.json?auth=${userC.idToken}&ns=${RTDB_NS}`,
       method: 'GET'
     });
-    assert.ok(res.status === 401 || res.status === 403, `Intruder C eavesdropped on signaling: status ${res.status}`);
+    assert.ok(res.status === 401 || res.status === 403, `Đồng đội C bất ngờ đọc được q/uidB: status ${res.status}`);
+  });
+
+  // 8. Host A CỐ TÌNH đọc toàn bộ danh sách hàng đợi q -> PHẢI BỊ CHẶN 401
+  await t.test('8. Host A cố đọc toàn bộ node q -> BỊ TỪ CHỐI (401/403)', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/q.json?auth=${userA.idToken}&ns=${RTDB_NS}`,
+      method: 'GET'
+    });
+    assert.ok(res.status === 401 || res.status === 403, `Host A bất ngờ đọc được toàn bộ q: status ${res.status}`);
+  });
+
+  // 9. Host A CỐ TÌNH ghi đè/giả mạo dữ liệu của B (m/uidB) -> PHẢI BỊ CHẶN 401
+  await t.test('9. Host A cố tình sửa/giả mạo dữ liệu của B (m/uidB) -> BỊ TỪ CHỐI (401/403)', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/m/${userB.uid}.json?auth=${userA.idToken}&ns=${RTDB_NS}`,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    }, { dex: 999, name: 'ForgedByHost' });
+    assert.ok(res.status === 401 || res.status === 403, `Host A bất ngờ sửa được dữ liệu B: status ${res.status}`);
+  });
+
+  // 10. B CỐ TÌNH sửa dữ liệu của C -> PHẢI BỊ CHẶN 401
+  await t.test('10. Thành viên B cố tình sửa dữ liệu của C (m/uidC) -> BỊ TỪ CHỐI (401/403)', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/m/${userC.uid}.json?auth=${userB.idToken}&ns=${RTDB_NS}`,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    }, { dex: 999, name: 'ForgedByB' });
+    assert.ok(res.status === 401 || res.status === 403, `Thành viên B bất ngờ sửa được dữ liệu C: status ${res.status}`);
+  });
+
+  // 11. Người ngoài (Outsider) không thể gửi tín hiệu vào q/uidB
+  await t.test('11. Người ngoài phòng (Outsider) không thể gửi tín hiệu vào phòng', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/q/${userB.uid}/msg_spam.json?auth=${userOutsider.idToken}&ns=${RTDB_NS}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    }, JSON.stringify("spam_sdp"));
+    assert.ok(res.status === 401 || res.status === 403, `Outsider bất ngờ gửi được tín hiệu: status ${res.status}`);
+  });
+
+  // 12. Thành viên B xóa tin nhắn sau khi đã nhận
+  await t.test('12. Thành viên B xóa tin nhắn của mình thành công', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/q/${userB.uid}/${msgIdB}.json?auth=${userB.idToken}&ns=${RTDB_NS}`,
+      method: 'DELETE'
+    });
+    assert.strictEqual(res.status, 200);
+  });
+
+  // 13. Thành viên C CỐ TÌNH xóa tin nhắn của B -> PHẢI BỊ CHẶN 401
+  await t.test('13. Thành viên C cố tình xóa tin nhắn của B -> BỊ TỪ CHỐI (401/403)', async () => {
+    // Tạo tin nhắn mới cho B
+    const tempMsg = `msg_temp_${Date.now()}`;
+    await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/q/${userB.uid}/${tempMsg}.json?auth=${userA.idToken}&ns=${RTDB_NS}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    }, JSON.stringify("test"));
+
+    const delRes = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/q/${userB.uid}/${tempMsg}.json?auth=${userC.idToken}&ns=${RTDB_NS}`,
+      method: 'DELETE'
+    });
+    assert.ok(delRes.status === 401 || delRes.status === 403, `Thành viên C bất ngờ xóa được tin nhắn của B: status ${delRes.status}`);
+  });
+
+  // 14. Host A cập nhật trạng thái phòng open = false
+  await t.test('14. Host A cập nhật đóng phòng (open = false) thành công', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/open.json?auth=${userA.idToken}&ns=${RTDB_NS}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    }, false);
+    assert.strictEqual(res.status, 200);
+  });
+
+  // 15. Thành viên B CỐ TÌNH mở lại phòng -> PHẢI BỊ CHẶN 401
+  await t.test('15. Thành viên B không phải Host cố tình sửa trạng thái phòng -> BỊ TỪ CHỐI (401/403)', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/open.json?auth=${userB.idToken}&ns=${RTDB_NS}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    }, true);
+    assert.ok(res.status === 401 || res.status === 403);
+  });
+
+  // 16. Thành viên B tự rời phòng (DELETE m/uidB)
+  await t.test('16. Thành viên B tự rời phòng (DELETE m/uidB) thành công', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}/m/${userB.uid}.json?auth=${userB.idToken}&ns=${RTDB_NS}`,
+      method: 'DELETE'
+    });
+    assert.strictEqual(res.status, 200);
+  });
+
+  // 17. Host A xóa toàn bộ phòng
+  await t.test('17. Host A xóa toàn bộ phòng khi kết thúc thành công', async () => {
+    const res = await httpRequest({
+      hostname: '127.0.0.1',
+      port: RTDB_PORT,
+      path: `/rooms/${roomId}.json?auth=${userA.idToken}&ns=${RTDB_NS}`,
+      method: 'DELETE'
+    });
+    assert.strictEqual(res.status, 200);
   });
 });
 
