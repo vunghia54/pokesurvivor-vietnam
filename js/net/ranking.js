@@ -43,7 +43,7 @@ G.Ranking = (() => {
   const GEN = 'vn1';
   const ALL = 'all_vn1';
 
-  const fbx = () => (G.DB && G.DB.online) ? G.DB.fb : null;
+  const fbx = () => (G.DB && G.DB.fb) ? G.DB.fb : null;
 
   // ---------------- Múi giờ & Kỳ xếp hạng (Asia/Ho_Chi_Minh) ----------------
 
@@ -371,8 +371,8 @@ G.Ranking = (() => {
       lv: r.lv || 1,
       uids: [fb.uid],
       names: [G.Social.me.name],
-      dex: [r.dex],
-      shiny: [!!r.shiny]
+      dex: Array.isArray(r.dex) ? r.dex : [r.dex],
+      shiny: Array.isArray(r.shiny) ? r.shiny : [!!r.shiny]
     };
 
     const boards = PERIODS.map(([p]) => [mode + '_' + ids[p], p]);

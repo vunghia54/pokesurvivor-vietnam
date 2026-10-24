@@ -848,6 +848,17 @@ G.DB = (() => {
     } catch (e) { return { ok: false, error: authError(e) }; }
   }
 
+  async function loginWithUser(u, customName) {
+    if (mode !== 'cloud') return { ok: false };
+    try {
+      const name = customName || displayNameOf(u);
+      await openCloud(u, { name });
+      return { ok: true, isNew: !save.partner };
+    } catch (e) {
+      return { ok: false, error: authError(e) };
+    }
+  }
+
   async function loginWithGoogle() {
     if (mode !== 'cloud') return { ok: false, error: 'Entrar con Google necesita la versión publicada del juego.' };
     try {
@@ -1021,7 +1032,7 @@ G.DB = (() => {
   }
 
   return {
-    ready, register, login, loginWithGoogle, playAsGuest, logout, commit, deleteAccount, flush: pushNow, saveNow,
+    ready, register, login, loginWithGoogle, loginWithUser, playAsGuest, logout, commit, deleteAccount, flush: pushNow, saveNow,
     owns, grant, ownsShiny, grantShiny, merge, setName, upgradesOf, isFav, setFav,
     onSync(fn) { listeners.add(fn); },
     onLeave(fn) { leaveHooks.push(fn); },
