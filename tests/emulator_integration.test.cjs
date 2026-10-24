@@ -60,6 +60,8 @@ function toFirestoreFields(obj) {
           })
         }
       };
+    } else if (typeof v === 'object') {
+      fields[k] = { mapValue: { fields: toFirestoreFields(v) } };
     }
   }
   return fields;
@@ -337,5 +339,92 @@ test('Firebase Emulator Suite — Kiểm thử thực tế Firestore Rules và D
   }, { at: Date.now(), email: 'secret@gmail.com' });
   assert.equal(rtdbLeak.status, 401, 'Bị chặn (401 Unauthorized) khi cố làm lộ email trong presence');
 
-  console.log('\n✔ TẤT CẢ 9 KIỂM THỬ THỰC TẾ TRÊN FIREBASE EMULATOR ĐÃ HOÀN TOÀN ĐẠT CHUẨN!');
+  // --- TEST 10: Kiểm thử cấm tài khoản (ban) trong saves/{uid} ---
+  console.log('10. Kiểm thử: Bảo mật cờ ban trong Cloud Save saves/{uid}');
+
+  // 10a. Người dùng không thể tự tạo Cloud Save với cờ ban: true
+  const badCreate = await httpRequest({
+    hostname: '127.0.0.1',
+    port: FIRESTORE_PORT,
+    path: `/v1/projects/${PROJECT_ID}/databases/(default)/documents:commit`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${userA.idToken}`
+    }
+  }, {
+    writes: [
+      {
+        update: {
+          name: `projects/${PROJECT_ID}/databases/(default)/documents/saves/${userA.uid}`,
+          fields: toFirestoreFields({
+            save: { coins: 100 },
+            v: 1,
+            ban: true,
+            rev: 1
+          })
+        },
+        updateTransforms: [{ fieldPath: 'updatedAt', setToServerValue: 'REQUEST_TIME' }]
+      }
+    ]
+  });
+  assert.equal(badCreate.status, 403, 'Người dùng không thể tự tạo save với cờ ban: true');
+
+  // 10b. Người A tạo Cloud Save hợp lệ (ban: false)
+  const goodCreate = await httpRequest({
+    hostname: '127.0.0.1',
+    port: FIRESTORE_PORT,
+    path: `/v1/projects/${PROJECT_ID}/databases/(default)/documents:commit`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${userA.idToken}`
+    }
+  }, {
+    writes: [
+      {
+        update: {
+          name: `projects/${PROJECT_ID}/databases/(default)/documents/saves/${userA.uid}`,
+          fields: toFirestoreFields({
+            save: { coins: 100 },
+            v: 1,
+            ban: false,
+            rev: 1
+          })
+        },
+        updateTransforms: [{ fieldPath: 'updatedAt', setToServerValue: 'REQUEST_TIME' }]
+      }
+    ]
+  });
+  assert.equal(goodCreate.status, 200, 'Người A tạo Cloud Save hợp lệ thành công');
+
+  // 10c. Người A cố tình thay đổi cờ ban khi cập nhật save
+  const badUpdateBan = await httpRequest({
+    hostname: '127.0.0.1',
+    port: FIRESTORE_PORT,
+    path: `/v1/projects/${PROJECT_ID}/databases/(default)/documents:commit`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${userA.idToken}`
+    }
+  }, {
+    writes: [
+      {
+        update: {
+          name: `projects/${PROJECT_ID}/databases/(default)/documents/saves/${userA.uid}`,
+          fields: toFirestoreFields({
+            save: { coins: 200 },
+            v: 1,
+            ban: true,
+            rev: 2
+          })
+        },
+        updateTransforms: [{ fieldPath: 'updatedAt', setToServerValue: 'REQUEST_TIME' }]
+      }
+    ]
+  });
+  assert.equal(badUpdateBan.status, 403, 'Người dùng không thể tự thay đổi cờ ban trong Cloud Save');
+
+  console.log('\n✔ TẤT CẢ 10 KIỂM THỬ THỰC TẾ TRÊN FIREBASE EMULATOR ĐÃ HOÀN TOÀN ĐẠT CHUẨN!');
 });
