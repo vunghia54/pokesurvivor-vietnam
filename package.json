@@ -1,0 +1,14 @@
+{
+  "name": "pokesurvivor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PokéSurvivor",
+  "scripts": {
+    "test": "node --test tests/i18n.test.cjs tests/net.test.cjs",
+    "build": "node tools/build.js"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "4.1.1",
+    "terser": "^5.39.0"
+  }
+}
