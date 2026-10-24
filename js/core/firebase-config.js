@@ -5,11 +5,7 @@
  * - Không kích hoạt backend online công khai khi Security Rules chưa được kiểm thử và triển khai an toàn.
  * - Đảm bảo độ trễ = 0, hoạt động hoàn hảo mọi lúc mọi nơi kể cả khi không có mạng.
  */
-G.FIREBASE_CONFIG = null;
 
-/* Cấu hình Firebase Project đã kết nối của PokéSurvivor Việt Nam
- * (Sử dụng khi triển khai Security Rules bằng Firebase CLI):
- */
 G.FIREBASE_CONFIG_READY = {
   apiKey: "AIzaSyDaC78u6QPXi1q-PNnClypYMRZM6IrsEYg",
   authDomain: "plucky-courier-365002.firebaseapp.com",
@@ -20,3 +16,13 @@ G.FIREBASE_CONFIG_READY = {
   appId: "1:409056798432:web:7a10948975b69b4d3f5285",
   measurementId: "G-HG8R2HRPKL"
 };
+
+// Kích hoạt Firebase CHỈ trên máy thử nghiệm local (localhost / 127.0.0.1)
+// Trên GitHub Pages (vunghia54.github.io) vẫn là null cho tới khi có lệnh phát hành chính thức.
+const isLocalTest = typeof location !== 'undefined' && (
+  location.hostname === 'localhost' ||
+  location.hostname === '127.0.0.1' ||
+  location.hostname === ''
+);
+
+G.FIREBASE_CONFIG = isLocalTest ? G.FIREBASE_CONFIG_READY : null;

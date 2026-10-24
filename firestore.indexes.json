@@ -1,5 +1,22 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "e",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "maxKills", "order": "DESCENDING" },
+        { "fieldPath": "timeAtMaxKills", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "e",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "maxTime", "order": "DESCENDING" },
+        { "fieldPath": "killsAtMaxTime", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": [
     {
       "collectionGroup": "e",
