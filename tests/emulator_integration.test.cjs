@@ -128,7 +128,7 @@ test('Firebase Emulator Suite — Kiểm thử thực tế Firestore Rules và D
   console.log(`User A UID: ${userA.uid}`);
   console.log(`User B UID: ${userB.uid}`);
 
-  const board = 's_d20261024vn1';
+  const board = 's_d' + Date.now() + 'vn1';
   const basePath = `/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
   // --- TEST 1: Khách (Chưa đăng nhập) ĐỌC bảng xếp hạng ---

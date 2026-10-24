@@ -32,7 +32,7 @@ G.LoginUI = (() => {
       $('rec-link').disabled = false;
       if (!r.ok) { $('rec-err').textContent = r.error; return; }
       $('scr-recover').classList.add('hidden');
-      G.UI.toast('¡Gmail vinculado! Si olvidas la contraseña, entra con Google.', 4500);
+      G.UI.toast(((window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN')) ? 'Đã liên kết Gmail! Nếu quên mật khẩu, hãy đăng nhập bằng Google.' : '¡Gmail vinculado! Si olvidas la contraseña, entra con Google.', 4500);
     };
     $('rec-later').onclick = () => $('scr-recover').classList.add('hidden');
     $('rec-never').onclick = () => {
@@ -112,23 +112,32 @@ G.LoginUI = (() => {
 
   /** Explica dónde se guarda la partida según el modo de la base de datos. */
   function modeNote() {
-    if (G.DB.mode === 'cloud') return 'Tu partida se guarda en la nube: entra desde cualquier ordenador. Como invitado no se guarda.';
+    const vn = (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
+    if (G.DB.mode === 'cloud') {
+      return vn
+        ? 'Tiến trình được lưu an toàn trên đám mây: chơi trên mọi thiết bị. Chơi Khách sẽ không lưu.'
+        : 'Tu partida se guarda en la nube: entra desde cualquier ordenador. Como invitado no se guarda.';
+    }
     const why = G.DB.localReason === 'file'
-      ? 'Abierto desde un archivo: la partida sólo se guarda en este navegador. Para guardar en la nube, juega en la versión publicada.'
+      ? (vn ? 'Mở từ tệp máy tính: tiến trình chỉ lưu trong trình duyệt này. Để lưu đám mây, hãy chơi bản phát hành online.'
+            : 'Abierto desde un archivo: la partida sólo se guarda en este navegador. Para guardar en la nube, juega en la versión publicada.')
       : G.DB.localReason === 'host'
-        ? (G.I18n && G.I18n.lang === 'vi-VN'
+        ? (vn
             ? 'Đây không phải trang chính thức: tiến trình chỉ lưu trong trình duyệt này. Website chính thức: vunghia54.github.io/pokesurvivor-vietnam.'
             : 'Esta no es la web oficial: la partida sólo se guarda en este navegador. Web oficial: vunghia54.github.io/pokesurvivor-vietnam.')
       : G.DB.localReason === 'config'
-        ? 'Nube sin configurar: la partida sólo se guarda en este navegador.'
-        : 'No se pudo conectar con la nube: la partida sólo se guarda en este navegador.';
+        ? (vn ? 'Chưa cấu hình đám mây: tiến trình chỉ lưu trong trình duyệt này.'
+              : 'Nube sin configurar: la partida sólo se guarda en este navegador.')
+        : (vn ? 'Không thể kết nối máy chủ đám mây: tiến trình chỉ lưu trong trình duyệt này.'
+              : 'No se pudo conectar con la nube: la partida sólo se guarda en este navegador.');
     return why;
   }
 
   function setMode(m) {
     mode = m;
     document.querySelectorAll('#scr-login .tab').forEach(t => t.classList.toggle('on', t.dataset.tab === m));
-    $('btn-auth').textContent = m === 'login' ? 'Entrar' : 'Crear cuenta';
+    const vn = (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
+    $('btn-auth').textContent = vn ? (m === 'login' ? 'Đăng nhập' : 'Tạo tài khoản') : (m === 'login' ? 'Entrar' : 'Crear cuenta');
     $('f-pass').autocomplete = m === 'login' ? 'current-password' : 'new-password';
     $('login-err').textContent = '';
   }
@@ -136,7 +145,8 @@ G.LoginUI = (() => {
   function open() {
     G.UI.chrome(false);
     G.UI.show('scr-login');
-    if (!G.DB.storageOk) $('login-err').textContent = 'Este navegador no deja guardar datos: juega como invitado.';
+    const vn = (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
+    if (!G.DB.storageOk) $('login-err').textContent = vn ? 'Trình duyệt không cho phép lưu dữ liệu: hãy chơi với tư cách Khách.' : 'Este navegador no deja guardar datos: juega como invitado.';
     $('btn-google').classList.toggle('hidden', G.DB.mode !== 'cloud');
     $('login-mode').textContent = modeNote();
     setTimeout(() => $('f-user').focus(), 50);

@@ -387,7 +387,8 @@ G.DB = (() => {
   }
   function applyInPlace(s) { assignDeep(save, s); }
 
-  const VALID = /^[A-Za-z0-9_ñÑáéíóúÁÉÍÓÚ]{3,16}$/;
+  const isVN = () => ((window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN'));
+  const VALID = /^[\p{L}\p{N}_]{3,16}$/u;
 
   // =====================================================================
   //                               MODO LOCAL
@@ -428,10 +429,10 @@ G.DB = (() => {
   async function registerLocal(name, pass) {
     const accs = read(K_ACC) || {};
     const k = name.toLowerCase();
-    if (accs[k]) return { ok: false, error: 'Ese nombre ya existe.' };
+    if (accs[k]) return { ok: false, error: isVN() ? 'Tên này đã có người sử dụng.' : 'Ese nombre ya existe.' };
     const salt = randomSalt();
     accs[k] = { name, salt, hash: await hash(pass, salt), created: Date.now() };
-    if (!write(K_ACC, accs)) return { ok: false, error: 'El navegador no deja guardar datos (¿modo incógnito?).' };
+    if (!write(K_ACC, accs)) return { ok: false, error: isVN() ? 'Trình duyệt không cho phép lưu dữ liệu (chế độ ẩn danh?).' : 'El navegador no deja guardar datos (¿modo incógnito?).' };
     beginLocal(k, name);
     write(K_SAVE + k, save);
     return { ok: true, isNew: true };
@@ -441,7 +442,7 @@ G.DB = (() => {
     const accs = read(K_ACC) || {};
     const acc = accs[name.toLowerCase()];
     if (!acc || acc.hash !== await hash(pass || '', acc.salt)) {
-      return { ok: false, error: 'Usuario o contraseña incorrectos.' };
+      return { ok: false, error: isVN() ? 'Sai tên đăng nhập hoặc mật khẩu.' : 'Usuario o contraseña incorrectos.' };
     }
     beginLocal(name.toLowerCase(), acc.name);
     return { ok: true, isNew: !save.partner };
@@ -597,8 +598,9 @@ G.DB = (() => {
   }
 
   function displayNameOf(u) {
-    const n = ((u && u.displayName) || 'Entrenador').trim().split(/\s+/)[0].replace(/[^A-Za-z0-9_ñÑáéíóúÁÉÍÓÚ]/g, '');
-    return (n || 'Entrenador').slice(0, 16);
+    const fallback = isVN() ? 'Huấn luyện viên' : 'Entrenador';
+    const n = ((u && u.displayName) || fallback).trim().split(/\s+/)[0].replace(/[^\p{L}\p{N}_]/gu, '');
+    return (n || fallback).slice(0, 16);
   }
 
   const docRef = () => fs.collection('saves').doc(uid);
@@ -665,6 +667,7 @@ G.DB = (() => {
     if (!online) { pending = true; setSync('offline'); }
     else if (same) setSync('ok');
     else { pending = true; setSync('pending'); }
+    if (G.Presence && G.Presence.setUid && uid) G.Presence.setUid(uid);
   }
 
   /*
@@ -798,7 +801,8 @@ G.DB = (() => {
       'unavailable': 'Sin conexión con la base de datos.'
     };
     if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return '';
-    return M[c] || ('Error: ' + (c || (e && e.message) || 'desconocido'));
+    if (M[c]) return (G.T && isVN()) ? G.T(M[c]) : M[c];
+    return (isVN() ? 'Lỗi: ' : 'Error: ') + (c || (e && e.message) || (isVN() ? 'không xác định' : 'desconocido'));
   }
 
   // =====================================================================
@@ -824,9 +828,9 @@ G.DB = (() => {
 
   async function register(name, pass) {
     name = (name || '').trim();
-    if (!VALID.test(name)) return { ok: false, error: 'El nombre debe tener 3-16 letras, números o _.' };
+    if (!VALID.test(name)) return { ok: false, error: isVN() ? 'Tên phải gồm 3-16 chữ cái, chữ số hoặc _.' : 'El nombre debe tener 3-16 letras, números o _.' };
     const min = mode === 'cloud' ? 6 : 4;
-    if ((pass || '').length < min) return { ok: false, error: `La contraseña debe tener al menos ${min} caracteres.` };
+    if ((pass || '').length < min) return { ok: false, error: isVN() ? `Mật khẩu phải có ít nhất ${min} ký tự.` : `La contraseña debe tener al menos ${min} caracteres.` };
     if (mode === 'local') return registerLocal(name, pass);
     // Tope de cuentas del mes (Firebase cobra a partir de 50.000 al mes).
     try {
@@ -860,13 +864,14 @@ G.DB = (() => {
   }
 
   async function loginWithGoogle() {
-    if (mode !== 'cloud') return { ok: false, error: 'Entrar con Google necesita la versión publicada del juego.' };
+    if (mode !== 'cloud') return { ok: false, error: isVN() ? 'Đăng nhập Google yêu cầu chơi bản trực tuyến.' : 'Entrar con Google necesita la versión publicada del juego.' };
     try {
       const cred = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
       let legacy = null;
       let importedLocal = false;
       const local = findLocalSave();
-      if (local && (!read(K_MIGRATED + local.key) || local.key === 'guest')) {
+      const migratedTo = local ? read(K_MIGRATED + local.key) : null;
+      if (local && (!migratedTo || migratedTo === cred.user.uid)) {
         const vn = ((window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN'));
         const askMsg = vn
           ? 'Phát hiện dữ liệu chơi offline/khách trên máy này. Bạn có muốn đồng bộ tiến trình vào tài khoản Google không?'
@@ -891,8 +896,9 @@ G.DB = (() => {
   }
 
   function playAsGuest() {
-    user = 'Invitado'; key = null; guest = true; uid = null;
-    save = newSave('Invitado');
+    const defaultName = isVN() ? 'Khách' : 'Invitado';
+    user = defaultName; key = null; guest = true; uid = null;
+    save = newSave(defaultName);
     if (mode === 'local') remove(K_SES);
     return { ok: true, isNew: true };
   }
@@ -946,7 +952,7 @@ G.DB = (() => {
     return !!(u && u.providerData.some(p => p.providerId === 'google.com'));
   }
   async function linkGoogle() {
-    if (!auth || !auth.currentUser) return { ok: false, error: 'Inicia sesión primero.' };
+    if (!auth || !auth.currentUser) return { ok: false, error: isVN() ? 'Hãy đăng nhập trước.' : 'Inicia sesión primero.' };
     try {
       await auth.currentUser.linkWithPopup(new firebase.auth.GoogleAuthProvider());
       return { ok: true };
@@ -954,7 +960,7 @@ G.DB = (() => {
       const c = (e && e.code) || '';
       if (c === 'auth/provider-already-linked') return { ok: true };
       if (c === 'auth/credential-already-in-use' || c === 'auth/email-already-in-use')
-        return { ok: false, error: 'Ese Gmail ya tiene su propia cuenta del juego. Usa otro Gmail.' };
+        return { ok: false, error: isVN() ? 'Gmail này đã gắn với một tài khoản game khác. Hãy dùng Gmail khác.' : 'Ese Gmail ya tiene su propia cuenta del juego. Usa otro Gmail.' };
       return { ok: false, error: authError(e) };
     }
   }
@@ -964,7 +970,7 @@ G.DB = (() => {
    * @param pass  contraseña (cuentas de nombre y contraseña)
    */
   async function deleteAccount(pass) {
-    if (guest || !key) return { ok: false, error: 'No hay cuenta que borrar.' };
+    if (guest || !key) return { ok: false, error: isVN() ? 'Không có tài khoản nào để xóa.' : 'No hay cuenta que borrar.' };
     if (mode === 'local') {
       const accs = read(K_ACC) || {};
       delete accs[key];
@@ -980,7 +986,7 @@ G.DB = (() => {
       // se podía volver a usar.
       const cu = auth.currentUser;
       if (nameAccount()) {
-        if (!pass) return { ok: false, error: 'Escribe tu contraseña.' };
+        if (!pass) return { ok: false, error: isVN() ? 'Vui lòng nhập mật khẩu.' : 'Escribe tu contraseña.' };
         await cu.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(cu.email, pass));
       } else {
         await cu.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());

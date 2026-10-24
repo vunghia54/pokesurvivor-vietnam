@@ -21,6 +21,8 @@ G.Presence = (() => {
   let isConnected = false;
   let onlineCount = null;
   let initialized = false;
+  let onlineUids = new Set();
+  const presenceListeners = new Set();
 
   function loadScript(src) {
     if (typeof document === 'undefined') return Promise.resolve();
@@ -96,6 +98,10 @@ G.Presence = (() => {
 
       auth = app.auth();
       rtdb = app.database();
+      if (cfg.emulator) {
+        auth.useEmulator('http://127.0.0.1:9099');
+        if (rtdb) rtdb.useEmulator('127.0.0.1', 9000);
+      }
 
       // Thiết lập persistence LOCAL
       try {
@@ -161,10 +167,12 @@ G.Presence = (() => {
     presenceRef.on('value', snap => {
       const data = snap.val() || {};
       // Đếm số lượng UID duy nhất (mỗi UID là 1 người chơi)
-      const uniqueUsers = Object.keys(data).length;
+      onlineUids = new Set(Object.keys(data));
+      const uniqueUsers = onlineUids.size;
       onlineCount = uniqueUsers;
       if (isConnected) {
         updateUI(uniqueUsers, true);
+        presenceListeners.forEach(fn => { try { fn(onlineUids); } catch (e) {} });
       }
     }, err => {
       console.warn('[OnlinePresence] Lỗi đọc presence:', err.message);
@@ -212,6 +220,8 @@ G.Presence = (() => {
     setUid,
     onLogout,
     updateUI,
+    isOnline(u) { return !!(u && onlineUids.has(u)); },
+    onPresenceChange(fn) { presenceListeners.add(fn); return () => presenceListeners.delete(fn); },
     get isConnected() { return isConnected; },
     get count() { return onlineCount; }
   };

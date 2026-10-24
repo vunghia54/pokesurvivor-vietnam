@@ -22,7 +22,8 @@
  * El resto del juego escucha los cambios con G.Social.on(fn).
  */
 G.Social = (() => {
-  const VALID = /^[A-Za-z0-9_ñÑáéíóúÁÉÍÓÚ]{3,16}$/;
+  const isVN = () => ((window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN'));
+  const VALID = /^[\p{L}\p{N}_]{3,16}$/u;
   const MAX_PLAYERS = 4;
   const INVITE_TTL = 3 * 60 * 1000;
   /*
@@ -101,7 +102,7 @@ G.Social = (() => {
   /** Reserva un apodo único y crea el perfil público. */
   async function claimNick(name) {
     name = (name || '').trim();
-    if (!VALID.test(name)) return { ok: false, error: 'El apodo debe tener 3-16 letras, números o _.' };
+    if (!VALID.test(name)) return { ok: false, error: isVN() ? 'Biệt danh phải gồm 3-16 chữ cái, chữ số hoặc _.' : 'El apodo debe tener 3-16 letras, números o _.' };
     const lower = name.toLowerCase();
     try {
       await fb.fs.runTransaction(async tx => {
@@ -113,8 +114,8 @@ G.Social = (() => {
           { name, lower, at: firebase.firestore.FieldValue.serverTimestamp() });
       });
     } catch (e) {
-      if (e && e.code === 'taken') return { ok: false, error: 'Ese apodo ya lo tiene otro jugador.' };
-      return { ok: false, error: 'No se pudo guardar el apodo (' + ((e && e.code) || 'error') + ').' };
+      if (e && e.code === 'taken') return { ok: false, error: isVN() ? 'Biệt danh này đã có người sử dụng.' : 'Ese apodo ya lo tiene otro jugador.' };
+      return { ok: false, error: isVN() ? ('Không lưu được biệt danh (' + ((e && e.code) || 'lỗi') + ').') : ('No se pudo guardar el apodo (' + ((e && e.code) || 'error') + ').') };
     }
     me = { uid, name };
     try { localStorage.setItem('ps.nick.' + uid, name); } catch (e) { /* nada */ }
@@ -220,6 +221,7 @@ G.Social = (() => {
       snap.forEach(d => {
         const f = d.data();
         const other = f.users[0] === uid ? f.users[1] : f.users[0];
+        if (isBlocked(other)) return;
         next.set(other, Object.assign({
           uid: other, pid: d.id, name: (f.names && f.names[other]) || '???',
           status: f.status === 'ok' ? 'ok' : f.to === uid ? 'in' : 'out',
@@ -241,15 +243,16 @@ G.Social = (() => {
   /** Envía una solicitud de amistad (o acepta la que ya te había mandado). */
   async function request(name) {
     name = (name || '').trim();
-    if (!me) return { ok: false, error: 'Primero elige tu apodo.' };
-    if (!VALID.test(name)) return { ok: false, error: 'Escribe el apodo exacto de tu amigo.' };
+    if (!me) return { ok: false, error: isVN() ? 'Hãy chọn biệt danh trước.' : 'Primero elige tu apodo.' };
+    if (!VALID.test(name)) return { ok: false, error: isVN() ? 'Hãy nhập chính xác biệt danh của bạn bè.' : 'Escribe el apodo exacto de tu amigo.' };
     const n = await fb.fs.collection('names').doc(name.toLowerCase()).get().catch(() => null);
-    if (!n || !n.exists) return { ok: false, error: 'No hay ningún jugador con ese apodo.' };
+    if (!n || !n.exists) return { ok: false, error: isVN() ? 'Không tìm thấy người chơi nào có biệt danh này.' : 'No hay ningún jugador con ese apodo.' };
     const other = n.data().uid;
-    if (other === uid) return { ok: false, error: 'Ese eres tú.' };
+    if (other === uid) return { ok: false, error: isVN() ? 'Đây là biệt danh của chính bạn.' : 'Ese eres tú.' };
+    if (isBlocked(other)) return { ok: false, error: isVN() ? 'Người chơi này đang trong danh sách chặn của bạn.' : 'Este jugador está bloqueado.' };
     const f = friends.get(other);
-    if (f && f.status === 'ok') return { ok: false, error: 'Ya sois amigos.' };
-    if (f && f.status === 'out') return { ok: false, error: 'Ya le enviaste una solicitud.' };
+    if (f && f.status === 'ok') return { ok: false, error: isVN() ? 'Hai bạn đã là bạn bè.' : 'Ya sois amigos.' };
+    if (f && f.status === 'out') return { ok: false, error: isVN() ? 'Bạn đã gửi lời mời kết bạn rồi.' : 'Ya le enviaste una solicitud.' };
     if (f && f.status === 'in') return accept(other);
     const prof = await fb.fs.collection('profiles').doc(other).get().catch(() => null);
     const otherName = prof && prof.exists ? prof.data().name : name;
@@ -260,26 +263,53 @@ G.Social = (() => {
         names: { [uid]: me.name, [other]: otherName },
         at: firebase.firestore.FieldValue.serverTimestamp()
       });
-      return { ok: true, msg: 'Solicitud enviada a ' + otherName };
-    } catch (e) { return { ok: false, error: 'No se pudo enviar (' + (e.code || 'error') + ').' }; }
+      return { ok: true, msg: isVN() ? ('Đã gửi lời mời đến ' + otherName) : ('Solicitud enviada a ' + otherName) };
+    } catch (e) { return { ok: false, error: isVN() ? ('Không gửi được (' + (e.code || 'lỗi') + ').') : ('No se pudo enviar (' + (e.code || 'error') + ').') }; }
   }
 
   async function accept(other) {
     const f = friends.get(other);
-    if (!f || f.status !== 'in') return { ok: false, error: 'No hay solicitud.' };
+    if (!f || f.status !== 'in') return { ok: false, error: isVN() ? 'Không có lời mời nào.' : 'No hay solicitud.' };
     try {
       await fb.fs.collection('friendships').doc(f.pid).update({
         status: 'ok', at: firebase.firestore.FieldValue.serverTimestamp(), ['names.' + uid]: me.name
       });
-      return { ok: true, msg: 'Ahora eres amigo de ' + f.name };
-    } catch (e) { return { ok: false, error: 'No se pudo aceptar (' + (e.code || 'error') + ').' }; }
+      return { ok: true, msg: isVN() ? ('Hiện bạn đã là bạn bè với ' + f.name) : ('Ahora eres amigo de ' + f.name) };
+    } catch (e) { return { ok: false, error: isVN() ? ('Không chấp nhận được (' + (e.code || 'lỗi') + ').') : ('No se pudo aceptar (' + (e.code || 'error') + ').') }; }
   }
 
   async function remove(other) {
     const f = friends.get(other);
     if (!f) return { ok: false };
     try { await fb.fs.collection('friendships').doc(f.pid).delete(); return { ok: true }; }
-    catch (e) { return { ok: false, error: 'No se pudo borrar (' + (e.code || 'error') + ').' }; }
+    catch (e) { return { ok: false, error: isVN() ? ('Không xóa được (' + (e.code || 'lỗi') + ').') : ('No se pudo borrar (' + (e.code || 'error') + ').') }; }
+  }
+
+  // ---------------- chặn người chơi / chống spam ----------------
+  const blocksKey = () => 'ps.blocks.' + (uid || 'guest');
+  function getBlocks() {
+    try {
+      const v = localStorage.getItem(blocksKey());
+      return v ? JSON.parse(v) : [];
+    } catch (e) { return []; }
+  }
+  function isBlocked(otherUid) {
+    return getBlocks().includes(otherUid);
+  }
+  function block(otherUid) {
+    if (!otherUid) return;
+    const b = getBlocks();
+    if (!b.includes(otherUid)) {
+      b.push(otherUid);
+      try { localStorage.setItem(blocksKey(), JSON.stringify(b)); } catch (e) {}
+    }
+    remove(otherUid);
+    emit('friends');
+  }
+  function unblock(otherUid) {
+    const b = getBlocks().filter(x => x !== otherUid);
+    try { localStorage.setItem(blocksKey(), JSON.stringify(b)); } catch (e) {}
+    emit('friends');
   }
 
   // ---------------- salas ----------------
@@ -316,15 +346,15 @@ G.Social = (() => {
       open = (await fb.rtdb.ref('rooms/' + id + '/open').get()).val();
       host = (await fb.rtdb.ref('rooms/' + id + '/host').get()).val();
     } catch (e) { /* sala borrada */ }
-    if (!host) { rtOff(); return { ok: false, error: 'Esa sala ya no existe.' }; }
-    if (open !== true) { rtOff(); return { ok: false, error: 'La partida de esa sala ya ha empezado.' }; }
+    if (!host) { rtOff(); return { ok: false, error: isVN() ? 'Phòng đó không còn tồn tại.' : 'Esa sala ya no existe.' }; }
+    if (open !== true) { rtOff(); return { ok: false, error: isVN() ? 'Phòng đó đã bắt đầu trận.' : 'La partida de esa sala ya ha empezado.' }; }
     try { await fb.rtdb.ref('rooms/' + id + '/m/' + uid).set(memberInfo()); }
-    catch (e) { rtOff(); return { ok: false, error: 'No se pudo entrar en la sala.' }; }
+    catch (e) { rtOff(); return { ok: false, error: isVN() ? 'Không vào được phòng.' : 'No se pudo entrar en la sala.' }; }
     const n = (await fb.rtdb.ref('rooms/' + id + '/m').get()).numChildren();
     if (n > MAX_PLAYERS) {
       await fb.rtdb.ref('rooms/' + id + '/m/' + uid).remove();
       rtOff();
-      return { ok: false, error: 'La sala está llena (máximo ' + MAX_PLAYERS + ').' };
+      return { ok: false, error: isVN() ? ('Phòng đã đầy (tối đa ' + MAX_PLAYERS + ').') : ('La sala está llena (máximo ' + MAX_PLAYERS + ').') };
     }
     enterRoom(id, host);
     return { ok: true };
@@ -493,15 +523,15 @@ G.Social = (() => {
 
   async function invite(other) {
     const f = friends.get(other);
-    if (!f || f.status !== 'ok') return { ok: false, error: 'Sólo puedes invitar a tus amigos.' };
-    if (room && room.members.length >= MAX_PLAYERS) return { ok: false, error: 'La sala está llena.' };
-    if (room && !room.isHost) return { ok: false, error: 'Sólo el anfitrión de la sala puede invitar.' };
+    if (!f || f.status !== 'ok') return { ok: false, error: isVN() ? 'Bạn chỉ có thể mời bạn bè.' : 'Sólo puedes invitar a tus amigos.' };
+    if (room && room.members.length >= MAX_PLAYERS) return { ok: false, error: isVN() ? 'Phòng đã đầy.' : 'La sala está llena.' };
+    if (room && !room.isHost) return { ok: false, error: isVN() ? 'Chỉ chủ phòng mới có thể mời.' : 'Sólo el anfitrión de la sala puede invitar.' };
     if (!room) await createRoom();
     try {
       await fb.fs.collection('inv').doc(other + '_' + uid).set({ to: other, from: uid, room: room.id, name: me.name, at: fts() });
-    } catch (e) { return { ok: false, error: 'No se pudo invitar (' + (e.code || 'error') + ').' }; }
+    } catch (e) { return { ok: false, error: isVN() ? ('Không gửi được lời mời (' + (e.code || 'lỗi') + ').') : ('No se pudo invitar (' + (e.code || 'error') + ').') }; }
     sentInv.add(other);
-    return { ok: true, msg: 'Invitación enviada a ' + f.name };
+    return { ok: true, msg: isVN() ? ('Đã gửi lời mời đến ' + f.name) : ('Invitación enviada a ' + f.name) };
   }
 
   /** Retira las invitaciones que mandaste (al salir de la sala). */
@@ -513,7 +543,7 @@ G.Social = (() => {
 
   function onInvite(ref, v) {
     // Las caducadas se borran; sólo se aceptan de amigos confirmados.
-    if (!v || (v.at && now() - msOf(v.at) > INVITE_TTL)) { ref.delete().catch(() => {}); return; }
+    if (!v || (v.at && now() - msOf(v.at) > INVITE_TTL) || isBlocked(v.from)) { ref.delete().catch(() => {}); return; }
     const f = friends.get(v.from);
     if (f && f.status !== 'ok') return;
     invites.set(v.from, { from: v.from, name: v.name, room: v.room, at: msOf(v.at) || now() });
@@ -524,7 +554,7 @@ G.Social = (() => {
 
   async function acceptInvite(from) {
     const inv = invites.get(from);
-    if (!inv || now() - inv.at > INVITE_TTL) { invites.delete(from); emit('invites'); return { ok: false, error: 'La invitación ha caducado.' }; }
+    if (!inv || now() - inv.at > INVITE_TTL) { invites.delete(from); emit('invites'); return { ok: false, error: isVN() ? 'Lời mời đã hết hạn.' : 'La invitación ha caducado.' }; }
     invites.delete(from);
     invDoc(from).delete().catch(() => {});
     emit('invites');
@@ -616,6 +646,7 @@ G.Social = (() => {
     start, stop, claimNick, request, accept, remove, publishProfile, getProfile, profileData,
     createRoom, joinRoom, leaveRoom, setOpen, refreshMember, dropMember, setPlaying, refreshPresence, ensureFriends,
     invite, acceptInvite, declineInvite,
+    block, unblock, isBlocked, getBlocks, get blocks() { return getBlocks(); },
     on(fn) { listeners.add(fn); }, off(fn) { listeners.delete(fn); },
     get me() { return me; },
     get started() { return started; },

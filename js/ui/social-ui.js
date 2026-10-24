@@ -63,8 +63,46 @@
         msg(r.ok ? r.msg : r.error, !r.ok);
         if (r.ok) $('fr-name').value = '';
       };
+      const crBtn = $('fr-create-room');
+      if (crBtn) {
+        crBtn.onclick = () => {
+          withNick(async () => {
+            msg('');
+            crBtn.disabled = true;
+            try {
+              await G.Social.createRoom();
+              G.LobbyUI.open();
+            } catch (e) {
+              msg(e.message || 'Lỗi tạo phòng', true);
+            } finally {
+              crBtn.disabled = false;
+            }
+          });
+        };
+      }
+      const joinForm = $('fr-join-form');
+      if (joinForm) {
+        joinForm.onsubmit = e => {
+          e.preventDefault();
+          withNick(async () => {
+            const code = ($('fr-room-code').value || '').trim();
+            if (!code) return;
+            msg('');
+            const r = await G.Social.joinRoom(code);
+            if (r.ok) {
+              $('fr-room-code').value = '';
+              G.LobbyUI.open();
+            } else {
+              msg(r.error, true);
+            }
+          });
+        };
+      }
       $('fr-room').onclick = () => G.LobbyUI.open();
       G.Social.on(() => { if (G.UI.isOpen('scr-friends')) render(); });
+      if (G.Presence && G.Presence.onPresenceChange) {
+        G.Presence.onPresenceChange(() => { if (G.UI.isOpen('scr-friends')) render(); });
+      }
     }
 
     function msg(t, bad) {
@@ -82,9 +120,12 @@
 
     // (Sin "en línea" desde el 20-10-2026: costaba 1/4 de las escrituras de Firestore.)
     function stateText(f) {
-      if (f.status === 'in') return 'Quiere ser tu amigo';
-      if (f.status === 'out') return 'Solicitud enviada';
-      return '';
+      const vn = (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
+      if (f.status === 'in') return vn ? 'Yêu cầu kết bạn' : 'Quiere ser tu amigo';
+      if (f.status === 'out') return vn ? 'Đã gửi lời mời' : 'Solicitud enviada';
+      const online = G.Presence && G.Presence.isOnline && G.Presence.isOnline(f.uid);
+      if (online) return vn ? 'Trực tuyến' : 'En línea';
+      return vn ? 'Ngoại tuyến' : 'Desconectado';
     }
 
     function render() {
@@ -104,7 +145,8 @@
       for (const f of list) {
         const el = document.createElement('div');
         el.className = 'fr-row';
-        const dot = f.status !== 'ok' ? 'pend' : 'on';
+        const online = G.Presence && G.Presence.isOnline && G.Presence.isOnline(f.uid);
+        const dot = f.status !== 'ok' ? 'pend' : (online ? 'on' : '');
         const inRoom = room && room.members.some(m => m.uid === f.uid);
         el.innerHTML = `<i class="dot ${dot}"></i><b translate="no"><a href="#" class="plink" title="Ver su perfil">${esc(f.name)}</a></b><span class="st">${inRoom ? 'En tu sala' : stateText(f)}</span><span class="grow"></span>`;
         if (f.status === 'ok') el.querySelector('.plink').onclick = e => { e.preventDefault(); G.ProfileUI.show(f.uid); };
@@ -113,22 +155,54 @@
           const b = document.createElement('button');
           b.className = 'btn small ' + cls; b.textContent = txt; b.onclick = fn; el.appendChild(b); return b;
         };
+        const vn = (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
         if (f.status === 'in') {
-          btn('Aceptar', 'gold', async () => { const r = await G.Social.accept(f.uid); msg(r.ok ? r.msg : r.error, !r.ok); });
-          btn('Rechazar', 'ghost', () => G.Social.remove(f.uid));
+          btn(vn ? 'Đồng ý' : 'Aceptar', 'gold', async () => { const r = await G.Social.accept(f.uid); msg(r.ok ? r.msg : r.error, !r.ok); });
+          btn(vn ? 'Từ chối' : 'Rechazar', 'ghost', () => G.Social.remove(f.uid));
         } else if (f.status === 'out') {
-          btn('Cancelar', 'ghost', () => G.Social.remove(f.uid));
+          btn(vn ? 'Hủy lời mời' : 'Cancelar', 'ghost', () => G.Social.remove(f.uid));
         } else {
           if (!inRoom && (!room || room.isHost)) {
-            btn('Invitar', 'gold', async () => {
+            btn(vn ? 'Mời vào phòng' : 'Invitar', 'gold', async () => {
               const r = await G.Social.invite(f.uid);
               msg(r.ok ? r.msg : r.error, !r.ok);
               if (r.ok) G.LobbyUI.open();
             });
           }
-          btn('Quitar', 'ghost', () => { if (confirm('¿Quitar a ' + f.name + ' de tus amigos?')) G.Social.remove(f.uid); });
+          btn(vn ? 'Hủy bạn' : 'Quitar', 'ghost', () => {
+            const askMsg = vn ? ('Hủy kết bạn với ' + f.name + '?') : ('¿Quitar a ' + f.name + ' de tus amigos?');
+            if (confirm(askMsg)) G.Social.remove(f.uid);
+          });
+          btn(vn ? 'Chặn' : 'Bloquear', 'ghost', () => {
+            const askBlock = vn ? ('Chặn ' + f.name + '? Người này sẽ không thể gửi lời mời hoặc vào phòng cùng bạn.') : ('¿Bloquear a ' + f.name + '?');
+            if (confirm(askBlock)) G.Social.block(f.uid);
+          });
         }
         box.appendChild(el);
+      }
+      const blkBox = $('fr-blocks');
+      if (blkBox) {
+        blkBox.innerHTML = '';
+        const blocks = G.Social.blocks || [];
+        if (blocks.length) {
+          const vn = (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
+          const d = document.createElement('details');
+          d.style.cssText = 'color:var(--muted);font-size:13px;margin-top:10px';
+          d.innerHTML = `<summary style="cursor:pointer">${vn ? 'Danh sách đã chặn' : 'Bloqueados'} (${blocks.length})</summary><div class="fr-blocked-inner" style="margin-top:6px;display:flex;flex-direction:column;gap:6px"></div>`;
+          const inner = d.querySelector('.fr-blocked-inner');
+          for (const bu of blocks) {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:rgba(255,255,255,0.05);border-radius:4px';
+            row.innerHTML = `<span style="font-family:monospace;font-size:12px">${esc(bu)}</span>`;
+            const ub = document.createElement('button');
+            ub.className = 'btn small ghost';
+            ub.textContent = vn ? 'Bỏ chặn' : 'Desbloquear';
+            ub.onclick = () => { G.Social.unblock(bu); render(); };
+            row.appendChild(ub);
+            inner.appendChild(row);
+          }
+          blkBox.appendChild(d);
+        }
       }
     }
 
@@ -149,6 +223,23 @@
       $('lobby-menu').onclick = () => G.MenuUI.open();
       $('lobby-start').onclick = start;
       $('lobby-start').dataset.sfx = 'confirm';
+      const copyBtn = $('lobby-copy-code');
+      if (copyBtn) {
+        copyBtn.onclick = () => {
+          const room = G.Social.room;
+          if (!room) return;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(room.id).then(() => {
+              const vn = (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
+              G.UI.toast(vn ? 'Đã sao chép mã phòng!' : '¡Código copiado!', 2500);
+            }).catch(() => {
+              prompt('Mã phòng:', room.id);
+            });
+          } else {
+            prompt('Mã phòng:', room.id);
+          }
+        };
+      }
       // Conecta / desconecta la red al entrar o salir de una sala.
       G.Social.on(what => {
         const room = G.Social.room;
@@ -188,6 +279,8 @@
     function render() {
       const room = G.Social.room;
       if (!room) return;
+      const codeEl = $('lobby-code-display');
+      if (codeEl) codeEl.textContent = room ? room.id : '';
       const ms = room.members;
       $('lobby-sub').textContent = room.isHost
         ? 'Eres el anfitrión. Invita a tus amigos (hasta ' + G.Social.MAX_PLAYERS + ') y empezad cuando estéis.'

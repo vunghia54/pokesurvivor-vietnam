@@ -25,4 +25,5 @@ const isAllowedHost = typeof location !== 'undefined' && (
   location.hostname === ''
 );
 
-G.FIREBASE_CONFIG = isAllowedHost ? G.FIREBASE_CONFIG_READY : null;
+const isLocalHost = typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+G.FIREBASE_CONFIG = isAllowedHost ? Object.assign({}, G.FIREBASE_CONFIG_READY, isLocalHost ? { emulator: true } : {}) : null;

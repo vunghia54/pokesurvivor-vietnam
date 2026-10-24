@@ -608,8 +608,9 @@ G.Player = class Player {
       G.I18n.rawCanvas(ctx, 'fillText', this.tag, this.x, y);
       if (this.dead) {
         ctx.font = '700 6px Pixelify,"Segoe UI",sans-serif';
-        ctx.strokeText(this.revLabel || '', this.x, y - 8);
-        ctx.fillText(this.revLabel || '', this.x, y - 8);
+        const lbl = (G.I18n && G.I18n.t) ? G.I18n.t(this.revLabel || '') : (this.revLabel || '');
+        G.I18n.rawCanvas(ctx, 'strokeText', lbl, this.x, y - 8);
+        G.I18n.rawCanvas(ctx, 'fillText', lbl, this.x, y - 8);
       }
       ctx.restore();
     }
