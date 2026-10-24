@@ -533,13 +533,13 @@ G.DB = (() => {
    * cierra de verdad es la clave de la API restringida a estos dominios en
    * Google Cloud; esto frena las copias que ni lo miran (14-10-2026).
    */
-  const HOSTS = ['pokesurvivor.com', 'www.pokesurvivor.com', 'jpter78.github.io', 'localhost', '127.0.0.1'];
+  const HOSTS = ['vunghia54.github.io', 'localhost', '127.0.0.1'];
 
   async function initCloud() {
     const cfg = G.FIREBASE_CONFIG;
     if (!/^https?:$/.test(location.protocol)) { localReason = 'file'; return false; }
     if (cfg && !cfg.emulator && !HOSTS.includes(location.hostname)) { localReason = 'host'; return false; }
-    if (!cfg || !cfg.apiKey || !cfg.projectId) { localReason = 'config'; return false; }
+    if (!cfg || !cfg.apiKey || !cfg.projectId || cfg.apiKey.startsWith('PLACEHOLDER')) { localReason = 'config'; return false; }
     await loadScript(SDK + 'firebase-app-compat.js');
     await loadScript(SDK + 'firebase-auth-compat.js');
     await loadScript(SDK + 'firebase-firestore-compat.js');
@@ -559,7 +559,7 @@ G.DB = (() => {
       if (rtdb) rtdb.useEmulator('127.0.0.1', 9000);
     }
     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    auth.languageCode = 'es';
+    auth.languageCode = ((window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN')) ? 'vi' : ((window.G && window.G.I18n) ? window.G.I18n.lang : 'es');
     // (Al salir de la pestaña ya no se sube nada: sólo con Guardar, ver MODO NUBE.
     // Y al volver tampoco se lee la nube desde el 20-10-2026: lo del otro aparato
     // se trae al recargar la página; pullSoon queda sin usar.)
@@ -602,6 +602,36 @@ G.DB = (() => {
 
   const docRef = () => fs.collection('saves').doc(uid);
   const plain = s => JSON.parse(JSON.stringify(s));      // Firestore no admite undefined
+
+  function findLocalSave() {
+    const ses = read(K_SES);
+    if (ses) {
+      const s = read(K_SAVE + ses);
+      if (s && (s.partner || Object.keys(s.owned || {}).length > 0)) return { key: ses, save: migrate(s, s.name) };
+    }
+    if (guest && save && (save.partner || Object.keys(save.owned || {}).length > 0)) {
+      return { key: 'guest', save: migrate(JSON.parse(JSON.stringify(save)), save.name) };
+    }
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(K_SAVE)) {
+          const s = read(k);
+          if (s && (s.partner || Object.keys(s.owned || {}).length > 0)) {
+            return { key: k.slice(K_SAVE.length), save: migrate(s, s.name) };
+          }
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function backupLocalSave(loc) {
+    if (!loc || !loc.save) return;
+    try {
+      write('ps.backup.' + Date.now(), { at: new Date().toISOString(), key: loc.key, save: loc.save });
+    } catch (e) {}
+  }
 
   /** Abre la partida de la nube de un usuario recién autenticado. */
   async function openCloud(u, opts = {}) {
@@ -821,8 +851,23 @@ G.DB = (() => {
     if (mode !== 'cloud') return { ok: false, error: 'Entrar con Google necesita la versión publicada del juego.' };
     try {
       const cred = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      await openCloud(cred.user, { name: displayNameOf(cred.user) });
-      return { ok: true, isNew: !save.partner };
+      let legacy = null;
+      let importedLocal = false;
+      const local = findLocalSave();
+      if (local && (!read(K_MIGRATED + local.key) || local.key === 'guest')) {
+        const vn = ((window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN'));
+        const askMsg = vn
+          ? 'Phát hiện dữ liệu chơi offline/khách trên máy này. Bạn có muốn đồng bộ tiến trình vào tài khoản Google không?'
+          : 'Se ha detectado una partida local en este dispositivo. ¿Deseas sincronizarla con tu cuenta de Google?';
+        const wantImport = typeof window !== 'undefined' && window.confirm ? window.confirm(askMsg) : true;
+        if (wantImport) {
+          backupLocalSave(local);
+          legacy = local;
+          importedLocal = true;
+        }
+      }
+      await openCloud(cred.user, { name: displayNameOf(cred.user), legacy });
+      return { ok: true, isNew: !save.partner, importedLocal };
     } catch (e) { return { ok: false, error: authError(e) }; }
   }
 

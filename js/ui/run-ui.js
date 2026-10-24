@@ -108,12 +108,16 @@ G.RunUI = (() => {
     G.UI.hide('scr-levelup');
   }
 
+  function isVN() {
+    return (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
+  }
+
   /**
-   * Mensaje de apoyo (Ko-fi) al acabar: tras un récord o cada 10 partidas,
+   * Mensaje de apoyo al acabar: tras un récord o cada 10 partidas,
    * nunca en la primera y como mucho una vez al día. Se cierra con la X.
    */
   function askSupport(r) {
-    if (!G.Funding || !G.Funding.url) return false;
+    if (!isVN() && (!G.Funding || !G.Funding.url)) return false;
     const runs = (G.DB.save && G.DB.save.stats && G.DB.save.stats.runs) || 0;
     if (runs < 2 || !(r.record || runs % 10 === 0)) return false;
     const today = new Date().toISOString().slice(0, 10);
@@ -142,11 +146,23 @@ G.RunUI = (() => {
       ${r.record ? '<div style="grid-column:1/-1;text-align:center" class="gold">¡Nuevo récord de tiempo!</div>' : ''}
       ${askSupport(r) ? `<div class="support-ask" id="over-ask" style="grid-column:1/-1">
         <button class="x" type="button" aria-label="Cerrar">×</button>
+        ${isVN() ? `
+        <p>Bạn thấy bản PokéSurvivor tiếng Việt thế nào? Kết nối với người quản lý bản dịch trên Facebook hoặc gửi góp ý nhé!</p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px">
+          <a class="btn small" href="https://www.facebook.com/vunghiaaa" target="_blank" rel="noopener noreferrer" style="background:#1877f2;color:#fff">${G.Icons.html('fb', 14)} Facebook Vũ Trung Nghĩa</a>
+          <button class="btn small" type="button" id="over-sup-btn" style="background:#ffd23f;color:#0a1430;font-weight:700;text-shadow:none">${G.Icons.html('heart', 14)} Ủng hộ dự án</button>
+        </div>
+        ` : `
         <p>¿Te está gustando PokéSurvivor? Lo hago yo solo y los servidores cuestan dinero. Si quieres, puedes ayudarme a mantenerlo en línea.</p>
         <a class="btn small gold" href="${G.Funding.url}" target="_blank" rel="noopener">${G.Icons.html('heart', 14)} Apoyar en Ko-fi</a>
+        `}
       </div>` : ''}`;
     const ask = $('over-ask');
-    if (ask) ask.querySelector('.x').onclick = () => ask.remove();
+    if (ask) {
+      ask.querySelector('.x').onclick = () => ask.remove();
+      const supBtn = ask.querySelector('#over-sup-btn');
+      if (supBtn && G.SupportUI) supBtn.onclick = () => G.SupportUI.open();
+    }
     $('btn-again').onclick = onBack;
     if (r.caught && r.caught.length) {
       const row = $('over-caught');

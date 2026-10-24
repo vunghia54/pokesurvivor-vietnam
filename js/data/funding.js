@@ -9,8 +9,8 @@
  *   costs     gastos [concepto, euros al mes]; si el coste no es fijo, un texto
  */
 G.Funding = {
-  kofi: 'jpter78',
-  sponsors: 'JPTER78',
+  kofi: '',
+  sponsors: '',
   costs: [
     ['Servidores (partidas, cuentas, ranking y multijugador)', 'Según cuánta gente juegue'],
     ['Dominio pokesurvivor.com', '≈12 € al año']

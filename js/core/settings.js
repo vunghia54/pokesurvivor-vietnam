@@ -13,15 +13,23 @@
  *   gamepad     true/false                        jugar con mando (gamepad.js)
  *   padRumble   true/false                        que el mando vibre al recibir daño
  *   aimManual   true/false                        apuntar a mano (ratón o stick derecho) en vez de solo
+ *   autoSkill   true/false                        lanzar y ciclar habilidades automáticamente
  *
  *   G.Settings.get('quality')  ·  G.Settings.set('fps', true)  ·  G.Settings.on(fn)
  *   G.Settings.fx   nivel efectivo 0 (bajo) .. 2 (alto), ya resuelto el 'auto'
  */
 G.Settings = (() => {
   const KEY = 'ps.settings';
-  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false };
+  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false, autoSkill: true, autoSkillMode: 'simultaneous' };
   let s = Object.assign({}, DEF);
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* nada */ }
+  // Tương thích ngược với lựa chọn trước đó của người chơi
+  if (s.autoSkill === false && !s.autoSkillMode) {
+    s.autoSkillMode = 'off';
+  } else if (!s.autoSkillMode) {
+    s.autoSkillMode = 'simultaneous';
+  }
+  s.autoSkill = s.autoSkillMode !== 'off';
   const fns = new Set();
 
   // Calidad automática: empieza alta (media en móvil) y baja si va a tirones.
@@ -31,7 +39,13 @@ G.Settings = (() => {
 
   function save() { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* nada */ } }
   function get(k) { return s[k]; }
-  function set(k, v) { s[k] = v; save(); fns.forEach(fn => { try { fn(k, v); } catch (e) { /* nada */ } }); }
+  function set(k, v) {
+    s[k] = v;
+    if (k === 'autoSkillMode') s.autoSkill = v !== 'off';
+    if (k === 'autoSkill') s.autoSkillMode = v ? (s.autoSkillMode === 'off' ? 'simultaneous' : (s.autoSkillMode || 'simultaneous')) : 'off';
+    save();
+    fns.forEach(fn => { try { fn(k, v); } catch (e) { /* nada */ } });
+  }
 
   /** Lo llama el bucle del juego en cada fotograma (sólo durante la partida). */
   function sample(dt) {

@@ -21,7 +21,7 @@
 
   var lang = (window.PS_LOCALES && window.PS_LOCALES.lang) || document.documentElement.lang || 'en';
   var texts = {
-    'vi-VN': ['Đây không phải trang chính thức', 'PokéSurvivor chỉ chơi trên trang chính thức, miễn phí và không quảng cáo.', 'Chơi tại pokesurvivor.com'],
+    'vi-VN': ['Đây không phải trang chính thức', 'PokéSurvivor chỉ chơi trên trang chính thức, miễn phí và không quảng cáo.', 'Chơi tại PokéSurvivor Việt Nam'],
     es: ['Esta no es la web oficial', 'PokéSurvivor sólo se juega en su web oficial, gratis y sin anuncios.', 'Jugar en pokesurvivor.com'],
     en: ['This is not the official website', 'PokéSurvivor can only be played on its official website, free and without ads.', 'Play on pokesurvivor.com'],
     fr: ['Ce n’est pas le site officiel', 'PokéSurvivor se joue uniquement sur son site officiel, gratuitement et sans publicité.', 'Jouer sur pokesurvivor.com'],
@@ -33,7 +33,7 @@
   var copy = texts[lang] || texts.en;
 
   function show() {
-    var url = 'https://pokesurvivor.com' + location.pathname + location.search;
+    var url = 'https://vunghia54.github.io/pokesurvivor-vietnam/' + location.search;
     var box = document.createElement('div');
     box.setAttribute('translate', 'no');
     box.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;' +

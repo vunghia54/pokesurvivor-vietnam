@@ -103,19 +103,28 @@ G.UI = (() => {
 
   // ---------------- aviso legal ----------------
 
-  const CONTACT = 'jpieratorregrosa@gmail.com';
-  const REPO = 'https://github.com/JPTER78/pokesurvivor';
+  const CONTACT = 'vunghia546@gmail.com';
+  const REPO = 'https://github.com/vunghia54/pokesurvivor-vietnam';
+  const CONTACT_VN = 'vunghia546@gmail.com';
+  const REPO_VN = 'https://github.com/vunghia54/pokesurvivor-vietnam';
   let legalBack = null;
+
+  function isVN() {
+    return (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN');
+  }
 
   function openLegal() {
     legalBack = SCREENS.find(s => isOpen(s)) || null;
-    $('legal-mail').textContent = CONTACT;
-    $('legal-mail').href = 'mailto:' + CONTACT + '?subject=Pok%C3%A9Survivor';
-    $('legal-repo').textContent = REPO.replace('https://', '');
-    $('legal-repo').href = REPO;
+    const vn = isVN();
+    const mail = vn ? CONTACT_VN : CONTACT;
+    const repo = vn ? REPO_VN : REPO;
+    $('legal-mail').textContent = mail;
+    $('legal-mail').href = 'mailto:' + mail + '?subject=Pok%C3%A9Survivor';
+    $('legal-repo').textContent = repo.replace('https://', '');
+    $('legal-repo').href = repo;
     const canDelete = G.DB.loggedIn && !G.DB.guest;
     $('legal-delete').disabled = !canDelete;
-    $('legal-del-msg').textContent = canDelete ? '' : 'Inicia sesión para poder borrar tu cuenta.';
+    $('legal-del-msg').textContent = canDelete ? '' : (vn ? 'Đăng nhập để có thể xóa tài khoản của bạn.' : 'Inicia sesión para poder borrar tu cuenta.');
     $('scr-legal').classList.remove('hidden');
   }
 

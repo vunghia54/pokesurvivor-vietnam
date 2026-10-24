@@ -45,6 +45,11 @@ G.LoginUI = (() => {
       const r = await G.DB.loginWithGoogle();
       $('btn-google').disabled = false;
       if (!r.ok) { $('login-err').textContent = r.error; return; }
+      if (r.importedLocal && G.UI && G.UI.toast) {
+        G.UI.toast((G.I18n && G.I18n.lang === 'vi-VN')
+          ? 'Đã tự động sao lưu và đồng bộ tiến trình chơi trước đó lên tài khoản Google!'
+          : '¡Partida local respaldada y sincronizada con tu cuenta de Google!', 5000);
+      }
       G.Flow.afterLogin();
     };
   }
@@ -111,7 +116,9 @@ G.LoginUI = (() => {
     const why = G.DB.localReason === 'file'
       ? 'Abierto desde un archivo: la partida sólo se guarda en este navegador. Para guardar en la nube, juega en la versión publicada.'
       : G.DB.localReason === 'host'
-        ? 'Esta no es la web oficial: la partida sólo se guarda en este navegador. El juego oficial y gratis está en pokesurvivor.com.'
+        ? (G.I18n && G.I18n.lang === 'vi-VN'
+            ? 'Đây không phải trang chính thức: tiến trình chỉ lưu trong trình duyệt này. Website chính thức: vunghia54.github.io/pokesurvivor-vietnam.'
+            : 'Esta no es la web oficial: la partida sólo se guarda en este navegador. Web oficial: vunghia54.github.io/pokesurvivor-vietnam.')
       : G.DB.localReason === 'config'
         ? 'Nube sin configurar: la partida sólo se guarda en este navegador.'
         : 'No se pudo conectar con la nube: la partida sólo se guarda en este navegador.';

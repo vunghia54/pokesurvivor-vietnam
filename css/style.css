@@ -1004,6 +1004,7 @@ html:lang(vi) .btn, html:lang(vi) .chip, html:lang(vi) .tab { white-space: norma
 html:lang(vi) .tabs { flex-wrap: wrap; }
 html:lang(vi) .row > * { min-width: 0; }
 html:lang(vi) .btn { max-width: 100%; }
+html:lang(vi) .btn[style*="ffd23f"], html:lang(vi) .btn.gold { text-shadow: none !important; }
 
 html:lang(vi) .menu-item { min-width: 0; overflow-wrap: anywhere; letter-spacing: 0; }
 html:lang(vi) .menu-item small { white-space: normal; }

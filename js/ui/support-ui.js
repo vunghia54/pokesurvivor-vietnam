@@ -40,7 +40,7 @@ G.SupportUI = (() => {
       const showQr = canShowQR();
       $('sup-body').innerHTML = `
         <p>PokéSurvivor là dự án game của người hâm mộ, <b>hoàn toàn miễn phí</b>, không quảng cáo và không nạp thẻ.</p>
-        <p class="sub">Đây là <b>bản Việt hóa thử nghiệm</b> phi thương mại. Mọi đóng góp đều nhằm khích lệ tinh thần người dịch và xây dựng cộng đồng.</p>
+        <p class="sub">Dự án <b>PokéSurvivor Việt Nam</b> phi thương mại phát triển bởi <b>Vũ Trung Nghĩa</b>. Mọi đóng góp đều nhằm xây dựng và phát triển cộng đồng người chơi.</p>
         ${showQr ? `
         <div style="text-align:center;margin:14px 0">
           <a href="assets/ui/qr-ung-ho.png" target="_blank" rel="noopener noreferrer" title="Nhấn để xem ảnh kích thước lớn">
@@ -54,8 +54,8 @@ G.SupportUI = (() => {
         </div>`}
         <div class="row wrap" style="gap:8px;justify-content:center;margin-top:10px">
           <a class="btn" href="https://www.facebook.com/vunghiaaa" target="_blank" rel="noopener noreferrer" style="background:#1877f2;color:#fff">Facebook Vũ Trung Nghĩa</a>
-          <a class="btn" style="background:#ffd23f;color:#0a1430;font-weight:700" href="https://github.com/vunghia54/pokesurvivor-vietnam/issues/new?template=feature_request.yml" target="_blank" rel="noopener noreferrer">Góp ý tính năng</a>
-          <a class="btn ghost" href="${F.url || 'https://github.com/JPTER78/pokesurvivor'}" target="_blank" rel="noopener noreferrer">Tác giả gốc (JPTER78)</a>
+          <a class="btn" style="background:#ffd23f;color:#0a1430;font-weight:700;text-shadow:none" href="https://github.com/vunghia54/pokesurvivor-vietnam/issues/new?template=feature_request.yml" target="_blank" rel="noopener noreferrer">Góp ý tính năng</a>
+          <a class="btn ghost" href="https://github.com/vunghia54/pokesurvivor-vietnam" target="_blank" rel="noopener noreferrer">Mã nguồn GitHub</a>
         </div>
         <p class="sub center" style="margin-top:10px;font-size:11px;color:var(--muted)">Lưu ý: Không bán vật phẩm hay trao đổi lợi thế trong game. Bản quyền Pokémon thuộc về Nintendo, GAME FREAK và Creatures Inc.</p>`;
       $('scr-support').classList.remove('hidden');

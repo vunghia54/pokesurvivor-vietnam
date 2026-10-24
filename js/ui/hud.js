@@ -342,6 +342,16 @@ G.HUD = (() => {
           ctx.restore();
         }
 
+        // Destello visual al lanzarse (efecto de disparo en todas las ranuras)
+        const fl = 1 - (performance.now() - (m.castAt || 0)) / 200;
+        if (fl > 0) {
+          ctx.save();
+          roundRect(ctx, x, y, S, S, 12); ctx.clip();
+          ctx.fillStyle = 'rgba(255,255,255,' + (fl * 0.45).toFixed(2) + ')';
+          ctx.fillRect(x, y, S, S);
+          ctx.restore();
+        }
+
         // emblema del tipo + insignia de la familia
         G.Icons.draw(ctx, 'move:' + m.id, x + (S - 32) / 2, y + (S - 32) / 2 - 2, 32);
 

@@ -16,11 +16,242 @@ G.Combat = (() => {
   let ghost = false;
   let fields = [];
 
+  // ---------------- định vị mục tiêu và thi triển độc lập (Multi-Cast) ----------------
+
+  function findTargetForMove(pl, m, allEnemies) {
+    if (!allEnemies || !allEnemies.length) {
+      if (G.World && G.World.nearestBreakable) return G.World.nearestBreakable(pl.x, pl.y, reach(m));
+      return null;
+    }
+    const r = reach(m);
+    const ranged = m.kind === 'projectile' || m.kind === 'beam' || m.kind === 'chain' || m.kind === 'meteor' || m.kind === 'homing' || m.kind === 'bounce';
+
+    // 1. Boss trong tầm đánh
+    const boss = allEnemies.find(e => e.boss && !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) <= r);
+    // 2. Kẻ địch áp sát đe dọa người chơi
+    const threat = G.Projectiles.nearest(allEnemies, pl.x, pl.y, pl.r + 28);
+    const threatInReach = threat && G.U.dist(pl.x, pl.y, threat.x, threat.y) <= r ? threat : null;
+
+    if (ranged) {
+      if (boss) return boss;
+      if (threatInReach) return threatInReach;
+    } else {
+      if (threatInReach) return threatInReach;
+      if (boss) return boss;
+    }
+
+    // 3. Mục tiêu hiện tại nếu còn trong tầm đánh
+    if (pl.target && !pl.target.dead && G.U.dist(pl.x, pl.y, pl.target.x, pl.target.y) <= r) {
+      return pl.target;
+    }
+
+    // 4. Kẻ địch gần nhất trong tầm
+    const near = G.Projectiles.nearest(allEnemies, pl.x, pl.y, r);
+    if (near) return near;
+
+    // 5. Rương hoặc đá phá vỡ được
+    if (G.World && G.World.nearestBreakable) {
+      return G.World.nearestBreakable(pl.x, pl.y, r);
+    }
+
+    return null;
+  }
+
+  function tickIndependentMove(dt, pl, m, now, allEnemies) {
+    if (m.kind === 'orbit') {
+      orbit(pl, m, dt, now);
+      return;
+    }
+
+    m.t -= dt;
+    if (m.t > 0) return;
+
+    // Kiểm tra kỹ năng hỗ trợ (Buff / Regen / Def)
+    if (m.kind === 'buff') {
+      if (m.stat === 'regen') {
+        if (pl.hp >= pl.maxHp * 0.92) { m.t = 0.1; return; }
+      } else {
+        const b = pl.buffs && pl.buffs[m.stat];
+        const maxSt = m.stacks || 5;
+        const hasEnemies = allEnemies.some(e => !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) < 550);
+        if ((b && b.n >= maxSt && b.t > 2.0) || !hasEnemies) { m.t = 0.2; return; }
+      }
+    } else {
+      // Kiểm tra mục tiêu tấn công
+      const r = reach(m);
+      if (needsTarget(m, pl)) {
+        const tg = findTargetForMove(pl, m, allEnemies);
+        if (!tg) {
+          m.t = 0.05;
+          return;
+        }
+        if (!pl.manualAim) {
+          m._autoAim = Math.atan2(tg.y - pl.y, tg.x - pl.x);
+        }
+      } else {
+        const hasNearby = allEnemies.some(e => !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) <= r + 60);
+        if (!hasNearby) {
+          m.t = 0.1;
+          return;
+        }
+      }
+    }
+
+    // Đặt lại thời gian hồi chiêu độc lập
+    m.t = Math.max(0.05, m.cd * pl.cdMul * (m.kind === 'buff' && pl.abil && pl.abil.statusCd || 1));
+
+    const savedAim = pl.aim;
+    if (m._autoAim != null && !pl.manualAim) pl.aim = m._autoAim;
+
+    pl.cast(m);
+    if (G.Coop.active) G.Coop.cast(pl, m);
+    m.castAt = performance.now();
+
+    run(pl, m);
+
+    if (m._autoAim != null && !pl.manualAim) {
+      pl.aim = savedAim;
+      delete m._autoAim;
+    }
+  }
+
+  // ---------------- đánh giá luân phiên (Sequential Auto Cast) ----------------
+
+  function isSlotReadyToCast(pl, slotIdx, allEnemies) {
+    const slot = pl.slots[slotIdx];
+    if (!slot || !slot.length) return false;
+    const m = slot[0];
+    if (!m) return false;
+
+    // Movimiento en recarga
+    if (m.kind !== 'orbit' && m.t > 0) return false;
+
+    // Kỹ năng hỗ trợ / Buff / Hồi máu / Lá chắn
+    if (m.kind === 'buff') {
+      if (m.stat === 'regen') {
+        // Chỉ hồi phục khi máu giảm dưới 92% (tránh lãng phí khi đầy máu)
+        return pl.hp < pl.maxHp * 0.92;
+      }
+      if (m.stat === 'def') {
+        // Chỉ tăng thủ khi chưa đầy cộng dồn hoặc sắp hết hạn (< 2.0s), và có quái gần
+        const b = pl.buffs && pl.buffs.def;
+        const maxSt = m.stacks || 5;
+        const needShield = !b || b.n < maxSt || b.t < 2.0;
+        const hasEnemies = allEnemies.some(e => !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) < 550);
+        return needShield && hasEnemies;
+      }
+      // Các bùa tấn công / tốc độ (patk, satk, spd)
+      const b = pl.buffs && pl.buffs[m.stat];
+      const maxSt = m.stacks || 5;
+      const needBuff = !b || b.n < maxSt || b.t < 2.0;
+      const hasEnemies = allEnemies.some(e => !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) < 550);
+      return needBuff && hasEnemies;
+    }
+
+    // Kỹ năng dạng Orbit (orbes quay quanh)
+    if (m.kind === 'orbit') {
+      const r = (m.radius || 62) + 40;
+      return allEnemies.some(e => !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) <= r);
+    }
+
+    // Kỹ năng tấn công
+    const r = reach(m);
+    if (pl.target && !pl.target.dead && G.U.dist(pl.x, pl.y, pl.target.x, pl.target.y) <= r) return true;
+    if (allEnemies.some(e => !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) <= r + (e.r || 16))) return true;
+    if (G.World && G.World.nearestBreakable && G.World.nearestBreakable(pl.x, pl.y, r)) return true;
+
+    // Chiêu diện rộng không cần khóa mục tiêu đơn
+    if (!needsTarget(m, pl)) {
+      return allEnemies.some(e => !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) <= r + 60);
+    }
+
+    return false;
+  }
+
+  function evalAutoSkill(pl, dt, now) {
+    if (pl.hasItem && pl.hasItem('choiceband')) return;
+    if (pl.anim && pl.anim.busy && pl.anim.busy() && pl.anim.progress && pl.anim.progress() < 0.65) return;
+    if (now - (pl.lastAutoSwitchAt || 0) < 180) return;
+
+    const allEnemies = G.EnemyMgr ? G.EnemyMgr.all() : [];
+    const curSlot = pl.slots[pl.active];
+    const curMove = curSlot && curSlot[0];
+
+    // Nếu ô hiện tại sẵn sàng và có mục tiêu, bắn trước
+    if (curMove && isSlotReadyToCast(pl, pl.active, allEnemies)) return;
+
+    let bestSlot = -1;
+    let bestPriority = -1;
+
+    for (let i = 0; i < pl.slots.length; i++) {
+      if (i === pl.active) continue;
+      if (!isSlotReadyToCast(pl, i, allEnemies)) continue;
+
+      const m = pl.slots[i][0];
+      let prio = 50;
+
+      if (m.kind === 'buff' && m.stat === 'regen') {
+        prio = pl.hp < pl.maxHp * 0.45 ? 100 : 45;
+      } else if (m.kind === 'buff') {
+        prio = 40;
+      } else {
+        const r = reach(m);
+        const bossNearby = allEnemies.some(e => e.boss && !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) <= r);
+        const threatNearby = allEnemies.some(e => !e.dead && G.U.dist(pl.x, pl.y, e.x, e.y) <= pl.r + 28);
+        if (bossNearby) prio = 85;
+        else if (threatNearby && (m.kind === 'melee' || m.kind === 'nova' || m.kind === 'spin' || m.kind === 'shove')) prio = 75;
+        else prio = 50 + (pl.slots.length - i);
+      }
+
+      if (prio > bestPriority) {
+        bestPriority = prio;
+        bestSlot = i;
+      }
+    }
+
+    if (bestSlot >= 0) {
+      pl.lastAutoSwitchAt = now;
+      pl.setActive(bestSlot, { silent: true, auto: true });
+    }
+  }
+
   // ---------------- ejecutar el movimiento activo ----------------
 
   function tick(dt, pl, now) {
     if (pl.dead) return;
-    // Vínculos: todos los movimientos del hueco activo, cada uno con su recarga.
+
+    if (pl.manualLockT > 0) pl.manualLockT = Math.max(0, pl.manualLockT - dt);
+
+    const autoMode = G.Settings ? (G.Settings.get('autoSkillMode') || (G.Settings.get('autoSkill') === false ? 'off' : 'simultaneous')) : 'simultaneous';
+    const choiceBandLocked = pl.hasItem && pl.hasItem('choiceband') && pl.slots[pl.active];
+
+    // 1. Chế độ Đồng thời (Simultaneous / Multi-Cast): tất cả các ô tung chiêu độc lập cùng lúc
+    if (autoMode === 'simultaneous' && !choiceBandLocked) {
+      const allEnemies = G.EnemyMgr ? G.EnemyMgr.all() : [];
+      for (let i = 0; i < pl.slots.length; i++) {
+        for (const m of pl.slots[i]) {
+          tickIndependentMove(dt, pl, m, now, allEnemies);
+        }
+      }
+      return;
+    }
+
+    // 2. Chế độ Luân phiên (Sequential Cycle Auto Cast): tự động chuyển sang kỹ năng sẵn sàng
+    if (autoMode === 'cycle' && !choiceBandLocked) {
+      for (let i = 0; i < pl.slots.length; i++) {
+        if (i !== pl.active) {
+          for (const m of pl.slots[i]) {
+            if (m.t > 0) m.t = Math.max(0, m.t - dt);
+          }
+        }
+      }
+      if (pl.slots.length > 1 && (!pl.manualLockT || pl.manualLockT <= 0)) {
+        evalAutoSkill(pl, dt, now);
+      }
+    }
+
+    // 3. Chế độ Tắt (Thủ công) hoặc khi bị khóa bởi Choice Band hoặc chế độ Luân phiên:
+    // Chỉ kích hoạt nhóm kỹ năng ở ô đang chọn (activeGroup)
     for (const m of pl.activeGroup()) tickMove(dt, pl, m, now);
   }
 

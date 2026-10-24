@@ -38,6 +38,8 @@ G.Player = class Player {
     this.active = 0;           // hueco activo
     this.maxMoves = 4;         // huecos
     this.bonds = 0;            // vínculos por usar (premio de los legendarios)
+    this.manualLockT = 0;      // bloqueo temporal del cambio automático tras uso manual
+    this.lastAutoSwitchAt = 0; // marca de tiempo del último cambio automático
 
     // patk / satk: Danza Espada y Danza Dragón (físico) y Maquinación (especial).
     this.buffs = {
@@ -165,19 +167,24 @@ G.Player = class Player {
 
   hasMove(id) { return this.moves.some(m => m.id === id); }
 
-  setActive(i) {
+  setActive(i, opts = {}) {
     if (i < 0 || i >= this.slots.length || i === this.active) return;
     // Cinta Elección: no se puede cambiar de movimiento.
     if (this.hasItem('choiceband') && this.slots[this.active]) {
-      G.FX.dmgText(this.x, this.y - this.bodyH - 8, 'Cinta Elección', '#ff8ad8');
+      if (!opts.silent) G.FX.dmgText(this.x, this.y - this.bodyH - 8, 'Cinta Elección', '#ff8ad8');
       return;
     }
     this.active = i;
     G.Projectiles.clearOrbs(this);
-    G.Audio.sfx('select');
-    for (const m of this.slots[i]) m.t = Math.min(m.t, m.cd * 0.35);
-    const m = this.slots[i][0];
-    G.FX.ring(this.x, this.y - G.LIFT * 0.5, 6, this.r * 3.4, G.U.TYPE_COLOR[m.type], 0.3, 3);
+    if (!opts.silent) {
+      G.Audio.sfx('select');
+      const m = this.slots[i][0];
+      if (m) G.FX.ring(this.x, this.y - G.LIFT * 0.5, 6, this.r * 3.4, G.U.TYPE_COLOR[m.type], 0.3, 3);
+    }
+    if (!opts.auto) {
+      for (const m of this.slots[i]) m.t = Math.min(m.t, m.cd * 0.35);
+      this.manualLockT = 2.0; // Control manual tiene prioridad temporal de 2 s
+    }
   }
 
   cycle(dir) {

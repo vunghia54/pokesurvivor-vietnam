@@ -26,8 +26,12 @@ G.Audio = (() => {
     if (!AC) return false;
     ctx = new AC();
     master = ctx.createDynamicsCompressor();
-    master.threshold.value = -14; master.ratio.value = 4;
-    const out = outNode = ctx.createGain(); out.gain.value = 0.9;
+    master.threshold.value = -6;
+    master.knee.value = 10;
+    master.ratio.value = 16;
+    master.attack.value = 0.003;
+    master.release.value = 0.12;
+    const out = outNode = ctx.createGain(); out.gain.value = 0.85;
     master.connect(out).connect(ctx.destination);
 
     musicBus = ctx.createGain(); sfxBus = ctx.createGain();
@@ -71,8 +75,8 @@ G.Audio = (() => {
     if (!ctx) return;
     const t = ctx.currentTime;
     musicBus.gain.setTargetAtTime(settings.muted ? 0 : settings.music * 0.7, t, 0.05);
-    // Los efectos se generan bajitos: ×2,4 los pone a la par de la música (medido).
-    sfxBus.gain.setTargetAtTime(settings.muted ? 0 : settings.sfx * 2.4, t, 0.05);
+    // Los efectos se equilibran a ×1.7 para evitar saturar el compresor con impactos múltiples.
+    sfxBus.gain.setTargetAtTime(settings.muted ? 0 : settings.sfx * 1.7, t, 0.05);
   }
 
   function setVolume(which, v) { settings[which] = G.U.clamp(v, 0, 1); save(); applyVolumes(); }
@@ -86,6 +90,7 @@ G.Audio = (() => {
     const o = ctx.createOscillator();
     o.type = type; o.frequency.setValueAtTime(f, t);
     o.connect(dest); o.start(t); o.stop(end + 0.05);
+    o.onended = () => { try { o.disconnect(); } catch (e) {} };
     return o;
   }
 
@@ -103,6 +108,7 @@ G.Audio = (() => {
     const s = ctx.createBufferSource();
     s.buffer = noiseBuf;
     s.connect(dest); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+    s.onended = () => { try { s.disconnect(); } catch (e) {} };
     return s;
   }
 
@@ -329,10 +335,19 @@ G.Audio = (() => {
     if (name) startSong(name);
   }
 
-  // Planificador: programa con 150 ms de antelación.
+  // Planificador: programa con 150 ms de antelación (con protección anti-lag / cambio de pestaña).
   setInterval(() => {
     if (!ctx || !current || ctx.state !== 'running') return;
     const c = current, sd = 60 / c.song.bpm / 4;
+    // Protección contra acumulación de notas tras pausa / cambio de pestaña:
+    if (c.next < ctx.currentTime) {
+      const missed = Math.floor((ctx.currentTime - c.next) / sd);
+      if (missed > 0) {
+        c.step += missed;
+        c.next += missed * sd;
+      }
+      if (c.next < ctx.currentTime) c.next = ctx.currentTime + 0.02;
+    }
     while (c.next < ctx.currentTime + 0.15) {
       const i = c.step % c.song.steps;
       // Swing: retrasa las corcheas a contratiempo.
@@ -345,6 +360,21 @@ G.Audio = (() => {
       c.step++;
     }
   }, 25);
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (!ctx) return;
+      if (!document.hidden) {
+        if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+        if (current && current.next < ctx.currentTime) {
+          const sd = 60 / current.song.bpm / 4;
+          const missed = Math.ceil((ctx.currentTime - current.next) / sd);
+          current.step += missed;
+          current.next = ctx.currentTime + 0.05;
+        }
+      }
+    });
+  }
 
   // ---------------- efectos de sonido ----------------
 
@@ -365,6 +395,7 @@ G.Audio = (() => {
     g.gain.exponentialRampToValueAtTime(0.0005, t + dur);
     const o = osc(type, f0, t, t + dur, g);
     if (f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    setTimeout(() => { try { g.disconnect(); } catch (e) {} }, (dur + at) * 1000 + 100);
   }
 
   function hiss(dur, vol, type, f0, f1, at = 0, q = 1) {
@@ -375,6 +406,7 @@ G.Audio = (() => {
     const g = ctx.createGain(); b.connect(g); g.connect(sfxBus);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0005, t + dur);
     noise(t, dur, b);
+    setTimeout(() => { try { g.disconnect(); b.disconnect(); } catch (e) {} }, (dur + at) * 1000 + 100);
   }
 
   function arp(type, freqs, gap, dur, vol) { freqs.forEach((f, i) => tone(type, f, f, dur, vol, i * gap)); }
@@ -451,7 +483,11 @@ G.Audio = (() => {
   };
 
   // Separación mínima entre repeticiones del mismo efecto (ms).
-  const MIN_GAP = { hit: 45, faint: 60, xp: 35, coin: 50, grass: 70, shot: 70, hover: 40, break: 60, judge: 80 };
+  const MIN_GAP = {
+    hit: 50, faint: 70, xp: 40, coin: 45, grass: 80, shot: 60, hover: 40, break: 60, judge: 80,
+    hurt: 80, ball: 70, select: 40, click: 40, error: 80
+  };
+  let activeHits = 0;
 
   function sfx(name, opts) {
     if (!ctx || settings.muted || settings.sfx <= 0 || ctx.state !== 'running') return;
@@ -460,9 +496,21 @@ G.Audio = (() => {
     const now = performance.now();
     const key = name === 'shot' && opts ? 'shot' + opts.kind : name;
     if (now - (last[key] || 0) < (MIN_GAP[name] || 0)) return;
-    if (voices > 24) return;                    // tope de voces simultáneas
+
+    // Límite de impactos simultáneos para evitar saturación del audio thread en ataques AoE
+    if (name === 'hit') {
+      if (activeHits >= 3) return;
+      activeHits++;
+      setTimeout(() => { activeHits = Math.max(0, activeHits - 1); }, 60);
+    }
+
+    if (voices > 20) {
+      const highPrio = name === 'hurt' || name === 'faint' || name === 'levelup' || name === 'bossDown' || name === 'shiny' || name === 'gameover';
+      if (!highPrio) return;
+    }
+
     last[key] = now;
-    voices++; setTimeout(() => voices--, 150);
+    voices++; setTimeout(() => { voices = Math.max(0, voices - 1); }, 140);
     try { fn(opts); } catch (e) { /* un efecto nunca debe romper el juego */ }
   }
 

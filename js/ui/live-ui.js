@@ -2,14 +2,14 @@
  * Botón en la barra de arriba:
  * - En la versión vietnamita (vi-VN): lleva al Facebook del responsable
  *   de la traducción (Vũ Trung Nghĩa).
- * - En los demás idiomas: lleva al canal de YouTube de JPTER78 y avisa
+ * - Kênh cộng đồng và trang Facebook dự án (Vũ Trung Nghĩa)
  *   si está en directo.
  */
 G.LiveUI = (() => {
   const $ = G.UI.$;
-  const CHANNEL = 'https://www.youtube.com/@jpter78';
+  const CHANNEL = 'https://www.facebook.com/vunghiaaa';
   const FB_VN = 'https://www.facebook.com/vunghiaaa';
-  const SRC = 'https://raw.githubusercontent.com/JPTER78/pokesurvivor/live/live.json';
+  const SRC = '';
   const EVERY = 5 * 60 * 1000, STALE = 90 * 60 * 1000;
   let live = null, lastT = 0;
 
@@ -40,7 +40,7 @@ G.LiveUI = (() => {
     if (!b) return;
     if (isVN()) {
       b.classList.remove('live');
-      b.title = 'Facebook quản lý bản Việt hóa (Vũ Trung Nghĩa)';
+      b.title = 'Facebook Vũ Trung Nghĩa';
       b.innerHTML = G.Icons.html('fb', 18) + ' <span>Facebook</span>';
       return;
     }
@@ -50,7 +50,7 @@ G.LiveUI = (() => {
   }
 
   async function check() {
-    if (isVN()) return;
+    if (isVN() || !SRC) return;
     if (document.hidden || Date.now() - lastT < EVERY - 5000) return;
     lastT = Date.now();
     try {

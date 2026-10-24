@@ -7,7 +7,7 @@ G.SettingsUI = (() => {
   const $ = G.UI.$;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const VERSION = '1.2 · 2026-10-09';
-  const REPO = 'https://github.com/JPTER78/pokesurvivor';
+  const REPO = 'https://github.com/vunghia54/pokesurvivor-vietnam';
   const REPO_VN = 'https://github.com/vunghia54/pokesurvivor-vietnam';
   const BUG_VN = 'https://github.com/vunghia54/pokesurvivor-vietnam/issues/new?template=bug_report.yml';
   const FEAT_VN = 'https://github.com/vunghia54/pokesurvivor-vietnam/issues/new?template=feature_request.yml';
@@ -64,8 +64,12 @@ G.SettingsUI = (() => {
   function section(title, sub) { return `<h3 class="set-h">${esc(title)}</h3>${sub ? `<p class="sub">${sub}</p>` : ''}`; }
   function toggle(key, label, desc) {
     const on = !!G.Settings.get(key);
+    const isVi = G.I18n && G.I18n.lang === 'vi-VN';
+    const isEn = G.I18n && G.I18n.lang === 'en';
+    const onText = isVi ? 'Bật' : (isEn ? 'On' : 'Sí');
+    const offText = isVi ? 'Tắt' : (isEn ? 'Off' : 'No');
     return `<div class="set-row"><div class="grow"><b>${esc(label)}</b><small>${esc(desc)}</small></div>
-      <button class="btn small switch ${on ? 'gold' : ''}" data-k="${key}">${on ? 'Sí' : 'No'}</button></div>`;
+      <button class="btn small switch ${on ? 'gold' : ''}" data-k="${key}">${on ? onText : offText}</button></div>`;
   }
   function choice(key, opts) {
     const cur = G.Settings.get(key);
@@ -94,8 +98,33 @@ G.SettingsUI = (() => {
              <button class="btn small" id="set-full">${isFull() ? 'Salir' : 'Activar'}</button></div>`
            : iosTip() ? `<div class="set-row"><div class="grow"><b>Pantalla completa</b><small>${esc(IOS_TIP)}</small></div></div>` : '');
     } else if (tab === 'ctl') {
+      const isVi = G.I18n && G.I18n.lang === 'vi-VN';
+      const isEn = G.I18n && G.I18n.lang === 'en';
+      const curMode = G.Settings.get('autoSkillMode') || (G.Settings.get('autoSkill') === false ? 'off' : 'simultaneous');
+      const modeDesc = {
+        off: isVi ? 'Thủ công: dùng phím 1–4, Q/E hoặc bấm HUD để chọn và tung từng kỹ năng.'
+                  : (isEn ? 'Manual: use keys 1–4, Q/E or tap HUD to select and cast moves.'
+                          : 'Manual: usa las teclas 1–4, Q/E o pulsa el HUD para elegir y lanzar movimientos.'),
+        cycle: isVi ? 'Luân phiên: tự động luân chuyển và thi triển từng chiêu thức khi hồi chiêu xong.'
+                    : (isEn ? 'Cycle: automatically switches to and casts ready moves one by one.'
+                            : 'Alternar: cambia y lanza automáticamente un movimiento listo.'),
+        simultaneous: isVi ? 'Đồng thời: tự động thi triển tất cả kỹ năng đã trang bị độc lập cùng lúc (kiểu Vampire Survivors).'
+                           : (isEn ? 'Simultaneous: automatically casts all equipped moves independently (Vampire Survivors style).'
+                                   : 'Simultáneo: lanza automáticamente todos los movimientos equipados a la vez (estilo Vampire Survivors).')
+      }[curMode] || '';
+
+      const autoSkillSection = section(isVi ? 'Kỹ năng chiến đấu' : (isEn ? 'Combat' : 'Combate'),
+                                       isVi ? 'Tùy chỉnh cách tung kỹ năng trong trận chiến.' : (isEn ? 'Configure how moves are cast in battle.' : 'Configura cómo se lanzan los movimientos en combate.'))
+        + `<div class="set-row"><div class="grow"><b>${isVi ? 'Chế độ tự động kỹ năng' : (isEn ? 'Auto Skill Mode' : 'Modo automático')}</b><small>${esc(modeDesc)}</small></div></div>`
+        + choice('autoSkillMode', [
+            ['off', isVi ? 'Tắt' : (isEn ? 'Off' : 'Desactivado')],
+            ['cycle', isVi ? 'Luân phiên' : (isEn ? 'Cycle' : 'Alternar')],
+            ['simultaneous', isVi ? 'Đồng thời' : (isEn ? 'Simultaneous' : 'Simultáneo')]
+          ]);
+
       const pn = G.Pad.name;
-      box.innerHTML = section('Con mando', pn
+      box.innerHTML = autoSkillSection
+        + section('Con mando', pn
           ? 'Mando conectado: <b translate="no">' + esc(pn.replace(/\s*\(.*$/, '')) + '</b>'
           : 'Xbox, PlayStation, Switch y la mayoría de mandos USB o Bluetooth. Conéctalo y pulsa cualquier botón.')
         + toggle('gamepad', 'Usar mando', 'Moverte, cambiar de ataque y manejar los menús con el mando.')
@@ -124,7 +153,32 @@ G.SettingsUI = (() => {
              <div><kbd>1</kbd>–<kbd>3</kbd></div><span>elegir carta al subir de nivel</span>
            </div>`;
     } else if (tab === 'a11y') {
-      box.innerHTML = section('Apuntado')
+      const isVi = G.I18n && G.I18n.lang === 'vi-VN';
+      const isEn = G.I18n && G.I18n.lang === 'en';
+      const curMode = G.Settings.get('autoSkillMode') || (G.Settings.get('autoSkill') === false ? 'off' : 'simultaneous');
+      const modeDesc = {
+        off: isVi ? 'Thủ công: dùng phím 1–4, Q/E hoặc bấm HUD để chọn và tung từng kỹ năng.'
+                  : (isEn ? 'Manual: use keys 1–4, Q/E or tap HUD to select and cast moves.'
+                          : 'Manual: usa las teclas 1–4, Q/E o pulsa el HUD para elegir y lanzar movimientos.'),
+        cycle: isVi ? 'Luân phiên: tự động luân chuyển và thi triển từng chiêu thức khi hồi chiêu xong.'
+                    : (isEn ? 'Cycle: automatically switches to and casts ready moves one by one.'
+                            : 'Alternar: cambia y lanza automáticamente un movimiento listo.'),
+        simultaneous: isVi ? 'Đồng thời: tự động thi triển tất cả kỹ năng đã trang bị độc lập cùng lúc (kiểu Vampire Survivors).'
+                           : (isEn ? 'Simultaneous: automatically casts all equipped moves independently (Vampire Survivors style).'
+                                   : 'Simultáneo: lanza automáticamente todos los movimientos equipados a la vez (estilo Vampire Survivors).')
+      }[curMode] || '';
+
+      const autoSkillSection = section(isVi ? 'Kỹ năng chiến đấu' : (isEn ? 'Combat' : 'Combate'),
+                                       isVi ? 'Tùy chỉnh cách tung kỹ năng trong trận chiến.' : (isEn ? 'Configure how moves are cast in battle.' : 'Configura cómo se lanzan los movimientos en combate.'))
+        + `<div class="set-row"><div class="grow"><b>${isVi ? 'Chế độ tự động kỹ năng' : (isEn ? 'Auto Skill Mode' : 'Modo automático')}</b><small>${esc(modeDesc)}</small></div></div>`
+        + choice('autoSkillMode', [
+            ['off', isVi ? 'Tắt' : (isEn ? 'Off' : 'Desactivado')],
+            ['cycle', isVi ? 'Luân phiên' : (isEn ? 'Cycle' : 'Alternar')],
+            ['simultaneous', isVi ? 'Đồng thời' : (isEn ? 'Simultaneous' : 'Simultáneo')]
+          ]);
+
+      box.innerHTML = autoSkillSection
+        + section('Apuntado')
         + toggle('aimManual', 'Apuntar a mano', 'Tus ataques van hacia el ratón (o hacia donde empujes el stick derecho del mando) en vez de al enemigo más cercano. Si sueltas el stick y no mueves el ratón, vuelve a apuntar solo. La cadena y los meteoros siguen buscando a los enemigos solos.');
     } else if (tab === 'acc') {
       renderAccount(box);
@@ -141,7 +195,7 @@ G.SettingsUI = (() => {
         + `<div class="row wrap" style="justify-content:center;gap:8px">
              ${G.I18n && G.I18n.lang === 'vi-VN' ? `
              <a class="btn small" style="background:#e0533d;color:#fff" href="${BUG_VN}" target="_blank" rel="noopener noreferrer">Báo lỗi game</a>
-             <a class="btn small" style="background:#ffd23f;color:#0a1430;font-weight:700" href="${FEAT_VN}" target="_blank" rel="noopener noreferrer">Góp ý tính năng</a>
+             <a class="btn small" style="background:#ffd23f;color:#0a1430;font-weight:700;text-shadow:none" href="${FEAT_VN}" target="_blank" rel="noopener noreferrer">Góp ý tính năng</a>
              <a class="btn small" href="contacto/" target="_blank" rel="noopener">Liên hệ</a>
              <a class="btn small" href="https://www.facebook.com/vunghiaaa" target="_blank" rel="noopener noreferrer" style="background:#1877f2;color:#fff">Facebook</a>
              <a class="btn small" href="${REPO_VN}" target="_blank" rel="noopener noreferrer">Mã nguồn GitHub</a>
