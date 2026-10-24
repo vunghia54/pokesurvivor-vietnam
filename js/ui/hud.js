@@ -277,21 +277,27 @@ G.HUD = (() => {
       ctx.restore();
     }
 
-    // ---------- ranura de movimientos ----------
-    const S = 54, GAP = 9;
+    // ---------- ranura de movimientos (hỗ trợ 8 ô kỹ năng) ----------
     const n = Math.max(1, pl.slots.length);
-    const totalW = n * S + (n - 1) * GAP;
+    const is2Row = (touch || w < 860) && n > 4;
+    const cols = is2Row ? 4 : n;
+    const rows = is2Row ? Math.ceil(n / 4) : 1;
+    const S = touch ? (is2Row ? 44 : 48) : (is2Row ? 46 : (n > 4 ? 46 : 54));
+    const GAP = touch ? 5 : (n > 4 ? 6 : 9);
+    const totalW = cols * S + (cols - 1) * GAP;
+    const totalH = rows * S + (rows - 1) * GAP;
     let sx = (w - totalW) / 2;
     // Por encima de la barra de inicio del iPhone (allí los toques a veces no llegan).
-    let sy = h - S - 18 - (touch ? Math.min(28, G.Touch.safeArea().bottom) : 0);
+    let sy = h - totalH - 16 - (touch ? Math.min(24, G.Touch.safeArea().bottom) : 0);
     // En móvil, donde la haya puesto el jugador: el bloque objeto + todos los
     // huecos (aunque aún no estén llenos), por su centro, como en el editor
     // (layout-ui.js); los ataques nuevos van saliendo hacia la derecha.
     const pb = touch && G.Touch.spot('bar');
     if (pb) {
-      const nAll = Math.max(n, pl.maxMoves), bw = S + 18 + nAll * S + (nAll - 1) * GAP;
-      sx = G.U.clamp(pb[0] * w - bw / 2, 6, Math.max(6, w - bw - 6)) + S + 18;
-      sy = G.U.clamp(pb[1] * h - S / 2, 24, h - S - 6);
+      const nAllCols = is2Row ? 4 : Math.max(n, pl.maxMoves);
+      const bw = S + 14 + nAllCols * S + (nAllCols - 1) * GAP;
+      sx = G.U.clamp(pb[0] * w - bw / 2, 6, Math.max(6, w - bw - 6)) + S + 14;
+      sy = G.U.clamp(pb[1] * h - totalH / 2, 24, h - totalH - 6);
     }
     const BOND = '#ff8ad8';
     const cdOf = m => m.kind === 'orbit' ? 0 : G.U.clamp(m.t / (m.cd * pl.cdMul), 0, 1);
@@ -301,8 +307,10 @@ G.HUD = (() => {
       const m = g[0];
       const fused = g.length > 1;
       const on = i === pl.active;
-      const x = sx + i * (S + GAP);
-      const y = on ? sy - 6 : sy;
+      const colIdx = is2Row ? (i % 4) : i;
+      const rowIdx = is2Row ? Math.floor(i / 4) : 0;
+      const x = sx + colIdx * (S + GAP);
+      const y = sy + rowIdx * (S + GAP) - (on && !is2Row ? 4 : 0);
       // Tocar (o hacer clic en) un icono activa ese movimiento.
       if (m) G.Touch.addButton(x, y, S, S, () => { if (G.Game.state === 'playing' && pl.active !== i) { pl.setActive(i); G.Audio.sfx('click'); } }, GAP / 2 + 3);
       const col = m ? G.U.TYPE_COLOR[m.type] : '#4a5468';
@@ -353,7 +361,8 @@ G.HUD = (() => {
         }
 
         // emblema del tipo + insignia de la familia
-        G.Icons.draw(ctx, 'move:' + m.id, x + (S - 32) / 2, y + (S - 32) / 2 - 2, 32);
+        const iconSize = S < 48 ? 26 : 32;
+        G.Icons.draw(ctx, 'move:' + m.id, x + (S - iconSize) / 2, y + (S - iconSize) / 2 - 2, iconSize);
 
         // nivel del movimiento (puntitos)
         const dots = m.def.maxLvl;
@@ -376,13 +385,15 @@ G.HUD = (() => {
         ctx.font = F(700, 10);
         ctx.textAlign = 'center';
         ctx.fillStyle = fused ? BOND : col;
-        fitText(ctx, 'fillText', fused ? G.T(m.name, 'move') + ' +' + (g.length - 1) : G.T(m.name, 'move'), x + S / 2, y - 7, Math.min(130, 2 * Math.min(x + S / 2, w - x - S / 2) - 12));
+        const nameX = is2Row ? (sx + totalW / 2) : (x + S / 2);
+        const nameY = is2Row ? (sy - 6) : (y - 7);
+        fitText(ctx, 'fillText', fused ? G.T(m.name, 'move') + ' +' + (g.length - 1) : G.T(m.name, 'move'), nameX, nameY, Math.min(130, 2 * Math.min(nameX, w - nameX) - 12));
       }
     }
 
     // ---------- vínculo guardado (aún no hay dos movimientos sueltos) ----------
     if (pl.bonds > 0) {
-      const bx = sx + totalW + 12, by = sy + S / 2 - 12;
+      const bx = sx + totalW + 10, by = is2Row ? sy + (totalH - 24) / 2 : sy + S / 2 - 12;
       G.Icons.draw(ctx, 'bond', bx, by, 24);
       if (pl.bonds > 1) {
         ctx.font = F(800, 10);
@@ -394,7 +405,7 @@ G.HUD = (() => {
 
     // ---------- objeto equipado (a la izquierda de los movimientos) ----------
     {
-      const ix = sx - S - 18, iy = sy;
+      const ix = sx - S - 14, iy = is2Row ? sy + (totalH - S) / 2 : sy;
       roundRect(ctx, ix, iy, S, S, 12);
       ctx.fillStyle = pl.item ? 'rgba(40,30,10,.9)' : 'rgba(10,16,28,.55)';
       ctx.fill();
@@ -415,7 +426,7 @@ G.HUD = (() => {
     const buffs = Object.keys(ob).filter(id => ob[id] > 0);
     if (orbs.some(Boolean) || buffs.length) {
       const OS = 40, OG = 6, ow = G.Orbs.SLOTS * OS + (G.Orbs.SLOTS - 1) * OG;
-      const ox = sx + totalW / 2 - ow / 2, oy = sy - 30 - OS;
+      const ox = sx + totalW / 2 - ow / 2, oy = sy - 28 - OS;
       const cdF = G.U.clamp(G.Orbs.cd, 0, 1);
       for (let i = 0; i < G.Orbs.SLOTS; i++) {
         const o = orbs[i], x = ox + i * (OS + OG);
@@ -486,7 +497,7 @@ G.HUD = (() => {
       ctx.textAlign = 'center';
       ctx.fillStyle = 'rgba(180,200,230,.55)';
       ctx.fillText(touch ? 'Arrastra el dedo para moverte  ·  toca un ataque para cambiarlo'
-                         : 'WASD moverse  ·  1-4 / Q / E o clic en un ataque para cambiarlo  ·  Esc pausa', w / 2, h - 4);
+                         : 'WASD moverse  ·  1-8 / Q / E o clic en un ataque para cambiarlo  ·  Esc pausa', w / 2, h - 4);
     }
 
     ctx.restore();

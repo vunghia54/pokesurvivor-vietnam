@@ -102,15 +102,15 @@ G.SettingsUI = (() => {
       const isEn = G.I18n && G.I18n.lang === 'en';
       const curMode = G.Settings.get('autoSkillMode') || (G.Settings.get('autoSkill') === false ? 'off' : 'simultaneous');
       const modeDesc = {
-        off: isVi ? 'Thủ công: dùng phím 1–4, Q/E hoặc bấm HUD để chọn và tung từng kỹ năng.'
-                  : (isEn ? 'Manual: use keys 1–4, Q/E or tap HUD to select and cast moves.'
-                          : 'Manual: usa las teclas 1–4, Q/E o pulsa el HUD para elegir y lanzar movimientos.'),
+        off: isVi ? 'Thủ công: dùng phím 1–8, Q/E hoặc bấm HUD để chọn và tung từng kỹ năng.'
+                  : (isEn ? 'Manual: use keys 1–8, Q/E or tap HUD to select and cast moves.'
+                          : 'Manual: usa las teclas 1–8, Q/E o pulsa el HUD para elegir y lanzar movimientos.'),
         cycle: isVi ? 'Luân phiên: tự động luân chuyển và thi triển từng chiêu thức khi hồi chiêu xong.'
                     : (isEn ? 'Cycle: automatically switches to and casts ready moves one by one.'
                             : 'Alternar: cambia y lanza automáticamente un movimiento listo.'),
-        simultaneous: isVi ? 'Đồng thời: tự động thi triển tất cả kỹ năng đã trang bị độc lập cùng lúc (kiểu Vampire Survivors).'
-                           : (isEn ? 'Simultaneous: automatically casts all equipped moves independently (Vampire Survivors style).'
-                                   : 'Simultáneo: lanza automáticamente todos los movimientos equipados a la vez (estilo Vampire Survivors).')
+        simultaneous: isVi ? 'Đồng thời: tự động thi triển tất cả 8 kỹ năng đã trang bị độc lập cùng lúc (kiểu Vampire Survivors).'
+                           : (isEn ? 'Simultaneous: automatically casts all 8 equipped moves independently (Vampire Survivors style).'
+                                   : 'Simultáneo: lanza automáticamente los 8 movimientos equipados a la vez (estilo Vampire Survivors).')
       }[curMode] || '';
 
       const autoSkillSection = section(isVi ? 'Kỹ năng chiến đấu' : (isEn ? 'Combat' : 'Combate'),
@@ -157,15 +157,15 @@ G.SettingsUI = (() => {
       const isEn = G.I18n && G.I18n.lang === 'en';
       const curMode = G.Settings.get('autoSkillMode') || (G.Settings.get('autoSkill') === false ? 'off' : 'simultaneous');
       const modeDesc = {
-        off: isVi ? 'Thủ công: dùng phím 1–4, Q/E hoặc bấm HUD để chọn và tung từng kỹ năng.'
-                  : (isEn ? 'Manual: use keys 1–4, Q/E or tap HUD to select and cast moves.'
-                          : 'Manual: usa las teclas 1–4, Q/E o pulsa el HUD para elegir y lanzar movimientos.'),
+        off: isVi ? 'Thủ công: dùng phím 1–8, Q/E hoặc bấm HUD để chọn và tung từng kỹ năng.'
+                  : (isEn ? 'Manual: use keys 1–8, Q/E or tap HUD to select and cast moves.'
+                          : 'Manual: usa las teclas 1–8, Q/E o pulsa el HUD para elegir y lanzar movimientos.'),
         cycle: isVi ? 'Luân phiên: tự động luân chuyển và thi triển từng chiêu thức khi hồi chiêu xong.'
                     : (isEn ? 'Cycle: automatically switches to and casts ready moves one by one.'
                             : 'Alternar: cambia y lanza automáticamente un movimiento listo.'),
-        simultaneous: isVi ? 'Đồng thời: tự động thi triển tất cả kỹ năng đã trang bị độc lập cùng lúc (kiểu Vampire Survivors).'
-                           : (isEn ? 'Simultaneous: automatically casts all equipped moves independently (Vampire Survivors style).'
-                                   : 'Simultáneo: lanza automáticamente todos los movimientos equipados a la vez (estilo Vampire Survivors).')
+        simultaneous: isVi ? 'Đồng thời: tự động thi triển tất cả 8 kỹ năng đã trang bị độc lập cùng lúc (kiểu Vampire Survivors).'
+                           : (isEn ? 'Simultaneous: automatically casts all 8 equipped moves independently (Vampire Survivors style).'
+                                   : 'Simultáneo: lanza automáticamente los 8 movimientos equipados a la vez (estilo Vampire Survivors).')
       }[curMode] || '';
 
       const autoSkillSection = section(isVi ? 'Kỹ năng chiến đấu' : (isEn ? 'Combat' : 'Combate'),

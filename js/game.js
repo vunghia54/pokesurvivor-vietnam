@@ -364,7 +364,8 @@ G.Game = (() => {
     // Chế độ Đồng thời (Multi-Cast) bảo vệ tính công bằng bảng xếp hạng gốc
     const autoMode = G.Settings ? (G.Settings.get('autoSkillMode') || 'simultaneous') : 'simultaneous';
     const isMultiCast = autoMode === 'simultaneous';
-    const ok = clean() && !isMultiCast;
+    const has8Slots = pl.maxMoves > 4 || (pl.slots && pl.slots.length > 4);
+    const ok = clean() && !isMultiCast && !has8Slots;
     const sent = ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.dex, shiny: pl.shiny }))
                : ok && wasHost ? G.Ranking.submitGroup(Object.assign(mark, { members: team })) : null;
     if (sent) sent.then(b => { if (b && b.some(p => p !== 'a')) G.DB.commit(true); }).catch(() => {});
@@ -372,7 +373,7 @@ G.Game = (() => {
     G.RunUI.showOver({
       dead, time, level: pl.level, kills: pl.kills, bosses: pl.bosses, coins, record, t1: pl.t1, t10: pl.t10, judge,
       moves: pl.moves, caught,
-      breakdown: (isMultiCast ? '⚡ Đồng thời (Multi-Cast) · ' : '') + Object.entries(parts).filter(([, v]) => v).map(([k, v]) => `${k} ${v}`).join(' · ') +
+      breakdown: (has8Slots ? (isMultiCast ? '⚡ 8 Kỹ Năng Đồng Thời · ' : '⚡ 8 Kỹ Năng · ') : (isMultiCast ? '⚡ Đồng thời (Multi-Cast) · ' : '')) + Object.entries(parts).filter(([, v]) => v).map(([k, v]) => `${k} ${v}`).join(' · ') +
                  (mul > 1 ? ` · ×${mul.toFixed(2)} Fortuna` : '')
     }, () => { pl = null; G.Flow.afterRun(); });
   }
@@ -578,7 +579,7 @@ G.Game = (() => {
       return;
     }
     if (G.UI.isOpen('scr-bond')) {
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 8; i++) {
         if (G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1))) G.RunUI.pickBond(i);
       }
       return;
@@ -597,7 +598,7 @@ G.Game = (() => {
     }
     if (G.Input.tap('escape') || G.Input.tap('keyp')) { togglePause(); return; }
     if (state !== 'playing' || !pl) return;
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 8; i++) {
       if (G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1))) pl.setActive(i);
     }
     // Caído en grupo: Q / E cambian a quién miras.
@@ -605,8 +606,8 @@ G.Game = (() => {
     if (G.Input.tap('keyq')) pl.cycle(-1);
     if (G.Input.tap('keye') || G.Input.tap('tab')) pl.cycle(1);
     // Esferas: 5-8 (o el teclado numérico); en el mando, X la usa e Y cambia de esfera.
-    for (let i = 0; i < 4; i++) {
-      if (G.Input.tap('digit' + (i + 5)) || G.Input.tap('numpad' + (i + 5))) G.Orbs.use(pl, i);
+    for (let i = 0; i < 8; i++) {
+      if (i < 4 && (G.Input.tap('f' + (i + 1)) || (!pl.slots[i + 4] && (G.Input.tap('digit' + (i + 5)) || G.Input.tap('numpad' + (i + 5)))))) G.Orbs.use(pl, i);
     }
     if (G.Input.tap('padx')) G.Orbs.useSelected(pl);
     if (G.Input.tap('pady')) G.Orbs.next(pl);
