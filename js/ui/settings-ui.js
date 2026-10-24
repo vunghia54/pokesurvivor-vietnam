@@ -40,9 +40,19 @@ G.SettingsUI = (() => {
   function open(t) {
     if (t) tab = t;
     $('scr-settings').classList.remove('hidden');
+    if (G.UI && G.UI.chrome) {
+      G.UI.chrome(false);
+      if (document.body) document.body.classList.add('in-subscreen');
+    }
     render();
   }
-  function close() { $('scr-settings').classList.add('hidden'); }
+  function close() {
+    $('scr-settings').classList.add('hidden');
+    if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) {
+      G.UI.chrome(true);
+      if (document.body) document.body.classList.remove('in-subscreen');
+    }
+  }
   const isOpen = () => !$('scr-settings').classList.contains('hidden');
 
   // ---------------- pantalla completa ----------------

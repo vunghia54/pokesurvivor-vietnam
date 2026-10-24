@@ -5,9 +5,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.join(__dirname, '..');
-const styleCss = fs.readFileSync(path.join(root, 'css', 'style.css'), 'utf8');
-const settingsUiJs = fs.readFileSync(path.join(root, 'js', 'ui', 'settings-ui.js'), 'utf8');
-const devHtml = fs.readFileSync(path.join(root, 'dev.html'), 'utf8');
+const styleCss = fs.readFileSync(path.join(root, 'css', 'style.css'), 'utf8').replace(/\r\n/g, '\n');
+const settingsUiJs = fs.readFileSync(path.join(root, 'js', 'ui', 'settings-ui.js'), 'utf8').replace(/\r\n/g, '\n');
+const devHtml = fs.readFileSync(path.join(root, 'dev.html'), 'utf8').replace(/\r\n/g, '\n');
 
 test('Landscape & Modal: CSS includes multi-factor landscape & coarse-pointer breakpoints', () => {
   assert.ok(

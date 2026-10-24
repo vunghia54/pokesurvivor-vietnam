@@ -14,6 +14,10 @@ G.UI = (() => {
   function show(id, keepMenu = false) {
     for (const s of SCREENS) if (s !== id && !(keepMenu && s === 'scr-menu')) $(s).classList.add('hidden');
     $(id).classList.remove('hidden');
+    const isMenu = id === 'scr-menu';
+    chrome(isMenu);
+    document.body.classList.toggle('in-subscreen', !isMenu);
+    if (!isMenu) refreshSubscreenResources();
   }
   function hide(id) { $(id).classList.add('hidden'); }
   function hideAll() { for (const s of SCREENS) $(s).classList.add('hidden'); }
@@ -25,6 +29,7 @@ G.UI = (() => {
     $('credits-line').classList.toggle('hidden', !on);
     if (!on) $('sound-panel').classList.add('hidden');
     if (on) refreshCoins();
+    document.body.classList.toggle('in-subscreen', !on);
   }
 
   function refreshCoins() {
@@ -46,7 +51,25 @@ G.UI = (() => {
     $('user-pill').title = TIP[st] || (vn ? 'Tài khoản & Đồng bộ' : 'Cuenta y sincronización');
     // Botón Guardar: sólo con cuenta en la nube (en local ya se guarda al momento).
     const sb = $('btn-save');
-    sb.classList.toggle('hidden', G.DB.guest || G.DB.mode !== 'cloud');  }
+    sb.classList.toggle('hidden', G.DB.guest || G.DB.mode !== 'cloud');
+    refreshSubscreenResources();
+  }
+
+  function refreshSubscreenResources() {
+    const s = G.DB && G.DB.save;
+    const coinsStr = s ? s.coins.toLocaleString(G.I18n ? G.I18n.locale : 'es') : '0';
+    const upgC = $('upg-coins');
+    if (upgC) upgC.textContent = coinsStr;
+    const shopC = $('shop-coins');
+    if (shopC) shopC.textContent = coinsStr;
+    const gachaC = $('gacha-coins');
+    if (gachaC) gachaC.textContent = coinsStr;
+    const gachaT = $('gacha-tickets-pill');
+    if (gachaT && G.Icons) {
+      const t = (s && s.tickets) || { t1: 0, t10: 0 };
+      gachaT.innerHTML = `${G.Icons.html('ticket', 18)} ${t.t1} &nbsp;${G.Icons.html('ticket10', 18)} ${t.t10}`;
+    }
+  }
 
   let toastEl = null, toastT = 0;
   function toast(msg, ms = 2200) {
@@ -129,6 +152,8 @@ G.UI = (() => {
     const canDelete = G.DB.loggedIn && !G.DB.guest;
     $('legal-delete').disabled = !canDelete;
     $('legal-del-msg').textContent = canDelete ? '' : (vn ? 'Đăng nhập để có thể xóa tài khoản của bạn.' : 'Inicia sesión para poder borrar tu cuenta.');
+    chrome(false);
+    document.body.classList.add('in-subscreen');
     $('scr-legal').classList.remove('hidden');
   }
 
@@ -162,7 +187,13 @@ G.UI = (() => {
     });
   }
 
-  function closeLegal() { $('scr-legal').classList.add('hidden'); }
+  function closeLegal() {
+    $('scr-legal').classList.add('hidden');
+    if (isOpen('scr-menu')) {
+      chrome(true);
+      document.body.classList.remove('in-subscreen');
+    }
+  }
 
   function wireLegal() {
     document.addEventListener('click', e => {
@@ -340,6 +371,6 @@ G.UI = (() => {
     return cv;
   }
 
-  return { $, show, hide, hideAll, isOpen, chrome, refreshCoins, toast, typeChips, stars, confirmDelete,
+  return { $, show, hide, hideAll, isOpen, chrome, refreshCoins, refreshSubscreenResources, toast, typeChips, stars, confirmDelete,
            sprite, spriteCanvas, tick, initChrome, soundControls, hueSwap };
 })();

@@ -365,73 +365,99 @@
 </section>
 
 <!-- ====== Amigos ====== -->
-<section id="scr-friends" class="scr dim hidden">
-  <div class="box wide">
-    <div class="row between"><h2>Amigos</h2>
-      <div class="row"><button id="fr-room" class="btn small gold hidden">Ir a la sala</button><button class="btn small ghost" data-back>Volver</button></div></div>
-    <p class="sub" id="fr-me"></p>
-    <form id="fr-add" class="row" autocomplete="off">
-      <input id="fr-name" class="field grow" maxlength="16" spellcheck="false" placeholder="Apodo de tu amigo">
-      <button class="btn gold" type="submit" data-sfx="confirm">Añadir amigo</button>
-    </form>
-    <div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap">
-      <button id="fr-create-room" class="btn small gold" type="button">Tạo phòng Co-op</button>
-      <form id="fr-join-form" class="row grow" style="gap:6px" autocomplete="off">
-        <input id="fr-room-code" class="field grow" maxlength="40" spellcheck="false" placeholder="Nhập mã phòng Co-op">
-        <button class="btn small" type="submit">Vào phòng</button>
+<section id="scr-friends" class="scr dim hidden subscreen-view">
+  <div class="box wide subscreen-box">
+    <header class="subscreen-header">
+      <div class="subscreen-header-left">
+        <button class="btn small ghost back-btn" data-back title="Volver"><span class="back-arrow">‹</span> <span class="back-text">Volver</span></button>
+        <h2 class="subscreen-title">Amigos</h2>
+      </div>
+      <div class="subscreen-header-right">
+        <button id="fr-room" class="btn small gold hidden">Ir a la sala</button>
+      </div>
+    </header>
+    <div class="subscreen-body">
+      <p class="sub" id="fr-me"></p>
+      <form id="fr-add" class="row" autocomplete="off">
+        <input id="fr-name" class="field grow" maxlength="16" spellcheck="false" placeholder="Apodo de tu amigo">
+        <button class="btn gold" type="submit" data-sfx="confirm">Añadir amigo</button>
       </form>
+      <div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap">
+        <button id="fr-create-room" class="btn small gold" type="button">Tạo phòng Co-op</button>
+        <form id="fr-join-form" class="row grow" style="gap:6px" autocomplete="off">
+          <input id="fr-room-code" class="field grow" maxlength="40" spellcheck="false" placeholder="Nhập mã phòng Co-op">
+          <button class="btn small" type="submit">Vào phòng</button>
+        </form>
+      </div>
+      <p id="fr-msg" class="note"></p>
+      <div id="fr-list" class="fr-list"></div>
+      <div id="fr-blocks" class="fr-blocks" style="margin-top:10px"></div>
     </div>
-    <p id="fr-msg" class="note"></p>
-    <div id="fr-list" class="fr-list"></div>
-    <div id="fr-blocks" class="fr-blocks" style="margin-top:10px"></div>
   </div>
 </section>
 
 <!-- ====== Sala (partida en grupo) ====== -->
-<section id="scr-lobby" class="scr dim hidden">
-  <div class="box wide">
-    <div class="row between"><h2>Sala</h2>
-      <div class="row"><button id="lobby-menu" class="btn small ghost">Menú</button><button id="lobby-leave" class="btn small ghost">Salir de la sala</button></div></div>
-    <p class="sub" id="lobby-sub"></p>
-    <div class="row" style="margin: 6px 0 10px; gap: 8px; align-items: center;">
-      <span class="sub" style="margin:0">Mã phòng:</span>
-      <b class="gold" id="lobby-code-display" style="font-size: 16px; letter-spacing: 1px; user-select: all;"></b>
-      <button class="btn small ghost" id="lobby-copy-code" type="button">Sao chép mã</button>
+<section id="scr-lobby" class="scr dim hidden subscreen-view">
+  <div class="box wide subscreen-box">
+    <header class="subscreen-header">
+      <div class="subscreen-header-left">
+        <button id="lobby-menu" class="btn small ghost back-btn" title="Menú"><span class="back-arrow">‹</span> <span class="back-text">Menú</span></button>
+        <h2 class="subscreen-title">Sala</h2>
+      </div>
+      <div class="subscreen-header-right">
+        <button id="lobby-leave" class="btn small ghost">Salir de la sala</button>
+      </div>
+    </header>
+    <div class="subscreen-body">
+      <p class="sub" id="lobby-sub"></p>
+      <div class="row" style="margin: 6px 0 10px; gap: 8px; align-items: center;">
+        <span class="sub" style="margin:0">Mã phòng:</span>
+        <b class="gold" id="lobby-code-display" style="font-size: 16px; letter-spacing: 1px; user-select: all;"></b>
+        <button class="btn small ghost" id="lobby-copy-code" type="button">Sao chép mã</button>
+      </div>
+      <div id="lobby-members" class="lobby-members"></div>
+      <h3 id="lobby-inv-title" style="margin:14px 0 6px">Invitar amigos</h3>
+      <div id="lobby-invite" class="fr-list"></div>
+      <div class="row" style="margin-top:14px">
+        <button id="lobby-start" class="btn gold grow">Empezar partida</button>
+      </div>
+      <p class="note" id="lobby-note"></p>
     </div>
-    <div id="lobby-members" class="lobby-members"></div>
-    <h3 id="lobby-inv-title" style="margin:14px 0 6px">Invitar amigos</h3>
-    <div id="lobby-invite" class="fr-list"></div>
-    <div class="row" style="margin-top:14px">
-      <button id="lobby-start" class="btn gold grow">Empezar partida</button>
-    </div>
-    <p class="note" id="lobby-note"></p>
   </div>
 </section>
 
 <!-- ====== Ranking ====== -->
-<section id="scr-rank" class="scr dim hidden">
-  <div class="box wide">
-    <div class="row between">
-      <div>
-        <h2 style="margin-bottom:2px">Bảng Xếp Hạng Online</h2>
-        <div class="rk-beta-badge" style="color:var(--gold);font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:4px">
-          <span>⚠️</span> <span>Bảng xếp hạng Beta — Thành tích chưa xác minh</span>
+<section id="scr-rank" class="scr dim hidden subscreen-view">
+  <div class="box wide subscreen-box">
+    <header class="subscreen-header">
+      <div class="subscreen-header-left">
+        <button class="btn small ghost back-btn" data-back title="Quay lại"><span class="back-arrow">‹</span> <span class="back-text">Quay lại</span></button>
+        <div>
+          <h2 class="subscreen-title" style="margin-bottom:2px">Bảng Xếp Hạng Online</h2>
+          <div class="rk-beta-badge" style="color:var(--gold);font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:4px">
+            <span>⚠️</span> <span>Bảng xếp hạng Beta — Thành tích chưa xác minh</span>
+          </div>
         </div>
       </div>
-      <span class="row" style="gap:6px"><button id="rk-refresh" class="btn small ghost" title="Tải lại bảng xếp hạng">🔄 Làm mới</button><button id="rk-mod" class="btn small ghost hidden">Kiểm duyệt</button><button class="btn small ghost" data-back>Quay lại</button></span>
-    </div>
-    <div class="gen-tabs" id="rk-mode"></div>
-    <div class="filters" id="rk-period"></div>
-    <div class="row rk-tools" style="flex-wrap:wrap;gap:8px">
-      <div class="filters" id="rk-view" style="margin:0"></div>
-      <div class="filters" id="rk-scope" style="margin:0"></div>
-      <input id="rk-poke" class="field" list="rk-dl" placeholder="Lọc theo Pokémon (mọi thời đại)" spellcheck="false">
-      <datalist id="rk-dl"></datalist>
-      <button id="rk-clear" class="btn small ghost hidden">Bỏ lọc</button>
-    </div>
-    <div class="rk-split">
-      <div class="rk-col" id="rk-col-kills"><h3 class="rk-h">⚔️ Diệt Quái Nhiều Nhất</h3><div id="rk-klist" class="rk-list"></div><div id="rk-kme" class="rk-me"></div></div>
-      <div class="rk-col" id="rk-col-time"><h3 class="rk-h">⏳ Sinh Tồn Lâu Nhất</h3><div id="rk-tlist" class="rk-list"></div><div id="rk-tme" class="rk-me"></div></div>
+      <div class="subscreen-header-right">
+        <button id="rk-refresh" class="btn small ghost" title="Tải lại bảng xếp hạng">🔄 Làm mới</button>
+        <button id="rk-mod" class="btn small ghost hidden">Kiểm duyệt</button>
+      </div>
+    </header>
+    <div class="subscreen-body">
+      <div class="gen-tabs" id="rk-mode"></div>
+      <div class="filters" id="rk-period"></div>
+      <div class="row rk-tools" style="flex-wrap:wrap;gap:8px">
+        <div class="filters" id="rk-view" style="margin:0"></div>
+        <div class="filters" id="rk-scope" style="margin:0"></div>
+        <input id="rk-poke" class="field" list="rk-dl" placeholder="Lọc theo Pokémon (mọi thời đại)" spellcheck="false">
+        <datalist id="rk-dl"></datalist>
+        <button id="rk-clear" class="btn small ghost hidden">Bỏ lọc</button>
+      </div>
+      <div class="rk-split">
+        <div class="rk-col" id="rk-col-kills"><h3 class="rk-h">⚔️ Diệt Quái Nhiều Nhất</h3><div id="rk-klist" class="rk-list"></div><div id="rk-kme" class="rk-me"></div></div>
+        <div class="rk-col" id="rk-col-time"><h3 class="rk-h">⏳ Sinh Tồn Lâu Nhất</h3><div id="rk-tlist" class="rk-list"></div><div id="rk-tme" class="rk-me"></div></div>
+      </div>
     </div>
   </div>
 </section>
@@ -449,15 +475,22 @@
 </section>
 
 <!-- ====== Misiones, logros y perfil ====== -->
-<section id="scr-goals" class="scr dim hidden">
-  <div class="box wide">
-    <div class="row between"><h2>Misiones</h2><button class="btn small ghost" data-back>Volver</button></div>
-    <div class="tabs" id="goals-tabs">
-      <div class="tab on" data-tab="missions">Misiones</div>
-      <div class="tab" data-tab="ach">Logros</div>
-      <div class="tab" data-tab="profile">Perfil</div>
+<section id="scr-goals" class="scr dim hidden subscreen-view">
+  <div class="box wide subscreen-box">
+    <header class="subscreen-header">
+      <div class="subscreen-header-left">
+        <button class="btn small ghost back-btn" data-back title="Volver"><span class="back-arrow">‹</span> <span class="back-text">Volver</span></button>
+        <h2 class="subscreen-title">Misiones</h2>
+      </div>
+    </header>
+    <div class="subscreen-body">
+      <div class="tabs" id="goals-tabs">
+        <div class="tab on" data-tab="missions">Misiones</div>
+        <div class="tab" data-tab="ach">Logros</div>
+        <div class="tab" data-tab="profile">Perfil</div>
+      </div>
+      <div id="goals-body" class="goals-body"></div>
     </div>
-    <div id="goals-body" class="goals-body"></div>
   </div>
 </section>
 
@@ -479,30 +512,37 @@
 </div>
 
 <!-- ====== Colección ====== -->
-<section id="scr-dex" class="scr dim hidden">
-  <div class="box wide">
-    <div class="row between"><h2>Pokémon <span id="dex-total" class="sub" style="font-size:15px"></span></h2><button class="btn small ghost" data-back>Volver</button></div>
-    <div class="gen-tabs" id="dex-gens"></div>
-    <div class="split" style="margin-top:8px">
-      <div>
-        <div class="dex-tools">
-          <input id="dex-q" type="search" placeholder="Buscar por nombre o número" autocomplete="off" spellcheck="false">
-          <select id="dex-type" title="Tipo"></select>
-          <span id="dex-count" class="sub"></span>
-          <button class="btn small ghost hidden" id="dex-clear" type="button">Limpiar</button>
-        </div>
-        <div class="filters" id="dex-filters"></div>
-        <div class="filters dex-sort" id="dex-sort"></div>
-        <div class="grid" id="dex-grid"></div>
+<section id="scr-dex" class="scr dim hidden subscreen-view">
+  <div class="box wide subscreen-box dex-box">
+    <header class="subscreen-header">
+      <div class="subscreen-header-left">
+        <button class="btn small ghost back-btn" data-back title="Volver"><span class="back-arrow">‹</span> <span class="back-text">Volver</span></button>
+        <h2 class="subscreen-title">Pokémon <span id="dex-total" class="sub" style="font-size:15px"></span></h2>
       </div>
-      <div class="panel" id="dex-detail"></div>
+    </header>
+    <div class="subscreen-body">
+      <div class="gen-tabs" id="dex-gens"></div>
+      <div class="split" style="margin-top:8px">
+        <div>
+          <div class="dex-tools">
+            <input id="dex-q" type="search" placeholder="Buscar por nombre o número" autocomplete="off" spellcheck="false">
+            <select id="dex-type" title="Tipo"></select>
+            <span id="dex-count" class="sub"></span>
+            <button class="btn small ghost hidden" id="dex-clear" type="button">Limpiar</button>
+          </div>
+          <div class="filters" id="dex-filters"></div>
+          <div class="filters dex-sort" id="dex-sort"></div>
+          <div class="grid" id="dex-grid"></div>
+        </div>
+        <div class="panel" id="dex-detail"></div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ====== Tienda Kecleon (20-10-2026, del PR #236 de TheAdro7) ====== -->
-<section id="scr-shop" class="scr dim hidden">
-  <div class="box wide shop-box">
+<section id="scr-shop" class="scr dim hidden subscreen-view">
+  <div class="box wide shop-box subscreen-box">
     <!-- El puesto: cae, se despliega el toldo, sube la persiana y salen los dos Kecleon (ver shop-ui.js). -->
     <div class="shop-stall" id="shop-stall">
       <!-- Todo el puesto (paisaje, toldo, estanterías, persiana, farolillos y los dos
@@ -512,65 +552,106 @@
       <div class="shop-bubble hide" id="shop-bubble"></div>
     </div>
     <div class="shop-inner">
-      <div class="row between">
-        <h2 style="margin:0">Tienda Kecleon</h2>
-        <button class="btn small ghost" data-back>Volver</button>
+      <header class="subscreen-header">
+        <div class="subscreen-header-left">
+          <button class="btn small ghost back-btn" data-back title="Volver"><span class="back-arrow">‹</span> <span class="back-text">Volver</span></button>
+          <h2 class="subscreen-title" style="margin:0">Tienda Kecleon</h2>
+        </div>
+        <div class="subscreen-header-right">
+          <div class="pill subscreen-resource" id="shop-coins-pill" title="Monedas">
+            <span class="coin"></span> <span id="shop-coins">0</span>
+          </div>
+        </div>
+      </header>
+      <div class="subscreen-body">
+        <p class="sub" style="margin:8px 0 0" id="shop-hello">¡Bienvenido! Mentas, Cápsulas y MT. Lo que compres va a tu Mochila (en el menú principal); úsalo desde la ficha de cada Pokémon en la colección.</p>
+        <div id="shop-body"></div>
       </div>
-      <p class="sub" style="margin:8px 0 0" id="shop-hello">¡Bienvenido! Mentas, Cápsulas y MT. Lo que compres va a tu Mochila (en el menú principal); úsalo desde la ficha de cada Pokémon en la colección.</p>
-      <div id="shop-body"></div>
     </div>
   </div>
 </section>
 
 <!-- ====== Mochila (desde el menú principal, sin entrar en la tienda) ====== -->
-<section id="scr-bag" class="scr dim hidden">
-  <div class="box wide">
-    <div class="row between"><h2>Mochila</h2><button class="btn small ghost" data-back>Volver</button></div>
-    <div id="bag-body"></div>
+<section id="scr-bag" class="scr dim hidden subscreen-view">
+  <div class="box wide subscreen-box">
+    <header class="subscreen-header">
+      <div class="subscreen-header-left">
+        <button class="btn small ghost back-btn" data-back title="Volver"><span class="back-arrow">‹</span> <span class="back-text">Volver</span></button>
+        <h2 class="subscreen-title">Mochila</h2>
+      </div>
+    </header>
+    <div class="subscreen-body">
+      <div id="bag-body"></div>
+    </div>
   </div>
 </section>
 
 <!-- ====== Mejoras ====== -->
-<section id="scr-upgrades" class="scr dim hidden">
-  <div class="box wide">
-    <div class="row between"><h2>Mejoras</h2><button class="btn small ghost" data-back>Volver</button></div>
-    <div class="upg-head">
-      <canvas id="upg-stage" class="stage" width="120" height="96"></canvas>
-      <div class="grow">
-        <p class="sub" style="margin:0">Cada Pokémon tiene sus propias mejoras: sólo cuentan cuando juegas con él.</p>
-        <div class="row" style="margin-top:8px">
-          <label for="upg-mon" style="margin:0">Pokémon</label>
-          <select id="upg-mon" class="field" style="width:auto;min-width:220px"></select>
+<section id="scr-upgrades" class="scr dim hidden subscreen-view">
+  <div class="box wide subscreen-box upgrades-box">
+    <header class="subscreen-header upgrades-header">
+      <div class="subscreen-header-left">
+        <button class="btn small ghost back-btn" data-back title="Volver"><span class="back-arrow">‹</span> <span class="back-text">Volver</span></button>
+        <h2 class="subscreen-title">Mejoras</h2>
+      </div>
+      <div class="subscreen-header-right">
+        <div class="pill subscreen-resource" id="upg-coins-pill" title="Monedas">
+          <span class="coin"></span> <span id="upg-coins">0</span>
         </div>
       </div>
+    </header>
+    <div class="subscreen-body upgrades-body">
+      <div class="upg-head">
+        <canvas id="upg-stage" class="stage" width="120" height="96"></canvas>
+        <div class="grow">
+          <p class="sub" style="margin:0">Cada Pokémon tiene sus propias mejoras: sólo cuentan cuando juegas con él.</p>
+          <div class="row" style="margin-top:8px">
+            <label for="upg-mon" style="margin:0">Pokémon</label>
+            <select id="upg-mon" class="field" style="width:auto;min-width:220px"></select>
+          </div>
+        </div>
+      </div>
+      <div class="upg" id="upg-list"></div>
     </div>
-    <div class="upg" id="upg-list"></div>
   </div>
 </section>
 
 <!-- ====== Gacha ====== -->
-<section id="scr-gacha" class="scr dim hidden">
-  <div class="box wide">
-    <div class="row between"><h2>Gacha</h2><button class="btn small ghost" data-back>Volver</button></div>
-    <div class="gen-tabs" id="gacha-gens"></div>
-    <div class="split" style="margin-top:8px">
-      <div>
-        <div class="banner" id="banner">
-          <h3 id="banner-title"></h3>
-          <p id="banner-desc" style="margin:4px 0 6px"></p>
-          <p class="sub" id="gacha-owned" style="margin:0"></p>
-          <div class="feat" id="gacha-feat"></div>
-        </div>
-        <div class="row" style="margin-top:14px">
-          <button id="pull-10" class="btn gold grow" data-sfx="none">Tirar ×10 · <span id="cost-10"></span></button>
-          <button id="pull-10b" class="btn gold grow" data-sfx="none">Tirar ×10 · <span id="cost-10b"></span></button>
-          <button id="pull-100" class="btn gold grow" data-sfx="none">Tirar ×100 · <span id="cost-100"></span></button>
-          <button id="pull-100b" class="btn gold grow" data-sfx="none">Tirar ×100 · <span id="cost-100b"></span></button>
-        </div>
-        <p class="note tickets-line" id="gacha-tickets"></p>
-        <p class="note" id="gacha-pity"></p>
+<section id="scr-gacha" class="scr dim hidden subscreen-view">
+  <div class="box wide subscreen-box">
+    <header class="subscreen-header">
+      <div class="subscreen-header-left">
+        <button class="btn small ghost back-btn" data-back title="Volver"><span class="back-arrow">‹</span> <span class="back-text">Volver</span></button>
+        <h2 class="subscreen-title">Gacha</h2>
       </div>
-      <div class="panel rates" id="gacha-rates"></div>
+      <div class="subscreen-header-right">
+        <div class="pill subscreen-resource" id="gacha-tickets-pill" title="Tickets"></div>
+        <div class="pill subscreen-resource" id="gacha-coins-pill" title="Monedas">
+          <span class="coin"></span> <span id="gacha-coins">0</span>
+        </div>
+      </div>
+    </header>
+    <div class="subscreen-body">
+      <div class="gen-tabs" id="gacha-gens"></div>
+      <div class="split" style="margin-top:8px">
+        <div>
+          <div class="banner" id="banner">
+            <h3 id="banner-title"></h3>
+            <p id="banner-desc" style="margin:4px 0 6px"></p>
+            <p class="sub" id="gacha-owned" style="margin:0"></p>
+            <div class="feat" id="gacha-feat"></div>
+          </div>
+          <div class="row" style="margin-top:14px">
+            <button id="pull-10" class="btn gold grow" data-sfx="none">Tirar ×10 · <span id="cost-10"></span></button>
+            <button id="pull-10b" class="btn gold grow" data-sfx="none">Tirar ×10 · <span id="cost-10b"></span></button>
+            <button id="pull-100" class="btn gold grow" data-sfx="none">Tirar ×100 · <span id="cost-100"></span></button>
+            <button id="pull-100b" class="btn gold grow" data-sfx="none">Tirar ×100 · <span id="cost-100b"></span></button>
+          </div>
+          <p class="note tickets-line" id="gacha-tickets"></p>
+          <p class="note" id="gacha-pity"></p>
+        </div>
+        <div class="panel rates" id="gacha-rates"></div>
+      </div>
     </div>
   </div>
 </section>

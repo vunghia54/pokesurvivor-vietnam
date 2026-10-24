@@ -37,10 +37,20 @@ G.NewsUI = (() => {
       '</div>').join('');
     $('news-body').scrollTop = 0;
     $('scr-news').classList.remove('hidden');
+    if (G.UI && G.UI.chrome) {
+      G.UI.chrome(false);
+      if (document.body) document.body.classList.add('in-subscreen');
+    }
     try { localStorage.setItem(KEY, latest()); } catch (e) { /* nada */ }
     refresh();
   }
-  function close() { $('scr-news').classList.add('hidden'); }
+  function close() {
+    $('scr-news').classList.add('hidden');
+    if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) {
+      G.UI.chrome(true);
+      if (document.body) document.body.classList.remove('in-subscreen');
+    }
+  }
 
   return { init, open, close };
 })();

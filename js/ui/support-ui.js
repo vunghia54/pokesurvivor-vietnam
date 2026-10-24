@@ -34,6 +34,7 @@ G.SupportUI = (() => {
   }
 
   function open() {
+    if (G.UI && G.UI.chrome) { G.UI.chrome(false); if (document.body) document.body.classList.add('in-subscreen'); }
     const h2 = $('scr-support')?.querySelector('h2');
     if (isVN()) {
       if (h2) h2.textContent = 'Ủng hộ';
@@ -81,6 +82,10 @@ G.SupportUI = (() => {
   function close() {
     const s = $('scr-support');
     if (s) s.classList.add('hidden');
+    if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) {
+      G.UI.chrome(true);
+      if (document.body) document.body.classList.remove('in-subscreen');
+    }
   }
 
   return { init, open, close };

@@ -32,12 +32,17 @@ G.LoginUI = (() => {
       $('rec-link').disabled = false;
       if (!r.ok) { $('rec-err').textContent = r.error; return; }
       $('scr-recover').classList.add('hidden');
+      if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
       G.UI.toast(((window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN') || (window.G && window.G.I18n && window.G.I18n.lang === 'vi-VN')) ? 'Đã liên kết Gmail! Nếu quên mật khẩu, hãy đăng nhập bằng Google.' : '¡Gmail vinculado! Si olvidas la contraseña, entra con Google.', 4500);
     };
-    $('rec-later').onclick = () => $('scr-recover').classList.add('hidden');
+    $('rec-later').onclick = () => {
+      $('scr-recover').classList.add('hidden');
+      if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
+    };
     $('rec-never').onclick = () => {
       try { localStorage.setItem('ps.recover.no.' + G.DB.fb.uid, '1'); } catch (e) { /* nada */ }
       $('scr-recover').classList.add('hidden');
+      if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
     };
     $('btn-google').onclick = async () => {
       $('login-err').textContent = '';
@@ -65,6 +70,7 @@ G.LoginUI = (() => {
     try { if (localStorage.getItem('ps.recover.no.' + G.DB.fb.uid)) return; } catch (e) { /* nada */ }
     offered = true;
     $('rec-err').textContent = '';
+    if (G.UI && G.UI.chrome) { G.UI.chrome(false); if (document.body) document.body.classList.add('in-subscreen'); }
     $('scr-recover').classList.remove('hidden');
   }
 
@@ -95,7 +101,11 @@ G.LoginUI = (() => {
     const en = G.I18n.lang === 'en' ? 1 : 0;
     const next = () => {
       const n = queue.shift();
-      if (!n) { $('scr-savenote').classList.add('hidden'); return; }
+      if (!n) {
+        $('scr-savenote').classList.add('hidden');
+        if (G.UI && G.UI.chrome && G.UI.isOpen && G.UI.isOpen('scr-menu')) { G.UI.chrome(true); if (document.body) document.body.classList.remove('in-subscreen'); }
+        return;
+      }
       try { localStorage.setItem(n.key, '1'); } catch (e) { /* nada */ }
       $('savenote-title').textContent = n.title[en];
       // Otros idiomas: el aviso entero va traducido en su diccionario (por trozos sale raro); si falta, en inglés.
@@ -106,6 +116,7 @@ G.LoginUI = (() => {
     };
     $('savenote-ok').onclick = next;
     next();
+    if (G.UI && G.UI.chrome) { G.UI.chrome(false); if (document.body) document.body.classList.add('in-subscreen'); }
     $('scr-savenote').classList.remove('hidden');
     return true;
   }
