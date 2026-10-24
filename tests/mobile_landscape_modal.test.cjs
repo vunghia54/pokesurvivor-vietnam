@@ -45,6 +45,18 @@ test('Landscape & Modal: Topbar hides standalone logout and anchors cleanly to s
     styleCss.includes('.topbar-actions {\n    order: 2;\n    justify-content: flex-end;'),
     'Aligns action buttons row to the right safe-area'
   );
+  assert.ok(
+    styleCss.includes('.topbar-row > * {\n    pointer-events: auto;\n  }'),
+    'Allows buttons and pills to receive touch events while container passes clicks through'
+  );
+  assert.ok(
+    styleCss.includes('.topbar-actions .btn.small::before {\n    content: \'\';\n    position: absolute;'),
+    'Expands touch target for buttons to at least 44x44px via ::before pseudo-element'
+  );
+  assert.ok(
+    styleCss.includes('#user-pill::before {\n    content: \'\';\n    position: absolute;'),
+    'Expands touch target for user-pill to at least 44px height'
+  );
 });
 
 test('Landscape & Modal: Responsive modal system uses dynamic viewport units (dvh/vh) and safe-area', () => {

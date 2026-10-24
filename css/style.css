@@ -1125,15 +1125,16 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     pointer-events: none;
     z-index: 25;
   }
-  .topbar > * {
-    pointer-events: auto;
-  }
   .topbar-row {
     display: flex;
     gap: 3px;
     align-items: center;
     max-width: 100%;
     box-sizing: border-box;
+    pointer-events: none;
+  }
+  .topbar-row > * {
+    pointer-events: auto;
   }
   .topbar-info {
     order: 1;
@@ -1202,13 +1203,27 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     flex-shrink: 0;
   }
   #user-pill {
+    position: relative;
     max-width: 105px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
     flex-shrink: 1;
+    touch-action: manipulation;
     transition: transform .08s, border-color .15s;
+  }
+  #user-pill::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 100%;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
   }
   #user-pill span {
     overflow: hidden;
@@ -1222,10 +1237,11 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     transform: scale(0.96);
   }
   .topbar-actions .btn.small {
+    position: relative;
     padding: 4px 6px;
-    min-width: 32px;
-    min-height: 32px;
-    height: 32px;
+    min-width: 34px;
+    min-height: 34px;
+    height: 34px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1233,6 +1249,20 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     word-break: normal !important;
     overflow-wrap: normal !important;
     flex-shrink: 0;
+    touch-action: manipulation;
+  }
+  /* Vùng chạm cảm ứng tối thiểu 44x44px trên mobile chuẩn WCAG/Mobile HIG */
+  .topbar-actions .btn.small::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
   }
   .news-btn span, .yt-btn:not(.live) span {
     display: none !important;
