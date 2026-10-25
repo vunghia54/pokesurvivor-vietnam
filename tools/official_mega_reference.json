@@ -8,7 +8,174 @@
       "https://bulbapedia.bulbagarden.net/wiki/Mega_Evolution",
       "https://www.serebii.net/legendsz-a/megaevolutions.shtml",
       "https://www.serebii.net/legendsz-a/dlc-megaevolutions.shtml"
-    ]
+    ],
+    "generationBreakdown": {
+      "gen1": {
+        "gen": 1,
+        "range": "1-151",
+        "speciesCount": 18,
+        "formsCount": 21,
+        "forms": [
+          "mega_venusaur",
+          "mega_charizard_x",
+          "mega_charizard_y",
+          "mega_blastoise",
+          "mega_beedrill",
+          "mega_pidgeot",
+          "mega_raichu_x",
+          "mega_raichu_y",
+          "mega_clefable",
+          "mega_alakazam",
+          "mega_victreebel",
+          "mega_slowbro",
+          "mega_gengar",
+          "mega_kangaskhan",
+          "mega_starmie",
+          "mega_pinsir",
+          "mega_gyarados",
+          "mega_aerodactyl",
+          "mega_dragonite",
+          "mega_mewtwo_x",
+          "mega_mewtwo_y"
+        ]
+      },
+      "gen2": {
+        "gen": 2,
+        "range": "152-251",
+        "speciesCount": 9,
+        "formsCount": 9,
+        "forms": [
+          "mega_meganium",
+          "mega_feraligatr",
+          "mega_ampharos",
+          "mega_steelix",
+          "mega_scizor",
+          "mega_heracross",
+          "mega_skarmory",
+          "mega_houndoom",
+          "mega_tyranitar"
+        ]
+      },
+      "gen3": {
+        "gen": 3,
+        "range": "252-386",
+        "speciesCount": 21,
+        "formsCount": 22,
+        "forms": [
+          "mega_sceptile",
+          "mega_blaziken",
+          "mega_swampert",
+          "mega_gardevoir",
+          "mega_sableye",
+          "mega_mawile",
+          "mega_aggron",
+          "mega_medicham",
+          "mega_manectric",
+          "mega_sharpedo",
+          "mega_camerupt",
+          "mega_altaria",
+          "mega_banette",
+          "mega_chimecho",
+          "mega_absol",
+          "mega_absol_z",
+          "mega_glalie",
+          "mega_salamence",
+          "mega_metagross",
+          "mega_latias",
+          "mega_latios",
+          "mega_rayquaza"
+        ]
+      },
+      "gen4": {
+        "gen": 4,
+        "range": "387-493",
+        "speciesCount": 9,
+        "formsCount": 11,
+        "forms": [
+          "mega_staraptor",
+          "mega_lopunny",
+          "mega_garchomp",
+          "mega_garchomp_z",
+          "mega_lucario",
+          "mega_lucario_z",
+          "mega_abomasnow",
+          "mega_gallade",
+          "mega_froslass",
+          "mega_heatran",
+          "mega_darkrai"
+        ]
+      },
+      "gen5": {
+        "gen": 5,
+        "range": "494-649",
+        "speciesCount": 8,
+        "formsCount": 8,
+        "forms": [
+          "mega_emboar",
+          "mega_excadrill",
+          "mega_audino",
+          "mega_scolipede",
+          "mega_scrafty",
+          "mega_eelektross",
+          "mega_chandelure",
+          "mega_golurk"
+        ]
+      },
+      "gen6": {
+        "gen": 6,
+        "range": "650-721",
+        "speciesCount": 12,
+        "formsCount": 12,
+        "forms": [
+          "mega_chesnaught",
+          "mega_delphox",
+          "mega_greninja",
+          "mega_pyroar",
+          "mega_floette",
+          "mega_meowstic",
+          "mega_malamar",
+          "mega_barbaracle",
+          "mega_dragalge",
+          "mega_hawlucha",
+          "mega_zygarde",
+          "mega_diancie"
+        ]
+      },
+      "gen7": {
+        "gen": 7,
+        "range": "722-809",
+        "speciesCount": 5,
+        "formsCount": 5,
+        "forms": [
+          "mega_crabominable",
+          "mega_golisopod",
+          "mega_drampa",
+          "mega_magearna",
+          "mega_zeraora"
+        ]
+      },
+      "gen8": {
+        "gen": 8,
+        "range": "810-905",
+        "speciesCount": 1,
+        "formsCount": 1,
+        "forms": [
+          "mega_falinks"
+        ]
+      },
+      "gen9": {
+        "gen": 9,
+        "range": "906-1025",
+        "speciesCount": 4,
+        "formsCount": 4,
+        "forms": [
+          "mega_scovillain",
+          "mega_glimmora",
+          "mega_tatsugiri",
+          "mega_baxcalibur"
+        ]
+      }
+    }
   },
   "primaryForms": [
     {
@@ -100,8 +267,7 @@
       "species": "Raichu",
       "name": "Mega Raichu X",
       "types": [
-        "electric",
-        "fighting"
+        "electric"
       ],
       "stone": "Raichunite X",
       "branch": "X",
@@ -114,8 +280,7 @@
       "species": "Raichu",
       "name": "Mega Raichu Y",
       "types": [
-        "electric",
-        "psychic"
+        "electric"
       ],
       "stone": "Raichunite Y",
       "branch": "Y",
@@ -128,7 +293,8 @@
       "species": "Clefable",
       "name": "Mega Clefable",
       "types": [
-        "fairy"
+        "fairy",
+        "flying"
       ],
       "stone": "Clefablite",
       "branch": null,
@@ -321,7 +487,7 @@
       "name": "Mega Feraligatr",
       "types": [
         "water",
-        "dark"
+        "dragon"
       ],
       "stone": "Feraligatrite",
       "branch": null,
@@ -612,7 +778,7 @@
       "name": "Mega Chimecho",
       "types": [
         "psychic",
-        "ghost"
+        "steel"
       ],
       "stone": "Chimechite",
       "branch": null,
@@ -726,7 +892,9 @@
       "stone": "Dragon Ascent",
       "branch": null,
       "gen": 3,
-      "origin": "ORAS"
+      "origin": "ORAS",
+      "requiresMove": "Dragon Ascent",
+      "specialCondition": "Yêu cầu chiêu thức Dragon Ascent (không cần Mega Stone)"
     },
     {
       "id": "mega_staraptor",
@@ -734,7 +902,7 @@
       "species": "Staraptor",
       "name": "Mega Staraptor",
       "types": [
-        "normal",
+        "fighting",
         "flying"
       ],
       "stone": "Staraptorite",
@@ -776,8 +944,7 @@
       "species": "Garchomp",
       "name": "Mega Garchomp Z",
       "types": [
-        "dragon",
-        "ground"
+        "dragon"
       ],
       "stone": "Garchompite Z",
       "branch": "Z",
@@ -1059,7 +1226,9 @@
       "stone": "Floettite",
       "branch": null,
       "gen": 6,
-      "origin": "LEGENDS_ZA"
+      "origin": "LEGENDS_ZA",
+      "baseForm": "floette_eternal",
+      "specialCondition": "Yêu cầu dạng Eternal Flower Floette (AZ Floette)"
     },
     {
       "id": "mega_meowstic",
@@ -1142,7 +1311,9 @@
       "stone": "Zygardite",
       "branch": null,
       "gen": 6,
-      "origin": "LEGENDS_ZA"
+      "origin": "LEGENDS_ZA",
+      "baseForm": "zygarde_complete",
+      "specialCondition": "Yêu cầu dạng Zygarde Complete Form / Core phù hợp"
     },
     {
       "id": "mega_diancie",
@@ -1179,7 +1350,7 @@
       "name": "Mega Golisopod",
       "types": [
         "bug",
-        "water"
+        "steel"
       ],
       "stone": "Golisopodite",
       "branch": null,
@@ -1299,27 +1470,17 @@
   ],
   "formVariations": [
     {
-      "id": "mega_meowstic_female",
-      "baseDex": 678,
-      "species": "Meowstic",
-      "name": "Mega Meowstic (Female)",
+      "id": "mega_magearna_original",
+      "baseDex": 801,
+      "species": "Magearna",
+      "name": "Mega Magearna (Original Color)",
       "types": [
-        "psychic"
+        "steel",
+        "fairy"
       ],
-      "variationOf": "mega_meowstic",
-      "type": "Gender Variation"
-    },
-    {
-      "id": "mega_pyroar_female",
-      "baseDex": 668,
-      "species": "Pyroar",
-      "name": "Mega Pyroar (Female)",
-      "types": [
-        "fire",
-        "normal"
-      ],
-      "variationOf": "mega_pyroar",
-      "type": "Gender Variation"
+      "variationOf": "mega_magearna",
+      "type": "Form Variation",
+      "description": "Biến thể hình thức Màu gốc (Original Color) của Mega Magearna"
     },
     {
       "id": "mega_tatsugiri_droopy",
@@ -1331,7 +1492,21 @@
         "water"
       ],
       "variationOf": "mega_tatsugiri",
-      "type": "Form Variation"
+      "type": "Form Variation",
+      "description": "Biến thể hình thức Rũ (Droopy / Màu hồng) của Mega Tatsugiri"
+    },
+    {
+      "id": "mega_tatsugiri_stretchy",
+      "baseDex": 978,
+      "species": "Tatsugiri",
+      "name": "Mega Tatsugiri (Stretchy Form)",
+      "types": [
+        "dragon",
+        "water"
+      ],
+      "variationOf": "mega_tatsugiri",
+      "type": "Form Variation",
+      "description": "Biến thể hình thức Dài (Stretchy / Màu vàng) của Mega Tatsugiri"
     }
   ],
   "primalReversions": [

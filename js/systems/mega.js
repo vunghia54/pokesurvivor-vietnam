@@ -528,6 +528,8 @@ G.Mega = (() => {
           "baseDex": 384,
           "name": "Mega Rayquaza",
           "stone": "Dragon Ascent",
+          "requiresMove": "Dragon Ascent",
+          "specialCondition": "Yêu cầu chiêu thức Dragon Ascent (không cần Mega Stone)",
           "spriteId": "mega_384",
           "spriteAvailable": true,
           "types": [
@@ -544,7 +546,7 @@ G.Mega = (() => {
           "themeColor": "#43a047",
           "secondaryColor": "#ffeb3b",
           "auraScale": 1.35,
-          "description": "Bá chủ tầng ozone Delta Stream hóa giải điểm yếu gió, sức mạnh tối thượng vô địch."
+          "description": "Bá chủ tầng ozone Delta Stream hóa giải điểm yếu gió, sức mạnh tối thượng vô địch (Kích hoạt bằng chiêu thức Dragon Ascent)."
       },
       "mega_lopunny": {
           "id": "mega_lopunny",
@@ -687,6 +689,8 @@ G.Mega = (() => {
           "baseDex": 670,
           "name": "Mega Floette",
           "stone": "Floettite",
+          "baseForm": "floette_eternal",
+          "specialCondition": "Yêu cầu dạng Eternal Flower Floette (AZ Floette)",
           "spriteId": "mega_670",
           "spriteAvailable": true,
           "types": [
@@ -702,7 +706,7 @@ G.Mega = (() => {
           "themeColor": "#f48fb1",
           "secondaryColor": "#4caf50",
           "auraScale": 1.18,
-          "description": "Hoa ánh sáng trường cửu Light of Ruin của Vua AZ, phục sinh hào quang tiên tộc thanh khiết."
+          "description": "Hoa ánh sáng trường cửu Light of Ruin của Vua AZ, phục sinh hào quang tiên tộc thanh khiết (Dạng Eternal Flower)."
       },
       "mega_dragalge": {
           "id": "mega_dragalge",
@@ -732,6 +736,8 @@ G.Mega = (() => {
           "baseDex": 718,
           "name": "Mega Zygarde",
           "stone": "Zygardite",
+          "baseForm": "zygarde_complete",
+          "specialCondition": "Yêu cầu dạng Zygarde Complete Form / Core phù hợp",
           "spriteId": "mega_718",
           "spriteAvailable": true,
           "types": [
@@ -748,7 +754,7 @@ G.Mega = (() => {
           "themeColor": "#00e676",
           "secondaryColor": "#212121",
           "auraScale": 1.35,
-          "description": "Thần hộ vệ hệ sinh thái Kalos trừng phạt kẻ xâm lăng, chấn động địa cầu và áp đảo hắc ám."
+          "description": "Thần hộ vệ hệ sinh thái Kalos trừng phạt kẻ xâm lăng, chấn động địa cầu và áp đảo hắc ám (Dạng Zygarde Complete)."
       },
       "mega_diancie": {
           "id": "mega_diancie",
@@ -1376,7 +1382,8 @@ G.Mega = (() => {
           "spriteAvailable": false,
           "missingReason": "THIẾU SPRITE",
           "types": [
-              "fairy"
+              "fairy",
+              "flying"
           ],
           "atkMul": 1.35,
           "paMul": 1.25,
@@ -1496,7 +1503,7 @@ G.Mega = (() => {
           "missingReason": "THIẾU SPRITE",
           "types": [
               "water",
-              "dark"
+              "dragon"
           ],
           "atkMul": 1.35,
           "paMul": 1.25,
@@ -1854,8 +1861,7 @@ G.Mega = (() => {
           "spriteAvailable": false,
           "missingReason": "THIẾU SPRITE",
           "types": [
-              "dragon",
-              "ground"
+              "dragon"
           ],
           "atkMul": 1.35,
           "paMul": 1.25,
@@ -1901,8 +1907,7 @@ G.Mega = (() => {
           "spriteAvailable": false,
           "missingReason": "THIẾU SPRITE",
           "types": [
-              "electric",
-              "fighting"
+              "electric"
           ],
           "atkMul": 1.35,
           "paMul": 1.25,
@@ -1925,8 +1930,7 @@ G.Mega = (() => {
           "spriteAvailable": false,
           "missingReason": "THIẾU SPRITE",
           "types": [
-              "electric",
-              "psychic"
+              "electric"
           ],
           "atkMul": 1.35,
           "paMul": 1.25,
@@ -1950,7 +1954,7 @@ G.Mega = (() => {
           "missingReason": "THIẾU SPRITE",
           "types": [
               "psychic",
-              "ghost"
+              "steel"
           ],
           "atkMul": 1.35,
           "paMul": 1.25,
@@ -1973,7 +1977,7 @@ G.Mega = (() => {
           "spriteAvailable": false,
           "missingReason": "THIẾU SPRITE",
           "types": [
-              "normal",
+              "fighting",
               "flying"
           ],
           "atkMul": 1.35,
@@ -2093,7 +2097,7 @@ G.Mega = (() => {
           "missingReason": "THIẾU SPRITE",
           "types": [
               "bug",
-              "water"
+              "steel"
           ],
           "atkMul": 1.35,
           "paMul": 1.25,
