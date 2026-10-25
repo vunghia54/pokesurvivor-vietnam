@@ -1,11 +1,13 @@
 async function poll() {
-  for (let i = 0; i < 20; i++) {
+  const target = 'e5bd636a6b';
+  console.log(`Polling https://vunghia54.github.io/pokesurvivor-vietnam/version.json for target version ${target}...`);
+  for (let i = 0; i < 40; i++) {
     try {
       const res = await fetch('https://vunghia54.github.io/pokesurvivor-vietnam/version.json?_=' + Date.now(), { cache: 'no-store' });
       const data = await res.json();
-      console.log('Attempt ' + (i+1) + ': version = ' + data.v);
-      if (data.v === '580607caed') {
-        console.log('DEPLOYED: GitHub Pages updated to v1.3.2 (580607caed)!');
+      console.log(`Attempt ${i+1}: version = ${data.v} (target = ${target})`);
+      if (data.v === target) {
+        console.log(`\nSUCCESS: GitHub Pages is DEPLOYED and ACTIVE with v1.3.3 (${target})!`);
         return true;
       }
     } catch (e) {
@@ -18,6 +20,7 @@ async function poll() {
 
 poll().then(ok => {
   if (!ok) {
-    console.log('Timeout waiting for GitHub Pages');
+    console.log('Timeout waiting for GitHub Pages deployment.');
+    process.exit(1);
   }
 });
