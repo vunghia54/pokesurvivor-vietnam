@@ -1709,7 +1709,7 @@ G.Mega = (() => {
           "stone": "Pyroarite",
           "spriteId": null,
           "spriteAvailable": false,
-          "missingReason": "THIẾU POKÉMON GỐC",
+          "missingReason": "THIẾU SPRITE",
           "types": [
               "fire",
               "normal"
@@ -1724,7 +1724,7 @@ G.Mega = (() => {
           "themeColor": "#78909c",
           "secondaryColor": "#37474f",
           "auraScale": 1.2,
-          "description": "Mega Pyroar (Đang chờ tài nguyên sprite chính thức: THIẾU POKÉMON GỐC)."
+          "description": "Mega Pyroar (Đang chờ tài nguyên sprite chính thức: THIẾU SPRITE)."
       },
       "mega_malamar": {
           "id": "mega_malamar",
@@ -1805,7 +1805,7 @@ G.Mega = (() => {
           "stone": "Falinksite",
           "spriteId": null,
           "spriteAvailable": false,
-          "missingReason": "THIẾU POKÉMON GỐC",
+          "missingReason": "THIẾU SPRITE",
           "types": [
               "fighting"
           ],
@@ -1819,7 +1819,7 @@ G.Mega = (() => {
           "themeColor": "#78909c",
           "secondaryColor": "#37474f",
           "auraScale": 1.2,
-          "description": "Mega Falinks (Đang chờ tài nguyên sprite chính thức: THIẾU POKÉMON GỐC)."
+          "description": "Mega Falinks (Đang chờ tài nguyên sprite chính thức: THIẾU SPRITE)."
       },
       "mega_lucario_z": {
           "id": "mega_lucario_z",

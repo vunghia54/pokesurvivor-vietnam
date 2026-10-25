@@ -172,6 +172,8 @@ Sprites de Mega Evolution procedentes de [SpriteCollab](https://github.com/PMDCo
 
 Stats base y nombres en español: [PokeAPI](https://pokeapi.co/),
 descargados una vez y guardados en `js/data/pokedex.js`.
+Bổ sung Pokédex #668 Pyroar và #870 Falinks: PokeAPI, Pokemon Showdown & Bulbapedia.
+Tài nguyên Mega Evolution và Sprite: [PMDCollab / SpriteCollab](https://github.com/PMDCollab/SpriteCollab).
 
 ## Fuente
 

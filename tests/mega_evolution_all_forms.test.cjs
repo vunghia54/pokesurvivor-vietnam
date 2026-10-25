@@ -119,18 +119,20 @@ test('2. Phân định chính xác: 36 dạng hoàn chỉnh có sprite và 57 d�
   }
 });
 
-test('3. Ghi nhận rõ các dạng thiếu Pokémon gốc trong Pokédex 966 loài hiện có', () => {
+test('3. Ghi nhận rõ các dạng thiếu sprite: Pyroar #668 và Falinks #870 đã có Pokémon gốc nhưng khóa an toàn do thiếu sprite', () => {
   const G = setupTestEnv();
   const pyroar = G.Mega.FORMS['mega_pyroar'];
   const falinks = G.Mega.FORMS['mega_falinks'];
 
   assert.ok(pyroar, 'Mega Pyroar phải có trong danh mục');
-  assert.equal(pyroar.missingReason, 'THIẾU POKÉMON GỐC');
-  assert.equal(G.DEX_BY[pyroar.baseDex], undefined, 'Pyroar không có trong G.DEX');
+  assert.equal(pyroar.missingReason, 'THIẾU SPRITE');
+  assert.equal(pyroar.spriteAvailable, false, 'Mega Pyroar tiếp tục khóa an toàn');
+  assert.ok(G.DEX_BY[pyroar.baseDex], 'Pyroar #668 đã có trong G.DEX');
 
   assert.ok(falinks, 'Mega Falinks phải có trong danh mục');
-  assert.equal(falinks.missingReason, 'THIẾU POKÉMON GỐC');
-  assert.equal(G.DEX_BY[falinks.baseDex], undefined, 'Falinks không có trong G.DEX');
+  assert.equal(falinks.missingReason, 'THIẾU SPRITE');
+  assert.equal(falinks.spriteAvailable, false, 'Mega Falinks tiếp tục khóa an toàn');
+  assert.ok(G.DEX_BY[falinks.baseDex], 'Falinks #870 đã có trong G.DEX');
 });
 
 test('4. Kiểm tra toàn bộ 36 dạng khả dụng: file sprite thật trên ổ đĩa và animation metadata', () => {
