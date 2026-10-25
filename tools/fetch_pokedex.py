@@ -33,13 +33,23 @@ def gen_of(dex):
     return 9
 
 
+# Pokédex additions approved for Mega expansion (Pyroar #668, Falinks #870)
+EXPANSION_DEXES = {668, 870}
+
+
 def dexes_with_sprites():
-    """Sólo los que tienen sprite de Mundo Misterioso (según SpriteCollab)."""
-    url = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/tracker.json'
-    req = urllib.request.Request(url, headers={'User-Agent': 'pokesurvivor/1.0'})
-    t = json.load(urllib.request.urlopen(req, timeout=120))
+    """Sólo los que tienen sprite de Mundo Misterioso (según SpriteCollab) + expansiones aprobadas."""
+    local_cache = os.path.join(ROOT, 'tools', 'cache', 'pmdcollab_tracker.json')
+    if os.path.exists(local_cache):
+        with open(local_cache, 'r', encoding='utf-8') as f:
+            t = json.load(f)
+    else:
+        url = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/tracker.json'
+        req = urllib.request.Request(url, headers={'User-Agent': 'pokesurvivor/1.0'})
+        t = json.load(urllib.request.urlopen(req, timeout=120))
     need = {'Idle', 'Walk', 'Attack'}
-    return [d for d in range(1, 1026) if need <= set(t.get(f'{d:04d}', {}).get('sprite_files', {}))]
+    base_dexes = [d for d in range(1, 1026) if need <= set(t.get(f'{d:04d}', {}).get('sprite_files', {}))]
+    return sorted(list(set(base_dexes) | EXPANSION_DEXES))
 
 
 def get(url, retries=3):

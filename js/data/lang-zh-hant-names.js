@@ -1124,7 +1124,9 @@ G.I18n.add({
   "Tierra": "地面",
   "Veneno": "毒",
   "Volador": "飛行",
-  "Teselia": "合眾"
+  "Teselia": "合眾",
+  "Pyroar": "火炎獅",
+  "Falinks": "列陣兵"
 }, 'zh-Hant');
 
 // Spanish uses the same word for the Psychic type and the move Psychic.

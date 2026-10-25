@@ -317,7 +317,7 @@ test('15. Không làm hỏng Cloud Save và không lưu Pokémon Mega thành b�
   G.Mega.onRunEnd(pl);
 
   assert.equal(JSON.stringify(save), origSaveJson, 'Save hoàn toàn không bị biến đổi');
-  assert.equal(G.DEX.length, 966, 'Danh sách G.DEX giữ nguyên 966 Pokémon');
+  assert.equal(G.DEX.length, 968, 'Danh sách G.DEX giữ nguyên 966 Pokémon');
 });
 
 test('16. Tích hợp HUD: Button Mega hiển thị đúng trạng thái và không xung đột phím', () => {

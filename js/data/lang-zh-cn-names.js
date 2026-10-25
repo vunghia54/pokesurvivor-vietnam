@@ -1134,7 +1134,9 @@ G.I18n.add({
   "Síntesis": "光合作用",
   "Imán": "磁铁",
   "Baya Zidra": "文柚果",
-  "Tormenta de arena": "沙暴"
+  "Tormenta de arena": "沙暴",
+  "Pyroar": "火炎狮",
+  "Falinks": "列阵兵"
 }, 'zh-Hans');
 G.I18n.add({
   "A Bocajarro": "近身战",
@@ -2280,5 +2282,7 @@ G.I18n.add({
   "1017": "厄诡椪",
   "1018": "铝钢桥龙",
   "1019": "蜜集大蛇",
-  "1024": "太乐巴戈斯"
+  "1024": "太乐巴戈斯",
+  "668": "火炎狮",
+  "870": "列阵兵"
 }, 'zh-Hans', 'pokemon');
