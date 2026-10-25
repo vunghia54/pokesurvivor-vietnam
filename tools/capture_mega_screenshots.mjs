@@ -158,16 +158,17 @@ async function run() {
 
     for (const m of mons) {
       console.log(`\n=== Kiểm thử dạng: ${m.name} (Dex ${m.dex}) ===`);
-      // 1. Vào trận với Pokémon này
+      // 1. Vào trận với Pokémon này (Bản thường)
       await evalExpr(`
         (() => {
           G.DB.save.partner = ${m.dex};
+          G.DB.save.partnerShiny = false;
           G.Game.startRun();
         })()
       `);
-      await sleep(1200);
+      await sleep(1000);
 
-      // Chụp BEFORE
+      // Chụp BEFORE (Dạng thường)
       await saveScreenshot(`${m.prefix}_before.png`);
 
       // 2. Kích hoạt Mega
@@ -175,13 +176,26 @@ async function run() {
         (() => {
           const pl = G.Game.player;
           G.Mega.trigger(pl);
+          G.Mega.update(pl, 1.3); // Hoàn thành 1.2s biến hình
         })()
       `);
-      // Đợi hoàn thành hiệu ứng tiến hóa Mega (1.2s) + hào quang xoay
-      await sleep(1500);
+      await sleep(400);
 
-      // Chụp AFTER
-      await saveScreenshot(`${m.prefix}_after.png`);
+      // Chụp DURING (Đang Mega có hào quang xoay)
+      await saveScreenshot(`${m.prefix}_during.png`);
+      await saveScreenshot(`${m.prefix}_after.png`); // Đồng bộ tên cũ
+
+      // 3. Hết hạn 25 giây -> Hoàn nguyên
+      await evalExpr(`
+        (() => {
+          const pl = G.Game.player;
+          G.Mega.update(pl, 25.5);
+        })()
+      `);
+      await sleep(300);
+
+      // Chụp REVERT (Đã hết hạn 25s, trở về dạng thường)
+      await saveScreenshot(`${m.prefix}_revert.png`);
 
       // Thoát trận quay về Menu
       await evalExpr(`
@@ -191,7 +205,36 @@ async function run() {
           G.MenuUI.open();
         })()
       `);
-      await sleep(600);
+      await sleep(400);
+
+      // 4. Kiểm thử phiên bản SHINY của Pokémon này
+      console.log(`  -> Kiểm thử dạng Shiny: ${m.name}...`);
+      await evalExpr(`
+        (() => {
+          G.DB.save.partner = ${m.dex};
+          G.DB.save.partnerShiny = true;
+          // Cấp quyền sở hữu shiny trong DB mock
+          if (!G.DB.ownsShiny(${m.dex})) {
+            G.DB.save.shinies = G.DB.save.shinies || [];
+            if (!G.DB.save.shinies.includes(${m.dex})) G.DB.save.shinies.push(${m.dex});
+          }
+          G.Game.startRun();
+          const pl = G.Game.player;
+          G.Mega.trigger(pl);
+          G.Mega.update(pl, 1.3);
+        })()
+      `);
+      await sleep(400);
+      await saveScreenshot(`${m.prefix}_shiny_during.png`);
+
+      await evalExpr(`
+        (() => {
+          G.Game.quit();
+          G.Game.toUI();
+          G.MenuUI.open();
+        })()
+      `);
+      await sleep(400);
     }
 
     // Kiểm tra 4 Viewports theo yêu cầu

@@ -17,9 +17,8 @@ G.Mega = (() => {
 
   // Cấu hình chung
   const CONFIG = {
-    // 0 = duy trì vĩnh viễn trong run (chuẩn Pokémon chính thống 1 trận)
-    duration: 0,
-    evolveAnimDuration: 1.1, // Thời gian hiệu ứng hào quang biến hình (giây)
+    duration: 25, // 25 giây (chuyển thể thời gian thực cho game sinh tồn - chế độ thử nghiệm)
+    evolveAnimDuration: 1.2, // Thời gian hiệu ứng hào quang biến hình (1.2 giây)
     minLevel: 1 // Cấp độ sẵn sàng kích hoạt trong run thử nghiệm
   };
 
@@ -148,7 +147,7 @@ G.Mega = (() => {
   /** Kiểm tra Pokémon có khả năng Mega hay không */
   function hasMega(dex) {
     const list = getFormsForDex(dex);
-    return list.length > 0;
+    return list.some(f => f.spriteAvailable && f.spriteId);
   }
 
   /** Chọn dạng Mega dự kiến theo lựa chọn */
@@ -158,15 +157,20 @@ G.Mega = (() => {
     const pref = userPreferences[dex];
     if (pref) {
       const match = list.find(f => f.id === pref);
-      if (match) return match;
+      if (match && match.spriteAvailable && match.spriteId) return match;
     }
-    // Mặc định dạng đầu tiên có sprite khả dụng
-    return list.find(f => f.spriteAvailable) || list[0];
+    // Chỉ chọn dạng đã có sprite hoàn thiện và khả dụng
+    return list.find(f => f.spriteAvailable && f.spriteId) || null;
   }
 
   /** Đặt dạng ưu tiên (ví dụ Charizard X hoặc Y) */
   function setPreference(dex, formId) {
-    if (FORMS[formId] && FORMS[formId].baseDex === dex) {
+    const form = FORMS[formId];
+    if (form && form.baseDex === dex) {
+      if (!form.spriteAvailable || !form.spriteId) {
+        // Không cho phép đặt preference cho dạng chưa có sprite hoàn thiện (ví dụ Charizard Y)
+        return false;
+      }
       userPreferences[dex] = formId;
       return true;
     }
@@ -197,7 +201,7 @@ G.Mega = (() => {
     if (!pl || pl.dead) return false;
     if (pl.megaState !== STATES.MEGA_READY) return false;
     const form = getSelectedForm(pl.dex);
-    if (!form) return false;
+    if (!form || !form.spriteAvailable || !form.spriteId) return false;
     return true;
   }
 
@@ -269,6 +273,7 @@ G.Mega = (() => {
     if (!pl || pl.megaState !== STATES.MEGA_ACTIVE) return;
     pl.megaState = STATES.MEGA_USED;
     pl.megaForm = null;
+    pl.megaTimer = 0;
 
     // Trở về Animator của Pokémon gốc
     if (G.Sprites) {
@@ -277,6 +282,11 @@ G.Mega = (() => {
 
     if (G.FX && typeof G.FX.ring === 'function') {
       G.FX.ring(pl.x, pl.y, 10, 60, 'rgba(255,255,255,.5)', 0.5, 2);
+    }
+
+    // Đồng bộ hoàn nguyên cho đồng đội trong Co-op
+    if (G.Coop && typeof G.Coop.emitMega === 'function' && !pl.remote) {
+      G.Coop.emitMega('');
     }
   }
 
@@ -310,8 +320,10 @@ G.Mega = (() => {
   /** Kết thúc run hoặc người chơi chết: Dọn dẹp an toàn */
   function onRunEnd(pl) {
     if (!pl) return;
-    if (pl.megaState === STATES.MEGA_ACTIVE) {
-      // Đổi lại sprite gốc trước khi dọn dẹp
+    if (pl.megaState === STATES.MEGA_ACTIVE || pl.megaState === STATES.MEGA_EVOLVING) {
+      if (G.Coop && typeof G.Coop.emitMega === 'function' && !pl.remote) {
+        G.Coop.emitMega('');
+      }
       if (G.Sprites) {
         pl.anim = new G.Sprites.Animator(pl.dex, pl.scale, pl.shiny);
       }
@@ -319,16 +331,29 @@ G.Mega = (() => {
     pl.megaState = STATES.NORMAL;
     pl.megaForm = null;
     pl.megaPendingForm = null;
+    pl.megaTimer = 0;
+    pl.megaEvolvingT = 0;
   }
 
   /** Áp dụng trạng thái Mega cho Puppet trong phòng Co-op */
   function applyPuppet(puppet, formId, shiny) {
     if (!puppet) return;
+    if (!formId) {
+      // Hoàn nguyên Puppet về dạng thường
+      puppet.megaState = STATES.MEGA_USED;
+      puppet.megaForm = null;
+      puppet.megaTimer = 0;
+      if (G.Sprites) {
+        puppet.anim = new G.Sprites.Animator(puppet.dex, puppet.scale, shiny);
+      }
+      return;
+    }
     const form = FORMS[formId];
-    if (!form) return;
+    if (!form || !form.spriteAvailable || !form.spriteId) return;
 
     puppet.megaState = STATES.MEGA_ACTIVE;
     puppet.megaForm = form;
+    puppet.megaTimer = CONFIG.duration;
     if (form.spriteId && G.Sprites) {
       puppet.anim = new G.Sprites.Animator(form.spriteId, puppet.scale, shiny);
     }

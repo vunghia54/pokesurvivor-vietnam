@@ -267,7 +267,18 @@ G.Coop = (() => {
       if (!graceT.has(u)) return;
       stopGrace(u);
       const m = mates.get(u);
-      if (host && m && m.connected) G.Spawner.say(m.name + ' ha vuelto', 2);
+      if (host && m && m.connected) {
+        G.Spawner.say(m.name + ' ha vuelto', 2);
+        // Đồng bộ trạng thái Mega hiện tại cho người chơi mới vào hoặc vừa kết nối lại
+        if (local && local.megaState === 'MEGA_ACTIVE' && local.megaForm) {
+          m.q.push(['mega', me, local.megaForm.id, local.shiny ? 1 : 0]);
+        }
+        for (const other of mates.values()) {
+          if (other.uid !== u && other.pl && other.pl.megaState === 'MEGA_ACTIVE' && other.pl.megaForm) {
+            m.q.push(['mega', other.uid, other.pl.megaForm.id, other.pl.shiny ? 1 : 0]);
+          }
+        }
+      }
       return;
     }
     if (mode !== 'closed' && mode !== 'failed') return;

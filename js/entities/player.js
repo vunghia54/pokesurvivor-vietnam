@@ -320,7 +320,7 @@ G.Player = class Player {
     if (ab && ab.hurt && this.hp > 0) ab.hurt(this, type, cls);
     if (this.hp <= 0) {
       this.hp = 0; this.dead = true;
-    if (G.Mega && typeof G.Mega.onRunEnd === 'function') G.Mega.onRunEnd(this);
+      if (G.Mega && typeof G.Mega.expireMega === 'function') G.Mega.expireMega(this);
       this.anim.play('Faint', { hold: true });
       G.Projectiles.clearOrbs(this);
       this.reviveT = 0;
@@ -524,6 +524,7 @@ G.Player = class Player {
    */
   netUpdate(dt) {
     this.anim.update(dt);
+    if (G.Mega && typeof G.Mega.update === 'function') G.Mega.update(this, dt);
     const n = this.net;
     if (!n) return;
     if (this.flash > 0) this.flash -= dt;
@@ -534,8 +535,15 @@ G.Player = class Player {
     this.hp = n.hp; this.maxHp = n.maxHp;
     this.magnet = n.mag || this.magnet;
     this.reviveT = n.rev || 0;
-    if (n.dead && !this.dead) { this.dead = true; this.anim.play('Faint', { hold: true }); G.Projectiles.clearOrbs(this); }
-    else if (!n.dead && this.dead) this.revive(n.hp / (n.maxHp || 1));
+    if (n.dead && !this.dead) {
+      this.dead = true;
+      if (G.Mega && typeof G.Mega.expireMega === 'function') G.Mega.expireMega(this);
+      this.anim.play('Faint', { hold: true });
+      G.Projectiles.clearOrbs(this);
+    } else if (!n.dead && this.dead) {
+      this.revive(n.hp / (n.maxHp || 1));
+      if (G.Mega && typeof G.Mega.expireMega === 'function') G.Mega.expireMega(this);
+    }
     // Movimiento activo (para el halo, el HUD y los orbes).
     if (n.mv && (!this.moves[0] || this.moves[0].id !== n.mv || this.moves[0].lvl !== n.ml) && G.Moves.BY_ID[n.mv]) {
       this.moves = [G.Moves.instance(n.mv, n.ml || 1)];

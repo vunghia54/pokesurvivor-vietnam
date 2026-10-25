@@ -343,7 +343,7 @@ G.Net = (() => {
   }
 
   return {
-    open, close, syncMembers, send, toHost, broadcast,
+    open, close, syncMembers, send, toHost, broadcast, deliver,
     on(fn) { handlers.add(fn); }, off(fn) { handlers.delete(fn); },
     onPeer(fn) { peerHandlers.add(fn); },
     mode(u) { const p = peers.get(u); return p ? p.mode : 'closed'; },
@@ -354,7 +354,7 @@ G.Net = (() => {
     peers() { return [...peers.keys()]; },
     get open_() { return !!roomId; },
     get isHost() { return isHost; },
-    get uid() { return uid; },
+    get uid() { return uid; }, set uid(v) { uid = v; },
     get hostUid() { return hostUid; },
     stats
   };

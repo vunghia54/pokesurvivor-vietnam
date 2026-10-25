@@ -108,24 +108,22 @@ test('2. Pokémon không có dạng Mega (Pikachu, Bulbasaur...) không thể Me
   assert.equal(G.Mega.trigger(pl), false);
 });
 
-test('3. Charizard X và Y lựa chọn độc lập và không bao giờ kích hoạt cả hai dạng cùng lúc', () => {
+test('3. Charizard X và Y: Chặn kích hoạt Charizard Y khi chưa có sprite hoàn thiện', () => {
   const G = setupTestEnv();
   const forms = G.Mega.getFormsForDex(6);
   assert.equal(forms.length, 2, 'Charizard có 2 dạng X và Y');
   assert.equal(forms[0].id, 'mega_charizard_x');
   assert.equal(forms[1].id, 'mega_charizard_y');
+  assert.equal(forms[0].spriteAvailable, true, 'Charizard X có sprite chuẩn');
+  assert.equal(forms[1].spriteAvailable, false, 'Charizard Y thiếu sprite');
 
   // Mặc định chọn X
-  G.Mega.setPreference(6, 'mega_charizard_x');
   assert.equal(G.Mega.getSelectedForm(6).id, 'mega_charizard_x');
 
-  // Đổi sang chọn Y
-  G.Mega.setPreference(6, 'mega_charizard_y');
-  assert.equal(G.Mega.getSelectedForm(6).id, 'mega_charizard_y');
-
-  // Trở lại X
-  G.Mega.setPreference(6, 'mega_charizard_x');
-  assert.equal(G.Mega.getSelectedForm(6).id, 'mega_charizard_x');
+  // Cố gắng đặt preference sang Y phải bị từ chối
+  const res = G.Mega.setPreference(6, 'mega_charizard_y');
+  assert.equal(res, false, 'Không cho phép đặt preference cho Charizard Y');
+  assert.equal(G.Mega.getSelectedForm(6).id, 'mega_charizard_x', 'Vẫn giữ dạng X có sprite');
 
   const charizard = G.DEX.find(x => x.dex === 6);
   const pl = new G.Player(charizard, {}, false);
@@ -135,7 +133,7 @@ test('3. Charizard X và Y lựa chọn độc lập và không bao giờ kích 
 
   assert.equal(pl.megaState, 'MEGA_ACTIVE');
   assert.equal(pl.megaForm.id, 'mega_charizard_x');
-  assert.notEqual(pl.megaForm.id, 'mega_charizard_y', 'Không bao giờ kích hoạt đồng thời 2 dạng');
+  assert.notEqual(pl.megaForm.id, 'mega_charizard_y', 'Không bao giờ kích hoạt Y');
 });
 
 test('4. Không thể kích hoạt Mega hai lần trong cùng một run', () => {
@@ -342,4 +340,45 @@ test('16. Tích hợp HUD: Button Mega hiển thị đúng trạng thái và kh�
 
   G.Mega.drawButton(dummyCtx, pl, { x: 500, y: 400, size: 48, touch: true });
   assert.equal(buttonRegistered, true, 'Touch button được đăng ký đúng chuẩn 48x48px');
+});
+
+test('17. Hết hạn sau 25 giây: hoàn nguyên về dạng gốc, aura tắt và trạng thái là MEGA_USED', () => {
+  const G = setupTestEnv();
+  const charizard = G.DEX.find(x => x.dex === 6);
+  const pl = new G.Player(charizard, {}, false);
+  G.Mega.onRunStart(pl);
+  G.Mega.trigger(pl);
+  G.Mega.update(pl, 1.2); // Hết thời gian biến hình -> ACTIVE
+  assert.equal(pl.megaState, 'MEGA_ACTIVE');
+  assert.equal(pl.megaTimer, 25);
+  assert.equal(pl.anim.dex, 'mega_6_x');
+
+  // Trôi qua 25 giây game time
+  G.Mega.update(pl, 25.1);
+  assert.equal(pl.megaState, 'MEGA_USED', 'Trạng thái chuyển sang MEGA_USED');
+  assert.equal(pl.megaForm, null, 'Không còn giữ form Mega');
+  assert.equal(pl.anim.dex, 6, 'Sprite hoàn nguyên về Charizard thường (dex 6)');
+  assert.deepEqual(pl.types, ['fire', 'flying'], 'Hệ trở về Lửa / Bay');
+
+  // Không thể kích hoạt lại sau khi đã hết hạn
+  assert.equal(G.Mega.canTrigger(pl), false);
+  assert.equal(G.Mega.trigger(pl), false);
+});
+
+test('18. Đồng bộ Co-op khi hết hạn: Puppet hoàn nguyên về dạng thường', () => {
+  const G = setupTestEnv();
+  const gengar = G.DEX.find(x => x.dex === 94);
+  const puppet = new G.Player(gengar, {}, false);
+  puppet.remote = true;
+
+  // Puppet kích hoạt Mega
+  G.Mega.applyPuppet(puppet, 'mega_gengar', false);
+  assert.equal(puppet.megaState, 'MEGA_ACTIVE');
+  assert.equal(puppet.anim.dex, 'mega_94');
+
+  // Nhận tín hiệu hết hạn từ mạng (formId = '')
+  G.Mega.applyPuppet(puppet, '', false);
+  assert.equal(puppet.megaState, 'MEGA_USED');
+  assert.equal(puppet.megaForm, null);
+  assert.equal(puppet.anim.dex, 94, 'Puppet trở lại sprite Gengar thường (dex 94)');
 });
