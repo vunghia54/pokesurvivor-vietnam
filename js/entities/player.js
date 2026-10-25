@@ -82,6 +82,8 @@ G.Player = class Player {
     this.statsTaken = {};      // mejoras de stat cogidas (condición de evolución)
     this.abil = null;          // efecto de su habilidad (data/ability-fx.js), lo pone game.js
     this.sturdyAt = -999;      // última vez que le salvó Robustez
+    this.megaState = 'NORMAL';
+    this.megaForm = null;
   }
 
   /** Pone la habilidad (G.AbilityFX.of) y aplica lo que hace al empezar. */
@@ -108,22 +110,24 @@ G.Player = class Player {
    * Ataque con un movimiento: el físico o el especial de tu Pokémon (ver
    * G.Stats), con las danzas que sean de su lado (las de mejora, sin ninguna).
    */
+  get types() { return this.megaForm ? this.megaForm.types : this.mon.types; }
   atkFor(m) {
     const cat = m && m.cat, b = cat === 'physical' ? this.buffs.patk : cat === 'special' ? this.buffs.satk : null;
-    return this.atk * G.Stats.fit(this.mon, cat) * (b ? 1 + b.n * b.amount : 1) * (m && this.monoType(m.type) ? Player.MONO_K : 1);
+    const megaAtk = this.megaForm ? (cat === 'physical' ? (this.megaForm.paMul || this.megaForm.atkMul) : (this.megaForm.saMul || this.megaForm.atkMul)) : 1;
+    return this.atk * megaAtk * G.Stats.fit(this.mon, cat) * (b ? 1 + b.n * b.amount : 1) * (m && this.monoType(m.type) ? Player.MONO_K : 1);
   }
-  /** Monotipo (19-10-2026): los de un solo tipo pegan un +20 % con los ataques de su tipo (tienen menos variedad). */
   static get MONO_K() { return 1.2; }
-  monoType(type) { return this.mon.types.length === 1 && type === this.mon.types[0]; }
+  monoType(type) { const t = this.types; return t.length === 1 && type === t[0]; }
   get spd() {
     // (Habilidades: "steady" no se frena; speed() multiplica, ver data/ability-fx.js.)
     const ab = this.abil || {}, stuck = this.slowT > 0 && !ab.steady;
     const s = this.baseSpd * this.spdMul * (1 + this.buffs.spd.n * this.buffs.spd.amount) * (stuck ? 0.5 : 1) * (ab.speed ? ab.speed(this) : 1);
-    const w = G.Weather.speedFor(this.mon.types);
-    const slow = this.inLiquid && !ab.steady ? G.World.liquidEffect(this.mon.types).slow || 1 : 1;
-    return G.Judgment && G.Judgment.active ? G.Judgment.capSpd(s * slow * w) : s * slow * w;
+    const sMega = this.megaForm ? this.megaForm.spdMul : 1;
+    const w = G.Weather.speedFor(this.types);
+    const slow = this.inLiquid && !ab.steady ? G.World.liquidEffect(this.types).slow || 1 : 1;
+    return G.Judgment && G.Judgment.active ? G.Judgment.capSpd(s * sMega * slow * w) : s * sMega * slow * w;
   }
-  get reduction() { return Math.min(0.8, this.dmgReduce + this.buffs.def.n * this.buffs.def.amount); }
+  get reduction() { return Math.min(0.8, this.dmgReduce + (this.megaForm ? this.megaForm.dmgReduceAdd || 0 : 0) + this.buffs.def.n * this.buffs.def.amount); }
   get regen() { return this.regenFlat + this.buffs.regen.n * this.buffs.regen.amount; }
 
   // ---------------- movimientos ----------------
@@ -316,6 +320,7 @@ G.Player = class Player {
     if (ab && ab.hurt && this.hp > 0) ab.hurt(this, type, cls);
     if (this.hp <= 0) {
       this.hp = 0; this.dead = true;
+    if (G.Mega && typeof G.Mega.onRunEnd === 'function') G.Mega.onRunEnd(this);
       this.anim.play('Faint', { hold: true });
       G.Projectiles.clearOrbs(this);
       this.reviveT = 0;
@@ -380,6 +385,7 @@ G.Player = class Player {
   // ---------------- ciclo ----------------
   update(dt) {
     this.anim.update(dt);
+    if (G.Mega && typeof G.Mega.update === 'function') G.Mega.update(this, dt);
     if (this.dead) return;
     if (this.invuln > 0) this.invuln -= dt;
     if (this.flash > 0) this.flash -= dt;
@@ -568,6 +574,7 @@ G.Player = class Player {
     }
 
     const alpha = this.invuln > 0 && !this.dead ? (Math.floor(this.invuln * 18) % 2 ? 0.45 : 1) : 1;
+    if (G.Mega && typeof G.Mega.drawAura === 'function') G.Mega.drawAura(ctx, this);
     this.anim.draw(ctx, this.x, this.y, { flash: this.flash > 0, softFlash: true, alpha, color: '#ffcb3d' });
 
     // Arcos de buff alrededor de los pies.

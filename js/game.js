@@ -150,6 +150,7 @@ G.Game = (() => {
       else if (pool.length) pl.addMove(G.U.pick(pool));
       pl.setActive(0);
     }
+    if (G.Mega) G.Mega.onRunStart(pl);
 
     if (coop) {
       G.Coop.begin(coop, pl, coopApi);
@@ -328,6 +329,7 @@ G.Game = (() => {
     if (G.Coop.active) G.Coop.end();
     if (coop) G.Social.setPlaying(false);
     state = 'over';
+    if (G.Mega) G.Mega.onRunEnd(pl);
     G.Orbs.reset();
     G.Audio.music(null);
     G.Audio.sfx(dead ? 'gameover' : 'back');
@@ -616,6 +618,7 @@ G.Game = (() => {
     }
     if (G.Input.tap('padx')) G.Orbs.useSelected(pl);
     if (G.Input.tap('pady')) G.Orbs.next(pl);
+    if (G.Input.tap('keym') && G.Mega) G.Mega.trigger(pl);
   }
 
   // ---------------- bucle ----------------

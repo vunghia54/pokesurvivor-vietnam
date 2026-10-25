@@ -350,6 +350,7 @@ G.Coop = (() => {
         case 'he': holdOff(from); break;
         case 're': G.Rift.enterRequest(); break;
         case 'bye': mateGone(from); break;
+        case 'mega': if (G.Mega) G.Mega.applyPuppet(m.pl, ev[1], !!ev[2]); emit(['mega', from, ev[1], ev[2]], from); break;
       }
     }
   }
@@ -456,12 +457,19 @@ G.Coop = (() => {
       case 'fxr':
         if (typeof ev[4] === 'string') G.FX.ring(num(ev[1], 0, -1e6, 1e6), num(ev[2], 0, -1e6, 1e6), 8, num(ev[3], 8, 0, 2000), ev[4], 0.5, 3);
         break;
+      case 'mega': { const m = mates.get(ev[1]); if (m && G.Mega) G.Mega.applyPuppet(m.pl, ev[2], !!ev[3]); break; }
     }
   }
 
   // ---------------- ganchos que llaman los módulos del juego ----------------
 
   /** Tu ataque: los demás lo repiten como fantasma. */
+  function emitMega(formId) {
+    if (!active || !local) return;
+    if (host) emit(['mega', me, formId, local.shiny ? 1 : 0]);
+    else outEv.push(['mega', formId, local.shiny ? 1 : 0]);
+  }
+
   function cast(pl, m) {
     if (!active || pl !== local) return;
     if (host) emit(['c', me, m.id, m.lvl, r2(pl.aim), m.evolved ? 1 : 0]);
@@ -577,7 +585,7 @@ G.Coop = (() => {
   return {
     ANIMS, COLORS, begin, end, leave, keeps, tick, players, puppets, xpFactor, scaleRate, scaleHp,
     cast, hit, status, hurtShown, enemyAdded, enemyGone, enemyShot, pickupAdded, pickupGone, say,
-    propBroken, collected, shinyCaught, orbUsed, levelStart, localPicked, over, holdStart, holdEnd,
+    propBroken, collected, shinyCaught, orbUsed, levelStart, localPicked, over, holdStart, holdEnd, emitMega,
     /** Anfitrión: evento para todos. Invitado: evento para el anfitrión. */
     broadcast(ev) { emit(ev); },
     toHost(ev) { if (active && !host) { outEv.push(ev); flushClient(true); } },

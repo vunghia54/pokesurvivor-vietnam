@@ -14,7 +14,7 @@ G.Sprites = (() => {
   const PX = 2;
   const sheets = new Map();          // "dex/Anim[/s]" -> {img, ready, failed}
 
-  function meta(dex) { return G.SPRITE_META[dex] || null; }
+  function meta(dex) { return G.SPRITE_META[dex] || (G.MEGA_SPRITE_META && G.MEGA_SPRITE_META[dex]) || null; }
 
   /** ¿Flota en su sprite? (tools/hover_flags.py) Pasa por encima de rocas y agua. */
   function hovers(dex) { const m = meta(dex); return !!(m && m.hv); }

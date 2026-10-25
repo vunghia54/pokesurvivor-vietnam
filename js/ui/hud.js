@@ -403,6 +403,13 @@ G.HUD = (() => {
       }
     }
 
+    // ---------- nút Mega Evolution (bên phải các ô kỹ năng) ----------
+    if (G.Mega && G.Mega.hasMega(pl.dex)) {
+      const mx = sx + totalW + (pl.bonds > 0 ? 46 : 14);
+      const my = is2Row ? sy + (totalH - 48) / 2 : sy;
+      G.Mega.drawButton(ctx, pl, { x: mx, y: my, size: 48, touch });
+    }
+
     // ---------- objeto equipado (a la izquierda de los movimientos) ----------
     {
       const ix = sx - S - 14, iy = is2Row ? sy + (totalH - S) / 2 : sy;
