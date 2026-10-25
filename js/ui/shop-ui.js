@@ -65,7 +65,7 @@ G.ShopUI = (() => {
 
     function resize() {
       const r = cv.getBoundingClientRect();
-      if (!r.width) return false;
+      if (!r.width || !r.height) return false;
       const w = Math.round(r.width), h = Math.round(r.height);
       if (w === W && h === H) return true;
       const oldLW = LW;
@@ -259,9 +259,9 @@ G.ShopUI = (() => {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, W, H);
-      ctx.drawImage(back, 0, 0, LW * P, LH * P);
+      if (back && back.width && back.height) ctx.drawImage(back, 0, 0, LW * P, LH * P);
       for (const k of ks) drawKecleon(k);
-      ctx.drawImage(front, 0, 0, LW * P, LH * P);
+      if (front && front.width && front.height) ctx.drawImage(front, 0, 0, LW * P, LH * P);
       drawGlow();
       drawParts();
       placeBubble();
