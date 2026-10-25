@@ -124,17 +124,49 @@ uso **no comercial** y con atribución a sus artistas.
 | YoukaiMinori | <@91001329228464128> | 252, 253 |
 | ◥θ┴θ◤ | DC:<@215638650434617345> | 157, 445, 501, 504, 505, 566, 577, 595, 627, 650, 651, 658, 661, 676, 684, 707, 724, 726, 728, 729, 730, 761, 763, 790, 823, 872, 907, 991 |
 
-### Mega Evolution (v1.4.0)
+### Mega Evolution (v1.4)
 
 Sprites de Mega Evolution procedentes de [SpriteCollab](https://github.com/PMDCollab/SpriteCollab) bajo licencia [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) (uso no comercial, con atribución a sus creadores):
 
-| Pokémon Mega | Base Dex | Carpeta | Artista Principal | Colaboradores | Licencia |
+| Pokémon Mega | Base Dex | Thư mục Sprite | Họa sĩ chính | Cộng tác viên | Giấy phép |
 |---|---|---|---|---|---|
-| **Mega Charizard X** | #6 | `assets/pokemon/mega_6_x` | **KEVIN0ITACHI** | Gaston564 (`<@!350050109741858829>`), Audino (`<@!479925530129596426>`) | CC BY-NC 4.0 |
-| **Mega Charizard Y** | #6 | *En desarrollo (bloqueado)* | — | SpriteCollab (Incompleto) | CC BY-NC 4.0 |
-| **Mega Gengar** | #94 | `assets/pokemon/mega_94` | **DonLawliet** (`<@!653416391201783856>`) | BaronVonDrak (`<@!237286997645983744>`), Nico-Nii (`<@!544245909639397378>`) | CC BY-NC 4.0 |
-| **Mega Lucario** | #448 | `assets/pokemon/mega_448` | **Nico-Nii** (`<@!544245909639397378>`) | — | CC BY-NC 4.0 |
-| **Mega Gardevoir** | #282 | `assets/pokemon/mega_282` | **Nico-Nii** (`<@!544245909639397378>`) | — | CC BY-NC 4.0 |
+| **Mega Charizard X** | #6 | `assets/pokemon/mega_6_x` | **Kevin0itachi** | G〜, Kevin | CC BY-NC 4.0 |
+| **Mega Alakazam** | #65 | `assets/pokemon/mega_65` | **Michael12** | baronessfaron | CC BY-NC 4.0 |
+| **Mega Gengar** | #94 | `assets/pokemon/mega_94` | **Michael12** | Emboarger, baronessfaron | CC BY-NC 4.0 |
+| **Mega Kangaskhan** | #115 | `assets/pokemon/mega_115` | **Deeshura** | — | CC BY-NC 4.0 |
+| **Mega Aerodactyl** | #142 | `assets/pokemon/mega_142` | **Caitemis** | — | CC BY-NC 4.0 |
+| **Mega Mewtwo Y** | #150 | `assets/pokemon/mega_150_y` | **JFain** | — | CC BY-NC 4.0 |
+| **Mega Steelix** | #208 | `assets/pokemon/mega_208` | **baronessfaron** | — | CC BY-NC 4.0 |
+| **Mega Skarmory** | #227 | `assets/pokemon/mega_227` | **Johanne2** | — | CC BY-NC 4.0 |
+| **Mega Houndoom** | #229 | `assets/pokemon/mega_229` | **Top_Kec** | — | CC BY-NC 4.0 |
+| **Mega Tyranitar** | #248 | `assets/pokemon/mega_248` | **JFain** | — | CC BY-NC 4.0 |
+| **Mega Gardevoir** | #282 | `assets/pokemon/mega_282` | **baronessfaron** | — | CC BY-NC 4.0 |
+| **Mega Sableye** | #302 | `assets/pokemon/mega_302` | **Emmuffin** | — | CC BY-NC 4.0 |
+| **Mega Mawile** | #303 | `assets/pokemon/mega_303` | **baronessfaron** | — | CC BY-NC 4.0 |
+| **Mega Medicham** | #308 | `assets/pokemon/mega_308` | **JFain** | — | CC BY-NC 4.0 |
+| **Mega Manectric** | #310 | `assets/pokemon/mega_310` | **Top_Kec** | — | CC BY-NC 4.0 |
+| **Mega Camerupt** | #323 | `assets/pokemon/mega_323` | **Caitemis** | — | CC BY-NC 4.0 |
+| **Mega Altaria** | #334 | `assets/pokemon/mega_334` | **Emmuffin** | — | CC BY-NC 4.0 |
+| **Mega Banette** | #354 | `assets/pokemon/mega_354` | **baronessfaron** | — | CC BY-NC 4.0 |
+| **Mega Absol** | #359 | `assets/pokemon/mega_359` | **Emboarger** | — | CC BY-NC 4.0 |
+| **Mega Glalie** | #362 | `assets/pokemon/mega_362` | **baronessfaron** | — | CC BY-NC 4.0 |
+| **Mega Latias** | #380 | `assets/pokemon/mega_380` | **Emmuffin** | — | CC BY-NC 4.0 |
+| **Mega Latios** | #381 | `assets/pokemon/mega_381` | **Emmuffin** | — | CC BY-NC 4.0 |
+| **Mega Rayquaza** | #384 | `assets/pokemon/mega_384` | **Top_Kec** | — | CC BY-NC 4.0 |
+| **Mega Lopunny** | #428 | `assets/pokemon/mega_428` | **JFain** | — | CC BY-NC 4.0 |
+| **Mega Lucario** | #448 | `assets/pokemon/mega_448` | **baronessfaron** | — | CC BY-NC 4.0 |
+| **Mega Gallade** | #475 | `assets/pokemon/mega_475` | **JFain** | — | CC BY-NC 4.0 |
+| **Mega Darkrai** | #491 | `assets/pokemon/mega_491` | **Johanne2** | — | CC BY-NC 4.0 |
+| **Mega Excadrill** | #530 | `assets/pokemon/mega_530` | **pi3.14** | Soulja, DeltaL | CC BY-NC 4.0 |
+| **Mega Eelektross** | #604 | `assets/pokemon/mega_604` | **Top_Kec** | — | CC BY-NC 4.0 |
+| **Mega Floette** | #670 | `assets/pokemon/mega_670` | **pi3.14** | DeltaL | CC BY-NC 4.0 |
+| **Mega Dragalge** | #691 | `assets/pokemon/mega_691` | **pi3.14** | Soulja, DeltaL | CC BY-NC 4.0 |
+| **Mega Zygarde** | #718 | `assets/pokemon/mega_718` | **pi3.14** | DeltaL | CC BY-NC 4.0 |
+| **Mega Diancie** | #719 | `assets/pokemon/mega_719` | **baronessfaron** | — | CC BY-NC 4.0 |
+| **Mega Drampa** | #780 | `assets/pokemon/mega_780` | **pi3.14** | Soulja, DeltaL | CC BY-NC 4.0 |
+| **Mega Zeraora** | #807 | `assets/pokemon/mega_807` | **pi3.14** | DeltaL | CC BY-NC 4.0 |
+| **Mega Tatsugiri** | #978 | `assets/pokemon/mega_978` | **Emmuffin** | — | CC BY-NC 4.0 |
+
 
 ## Datos
 
