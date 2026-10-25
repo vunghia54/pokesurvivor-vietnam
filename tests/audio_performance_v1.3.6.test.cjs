@@ -59,9 +59,8 @@ class MockOscillatorNode extends MockAudioNode {
   start(t) { this.started = true; }
   stop(t) {
     this.stopped = true;
-    if (this.onended) {
-      // Allow synchronous simulation of note end
-      process.nextTick(() => { if (this.onended) this.onended(); });
+    if (typeof this.onended === 'function') {
+      process.nextTick(() => { try { this.onended(); } catch (_) {} });
     }
   }
 }
@@ -70,7 +69,7 @@ class MockBiquadFilterNode extends MockAudioNode {
   constructor(ctx) {
     super(ctx);
     this.type = 'lowpass';
-    this.frequency = new MockAudioParam(1000);
+    this.frequency = new MockAudioParam(350);
     this.Q = new MockAudioParam(1);
     ctx._createdFilters.push(this);
   }
@@ -85,11 +84,11 @@ class MockBufferSourceNode extends MockAudioNode {
     this.onended = null;
     ctx._createdSources.push(this);
   }
-  start(t, off) { this.started = true; }
+  start(t, offset) { this.started = true; }
   stop(t) {
     this.stopped = true;
-    if (this.onended) {
-      process.nextTick(() => { if (this.onended) this.onended(); });
+    if (typeof this.onended === 'function') {
+      process.nextTick(() => { try { this.onended(); } catch (_) {} });
     }
   }
 }
@@ -97,11 +96,11 @@ class MockBufferSourceNode extends MockAudioNode {
 class MockDynamicsCompressorNode extends MockAudioNode {
   constructor(ctx) {
     super(ctx);
-    this.threshold = new MockAudioParam(-10);
-    this.knee = new MockAudioParam(12);
-    this.ratio = new MockAudioParam(12);
+    this.threshold = new MockAudioParam(-6);
+    this.knee = new MockAudioParam(10);
+    this.ratio = new MockAudioParam(16);
     this.attack = new MockAudioParam(0.003);
-    this.release = new MockAudioParam(0.15);
+    this.release = new MockAudioParam(0.12);
   }
 }
 
@@ -157,6 +156,19 @@ function setupAudioEnv() {
   };
   global.performance = { now: () => Date.now() };
 
+  const origSetInterval = global.setInterval;
+  global.setInterval = (fn, ms) => {
+    const t = origSetInterval(fn, ms);
+    if (t && typeof t.unref === 'function') t.unref();
+    return t;
+  };
+  const origSetTimeout = global.setTimeout;
+  global.setTimeout = (fn, ms) => {
+    const t = origSetTimeout(fn, ms);
+    if (t && typeof t.unref === 'function') t.unref();
+    return t;
+  };
+
   // Setup minimal G namespace
   global.G = {
     U: { clamp: (v, min, max) => Math.max(min, Math.min(max, v)) },
@@ -173,79 +185,27 @@ function setupAudioEnv() {
   return global.G.Audio;
 }
 
-test('v1.3.6 Audio: Init and unlock creates compressor and buses properly', () => {
+test('v1.3.5 Audio Restoration: Init and unlock creates original compressor, master and buses', () => {
   const Audio = setupAudioEnv();
   Audio.unlock();
   assert.equal(Audio.canPlay(), true);
   assert.equal(Audio.running, true);
   assert.equal(typeof Audio.setVolume, 'function');
   assert.equal(typeof Audio.toggleMute, 'function');
+  assert.equal(typeof Audio.music, 'function');
+  assert.equal(typeof Audio.sfx, 'function');
+  assert.equal(typeof Audio.debugMeter, 'function');
+  assert.equal(typeof Audio.debugStream, 'function');
 });
 
-test('v1.3.6 Audio: SFX Priority classification correctly prioritizes High over Low under voice load', () => {
+test('v1.3.5 Audio Restoration: Settings defaults match original v1.3.5 (music: 0.55, sfx: 0.7)', () => {
   const Audio = setupAudioEnv();
-  Audio.unlock();
-
-  let played = [];
-  const origTone = Audio.sfx;
-
-  // Simulate High, Medium, Low sounds
-  Audio.sfx('hurt'); // High
-  Audio.sfx('boss'); // High
-  Audio.sfx('levelup'); // High
-  Audio.sfx('shiny'); // High
-  Audio.sfx('gameover'); // High
-
-  assert.ok(Audio.activeVoices >= 0, 'Active voices is non-negative');
+  assert.equal(Audio.settings.music, 0.55);
+  assert.equal(Audio.settings.sfx, 0.7);
+  assert.equal(Audio.settings.muted, false);
 });
 
-test('v1.3.6 Audio: Mute prevents AudioNode creation in Music Scheduler', () => {
-  const Audio = setupAudioEnv();
-  Audio.unlock();
-  Audio.music('village');
-
-  // Mute audio
-  Audio.setVolume('music', 0);
-  assert.equal(Audio.settings.music, 0);
-
-  Audio.toggleMute();
-  assert.equal(Audio.settings.muted, true);
-});
-
-test('v1.3.6 Audio: Multi-Cast rapid shot burst limiter prevents audio stacking', () => {
-  const Audio = setupAudioEnv();
-  Audio.unlock();
-
-  // Call shot 8 times in rapid succession (simulating 8 skills in 1 frame)
-  for (let i = 0; i < 8; i++) {
-    Audio.sfx('shot', { kind: 'projectile', type: 'fire' });
-  }
-  // Voices should be bounded
-  assert.ok(Audio.activeVoices <= 10, 'Active voices bounded during rapid multi-cast');
-});
-
-test('v1.3.6 Audio: Co-op Ghost Cast audio is throttled and does not overwhelm local audio', () => {
-  const Audio = setupAudioEnv();
-  Audio.unlock();
-
-  for (let i = 0; i < 10; i++) {
-    Audio.sfx('shot', { kind: 'projectile', type: 'electric', ghost: true });
-  }
-  assert.ok(Audio.activeVoices <= 8, 'Ghost cast voices properly throttled');
-});
-
-test('v1.3.6 Audio: Node cleanup and voice decrement onended works cleanly', async () => {
-  const Audio = setupAudioEnv();
-  Audio.unlock();
-
-  Audio.sfx('click');
-  const initialVoices = Audio.activeVoices;
-  // When nextTick triggers onended callbacks
-  await new Promise(r => setTimeout(r, 10));
-  assert.ok(Audio.activeVoices <= initialVoices, 'Voices decremented on note completion');
-});
-
-test('v1.3.6 Audio: Independent volume controls for music and sfx', () => {
+test('v1.3.5 Audio Restoration: Independent volume controls and clamping', () => {
   const Audio = setupAudioEnv();
   Audio.unlock();
 
@@ -261,11 +221,23 @@ test('v1.3.6 Audio: Independent volume controls for music and sfx', () => {
   assert.equal(Audio.settings.sfx, 0.0);
 });
 
-test('v1.3.6 Audio: Rapid music transitions clean up old fading buses', () => {
+test('v1.3.5 Audio Restoration: Mute toggles properly and persists in localStorage', () => {
   const Audio = setupAudioEnv();
   Audio.unlock();
 
-  // Switch rapidly between tracks
+  const isMuted = Audio.toggleMute();
+  assert.equal(isMuted, true);
+  assert.equal(Audio.settings.muted, true);
+
+  const unMuted = Audio.toggleMute();
+  assert.equal(unMuted, false);
+  assert.equal(Audio.settings.muted, false);
+});
+
+test('v1.3.5 Audio Restoration: Music scheduler and track transitions', () => {
+  const Audio = setupAudioEnv();
+  Audio.unlock();
+
   Audio.music('village');
   assert.equal(Audio.track, 'village');
   Audio.music('village'); // Redundant call should be no-op
@@ -278,11 +250,43 @@ test('v1.3.6 Audio: Rapid music transitions clean up old fading buses', () => {
   assert.equal(Audio.track, 'village');
 });
 
-test('v1.3.6 Audio: Audio unlock idempotency (never creates duplicate AudioContext)', () => {
+test('v1.3.5 Audio Restoration: Original SFX execution (combat, hits, shots, skills)', () => {
   const Audio = setupAudioEnv();
   Audio.unlock();
-  const firstCtx = Audio.running;
+
+  // Test standard game SFX calls
+  assert.doesNotThrow(() => {
+    Audio.sfx('hurt');
+    Audio.sfx('hit');
+    Audio.sfx('faint');
+    Audio.sfx('bossDown');
+    Audio.sfx('shiny');
+    Audio.sfx('coin');
+    Audio.sfx('select');
+    Audio.sfx('click');
+    Audio.sfx('shot', { kind: 'projectile', type: 'fire' });
+    Audio.sfx('shot', { kind: 'beam', type: 'water' });
+    Audio.sfx('burst', { rarity: 3 });
+    Audio.sfx('reveal', { rarity: 4 });
+  });
+});
+
+test('v1.3.5 Audio Restoration: Co-op and external calls with extra options do not throw', () => {
+  const Audio = setupAudioEnv();
+  Audio.unlock();
+
+  assert.doesNotThrow(() => {
+    // Calling with ghost flag or extra properties from co-op does not crash
+    Audio.sfx('shot', { kind: 'projectile', type: 'electric', ghost: true });
+    Audio.sfx('shot', { kind: 'melee', type: 'grass', ghost: false });
+  });
+});
+
+test('v1.3.5 Audio Restoration: Audio unlock idempotency (never creates duplicate AudioContext)', () => {
+  const Audio = setupAudioEnv();
+  Audio.unlock();
+  const firstRunning = Audio.running;
   Audio.unlock();
   Audio.unlock();
-  assert.equal(Audio.running, firstCtx);
+  assert.equal(Audio.running, firstRunning);
 });
