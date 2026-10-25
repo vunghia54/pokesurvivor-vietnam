@@ -110,13 +110,15 @@ G.Projectiles = (() => {
 
   function draw(ctx) {
     const L = G.LIFT;
-    // Sombras primero, todas juntas (batched path).
+    // Sombras primero, todas juntas con subpath độc lập (tránh nối đường thẳng gây tam giác khổng lồ).
     if (list.length > 0) {
       ctx.fillStyle = 'rgba(0,0,0,.25)';
       ctx.beginPath();
       for (let i = 0; i < list.length; i++) {
         const p = list[i];
-        ctx.ellipse(p.x, p.y, p.r * 0.9, p.r * 0.38, 0, 0, 6.2832);
+        const rx = p.r * 0.9, ry = p.r * 0.38;
+        ctx.moveTo(p.x + rx, p.y);
+        ctx.ellipse(p.x, p.y, rx, ry, 0, 0, 6.2832);
       }
       ctx.fill();
 
@@ -130,7 +132,11 @@ G.Projectiles = (() => {
         ctx.beginPath();
         for (let i = 0; i < list.length; i++) {
           const p = list[i];
-          if (!p.friendly) ctx.ellipse(p.x, p.y, p.r * 1.5, p.r * 0.6, 0, 0, 6.2832);
+          if (!p.friendly) {
+            const rx = p.r * 1.5, ry = p.r * 0.6;
+            ctx.moveTo(p.x + rx, p.y);
+            ctx.ellipse(p.x, p.y, rx, ry, 0, 0, 6.2832);
+          }
         }
         ctx.fill();
       }
