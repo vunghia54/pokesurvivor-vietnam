@@ -1,0 +1,1362 @@
+{
+  "meta": {
+    "officialSpeciesCount": 87,
+    "primaryFormsCount": 93,
+    "variationsCount": 3,
+    "totalWithVariations": 96,
+    "sources": [
+      "https://bulbapedia.bulbagarden.net/wiki/Mega_Evolution",
+      "https://www.serebii.net/legendsz-a/megaevolutions.shtml",
+      "https://www.serebii.net/legendsz-a/dlc-megaevolutions.shtml"
+    ]
+  },
+  "primaryForms": [
+    {
+      "id": "mega_venusaur",
+      "baseDex": 3,
+      "species": "Venusaur",
+      "name": "Mega Venusaur",
+      "types": [
+        "grass",
+        "poison"
+      ],
+      "stone": "Venusaurite",
+      "branch": null,
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_charizard_x",
+      "baseDex": 6,
+      "species": "Charizard",
+      "name": "Mega Charizard X",
+      "types": [
+        "fire",
+        "dragon"
+      ],
+      "stone": "Charizardite X",
+      "branch": "X",
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_charizard_y",
+      "baseDex": 6,
+      "species": "Charizard",
+      "name": "Mega Charizard Y",
+      "types": [
+        "fire",
+        "flying"
+      ],
+      "stone": "Charizardite Y",
+      "branch": "Y",
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_blastoise",
+      "baseDex": 9,
+      "species": "Blastoise",
+      "name": "Mega Blastoise",
+      "types": [
+        "water"
+      ],
+      "stone": "Blastoisinite",
+      "branch": null,
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_beedrill",
+      "baseDex": 15,
+      "species": "Beedrill",
+      "name": "Mega Beedrill",
+      "types": [
+        "bug",
+        "poison"
+      ],
+      "stone": "Beedrillite",
+      "branch": null,
+      "gen": 1,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_pidgeot",
+      "baseDex": 18,
+      "species": "Pidgeot",
+      "name": "Mega Pidgeot",
+      "types": [
+        "normal",
+        "flying"
+      ],
+      "stone": "Pidgeotite",
+      "branch": null,
+      "gen": 1,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_raichu_x",
+      "baseDex": 26,
+      "species": "Raichu",
+      "name": "Mega Raichu X",
+      "types": [
+        "electric",
+        "fighting"
+      ],
+      "stone": "Raichunite X",
+      "branch": "X",
+      "gen": 1,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_raichu_y",
+      "baseDex": 26,
+      "species": "Raichu",
+      "name": "Mega Raichu Y",
+      "types": [
+        "electric",
+        "psychic"
+      ],
+      "stone": "Raichunite Y",
+      "branch": "Y",
+      "gen": 1,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_clefable",
+      "baseDex": 36,
+      "species": "Clefable",
+      "name": "Mega Clefable",
+      "types": [
+        "fairy"
+      ],
+      "stone": "Clefablite",
+      "branch": null,
+      "gen": 1,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_alakazam",
+      "baseDex": 65,
+      "species": "Alakazam",
+      "name": "Mega Alakazam",
+      "types": [
+        "psychic"
+      ],
+      "stone": "Alakazite",
+      "branch": null,
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_victreebel",
+      "baseDex": 71,
+      "species": "Victreebel",
+      "name": "Mega Victreebel",
+      "types": [
+        "grass",
+        "poison"
+      ],
+      "stone": "Victreebelite",
+      "branch": null,
+      "gen": 1,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_slowbro",
+      "baseDex": 80,
+      "species": "Slowbro",
+      "name": "Mega Slowbro",
+      "types": [
+        "water",
+        "psychic"
+      ],
+      "stone": "Slowbronite",
+      "branch": null,
+      "gen": 1,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_gengar",
+      "baseDex": 94,
+      "species": "Gengar",
+      "name": "Mega Gengar",
+      "types": [
+        "ghost",
+        "poison"
+      ],
+      "stone": "Gengarite",
+      "branch": null,
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_kangaskhan",
+      "baseDex": 115,
+      "species": "Kangaskhan",
+      "name": "Mega Kangaskhan",
+      "types": [
+        "normal"
+      ],
+      "stone": "Kangaskhanite",
+      "branch": null,
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_starmie",
+      "baseDex": 121,
+      "species": "Starmie",
+      "name": "Mega Starmie",
+      "types": [
+        "water",
+        "psychic"
+      ],
+      "stone": "Starminite",
+      "branch": null,
+      "gen": 1,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_pinsir",
+      "baseDex": 127,
+      "species": "Pinsir",
+      "name": "Mega Pinsir",
+      "types": [
+        "bug",
+        "flying"
+      ],
+      "stone": "Pinsirite",
+      "branch": null,
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_gyarados",
+      "baseDex": 130,
+      "species": "Gyarados",
+      "name": "Mega Gyarados",
+      "types": [
+        "water",
+        "dark"
+      ],
+      "stone": "Gyaradosite",
+      "branch": null,
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_aerodactyl",
+      "baseDex": 142,
+      "species": "Aerodactyl",
+      "name": "Mega Aerodactyl",
+      "types": [
+        "rock",
+        "flying"
+      ],
+      "stone": "Aerodactylite",
+      "branch": null,
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_dragonite",
+      "baseDex": 149,
+      "species": "Dragonite",
+      "name": "Mega Dragonite",
+      "types": [
+        "dragon",
+        "flying"
+      ],
+      "stone": "Dragonitite",
+      "branch": null,
+      "gen": 1,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_mewtwo_x",
+      "baseDex": 150,
+      "species": "Mewtwo",
+      "name": "Mega Mewtwo X",
+      "types": [
+        "psychic",
+        "fighting"
+      ],
+      "stone": "Mewtwonite X",
+      "branch": "X",
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_mewtwo_y",
+      "baseDex": 150,
+      "species": "Mewtwo",
+      "name": "Mega Mewtwo Y",
+      "types": [
+        "psychic"
+      ],
+      "stone": "Mewtwonite Y",
+      "branch": "Y",
+      "gen": 1,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_meganium",
+      "baseDex": 154,
+      "species": "Meganium",
+      "name": "Mega Meganium",
+      "types": [
+        "grass",
+        "fairy"
+      ],
+      "stone": "Meganiumite",
+      "branch": null,
+      "gen": 2,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_feraligatr",
+      "baseDex": 160,
+      "species": "Feraligatr",
+      "name": "Mega Feraligatr",
+      "types": [
+        "water",
+        "dark"
+      ],
+      "stone": "Feraligatrite",
+      "branch": null,
+      "gen": 2,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_ampharos",
+      "baseDex": 181,
+      "species": "Ampharos",
+      "name": "Mega Ampharos",
+      "types": [
+        "electric",
+        "dragon"
+      ],
+      "stone": "Ampharosite",
+      "branch": null,
+      "gen": 2,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_steelix",
+      "baseDex": 208,
+      "species": "Steelix",
+      "name": "Mega Steelix",
+      "types": [
+        "steel",
+        "ground"
+      ],
+      "stone": "Steelixite",
+      "branch": null,
+      "gen": 2,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_scizor",
+      "baseDex": 212,
+      "species": "Scizor",
+      "name": "Mega Scizor",
+      "types": [
+        "bug",
+        "steel"
+      ],
+      "stone": "Scizorite",
+      "branch": null,
+      "gen": 2,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_heracross",
+      "baseDex": 214,
+      "species": "Heracross",
+      "name": "Mega Heracross",
+      "types": [
+        "bug",
+        "fighting"
+      ],
+      "stone": "Heracronite",
+      "branch": null,
+      "gen": 2,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_skarmory",
+      "baseDex": 227,
+      "species": "Skarmory",
+      "name": "Mega Skarmory",
+      "types": [
+        "steel",
+        "flying"
+      ],
+      "stone": "Skarmoryite",
+      "branch": null,
+      "gen": 2,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_houndoom",
+      "baseDex": 229,
+      "species": "Houndoom",
+      "name": "Mega Houndoom",
+      "types": [
+        "dark",
+        "fire"
+      ],
+      "stone": "Houndoominite",
+      "branch": null,
+      "gen": 2,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_tyranitar",
+      "baseDex": 248,
+      "species": "Tyranitar",
+      "name": "Mega Tyranitar",
+      "types": [
+        "rock",
+        "dark"
+      ],
+      "stone": "Tyranitarite",
+      "branch": null,
+      "gen": 2,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_sceptile",
+      "baseDex": 254,
+      "species": "Sceptile",
+      "name": "Mega Sceptile",
+      "types": [
+        "grass",
+        "dragon"
+      ],
+      "stone": "Sceptilite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_blaziken",
+      "baseDex": 257,
+      "species": "Blaziken",
+      "name": "Mega Blaziken",
+      "types": [
+        "fire",
+        "fighting"
+      ],
+      "stone": "Blazikenite",
+      "branch": null,
+      "gen": 3,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_swampert",
+      "baseDex": 260,
+      "species": "Swampert",
+      "name": "Mega Swampert",
+      "types": [
+        "water",
+        "ground"
+      ],
+      "stone": "Swampertite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_gardevoir",
+      "baseDex": 282,
+      "species": "Gardevoir",
+      "name": "Mega Gardevoir",
+      "types": [
+        "psychic",
+        "fairy"
+      ],
+      "stone": "Gardevoirite",
+      "branch": null,
+      "gen": 3,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_sableye",
+      "baseDex": 302,
+      "species": "Sableye",
+      "name": "Mega Sableye",
+      "types": [
+        "dark",
+        "ghost"
+      ],
+      "stone": "Sablenite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_mawile",
+      "baseDex": 303,
+      "species": "Mawile",
+      "name": "Mega Mawile",
+      "types": [
+        "steel",
+        "fairy"
+      ],
+      "stone": "Mawilite",
+      "branch": null,
+      "gen": 3,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_aggron",
+      "baseDex": 306,
+      "species": "Aggron",
+      "name": "Mega Aggron",
+      "types": [
+        "steel"
+      ],
+      "stone": "Aggronite",
+      "branch": null,
+      "gen": 3,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_medicham",
+      "baseDex": 308,
+      "species": "Medicham",
+      "name": "Mega Medicham",
+      "types": [
+        "fighting",
+        "psychic"
+      ],
+      "stone": "Medichamite",
+      "branch": null,
+      "gen": 3,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_manectric",
+      "baseDex": 310,
+      "species": "Manectric",
+      "name": "Mega Manectric",
+      "types": [
+        "electric"
+      ],
+      "stone": "Manectite",
+      "branch": null,
+      "gen": 3,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_sharpedo",
+      "baseDex": 319,
+      "species": "Sharpedo",
+      "name": "Mega Sharpedo",
+      "types": [
+        "water",
+        "dark"
+      ],
+      "stone": "Sharpedonite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_camerupt",
+      "baseDex": 323,
+      "species": "Camerupt",
+      "name": "Mega Camerupt",
+      "types": [
+        "fire",
+        "ground"
+      ],
+      "stone": "Cameruptite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_altaria",
+      "baseDex": 334,
+      "species": "Altaria",
+      "name": "Mega Altaria",
+      "types": [
+        "dragon",
+        "fairy"
+      ],
+      "stone": "Altarianite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_banette",
+      "baseDex": 354,
+      "species": "Banette",
+      "name": "Mega Banette",
+      "types": [
+        "ghost"
+      ],
+      "stone": "Banettite",
+      "branch": null,
+      "gen": 3,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_chimecho",
+      "baseDex": 358,
+      "species": "Chimecho",
+      "name": "Mega Chimecho",
+      "types": [
+        "psychic",
+        "ghost"
+      ],
+      "stone": "Chimechite",
+      "branch": null,
+      "gen": 3,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_absol",
+      "baseDex": 359,
+      "species": "Absol",
+      "name": "Mega Absol",
+      "types": [
+        "dark"
+      ],
+      "stone": "Absolite",
+      "branch": null,
+      "gen": 3,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_absol_z",
+      "baseDex": 359,
+      "species": "Absol",
+      "name": "Mega Absol Z",
+      "types": [
+        "dark"
+      ],
+      "stone": "Absolite Z",
+      "branch": "Z",
+      "gen": 3,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_glalie",
+      "baseDex": 362,
+      "species": "Glalie",
+      "name": "Mega Glalie",
+      "types": [
+        "ice"
+      ],
+      "stone": "Glalitite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_salamence",
+      "baseDex": 373,
+      "species": "Salamence",
+      "name": "Mega Salamence",
+      "types": [
+        "dragon",
+        "flying"
+      ],
+      "stone": "Salamencite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_metagross",
+      "baseDex": 376,
+      "species": "Metagross",
+      "name": "Mega Metagross",
+      "types": [
+        "steel",
+        "psychic"
+      ],
+      "stone": "Metagrossite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_latias",
+      "baseDex": 380,
+      "species": "Latias",
+      "name": "Mega Latias",
+      "types": [
+        "dragon",
+        "psychic"
+      ],
+      "stone": "Latiasite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_latios",
+      "baseDex": 381,
+      "species": "Latios",
+      "name": "Mega Latios",
+      "types": [
+        "dragon",
+        "psychic"
+      ],
+      "stone": "Latiosite",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_rayquaza",
+      "baseDex": 384,
+      "species": "Rayquaza",
+      "name": "Mega Rayquaza",
+      "types": [
+        "dragon",
+        "flying"
+      ],
+      "stone": "Dragon Ascent",
+      "branch": null,
+      "gen": 3,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_staraptor",
+      "baseDex": 398,
+      "species": "Staraptor",
+      "name": "Mega Staraptor",
+      "types": [
+        "normal",
+        "flying"
+      ],
+      "stone": "Staraptorite",
+      "branch": null,
+      "gen": 4,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_lopunny",
+      "baseDex": 428,
+      "species": "Lopunny",
+      "name": "Mega Lopunny",
+      "types": [
+        "normal",
+        "fighting"
+      ],
+      "stone": "Lopunnite",
+      "branch": null,
+      "gen": 4,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_garchomp",
+      "baseDex": 445,
+      "species": "Garchomp",
+      "name": "Mega Garchomp",
+      "types": [
+        "dragon",
+        "ground"
+      ],
+      "stone": "Garchompite",
+      "branch": null,
+      "gen": 4,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_garchomp_z",
+      "baseDex": 445,
+      "species": "Garchomp",
+      "name": "Mega Garchomp Z",
+      "types": [
+        "dragon",
+        "ground"
+      ],
+      "stone": "Garchompite Z",
+      "branch": "Z",
+      "gen": 4,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_lucario",
+      "baseDex": 448,
+      "species": "Lucario",
+      "name": "Mega Lucario",
+      "types": [
+        "fighting",
+        "steel"
+      ],
+      "stone": "Lucarionite",
+      "branch": null,
+      "gen": 4,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_lucario_z",
+      "baseDex": 448,
+      "species": "Lucario",
+      "name": "Mega Lucario Z",
+      "types": [
+        "fighting",
+        "steel"
+      ],
+      "stone": "Lucarionite Z",
+      "branch": "Z",
+      "gen": 4,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_abomasnow",
+      "baseDex": 460,
+      "species": "Abomasnow",
+      "name": "Mega Abomasnow",
+      "types": [
+        "grass",
+        "ice"
+      ],
+      "stone": "Abomasite",
+      "branch": null,
+      "gen": 4,
+      "origin": "XY"
+    },
+    {
+      "id": "mega_gallade",
+      "baseDex": 475,
+      "species": "Gallade",
+      "name": "Mega Gallade",
+      "types": [
+        "psychic",
+        "fighting"
+      ],
+      "stone": "Galladite",
+      "branch": null,
+      "gen": 4,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_froslass",
+      "baseDex": 478,
+      "species": "Froslass",
+      "name": "Mega Froslass",
+      "types": [
+        "ice",
+        "ghost"
+      ],
+      "stone": "Froslassite",
+      "branch": null,
+      "gen": 4,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_heatran",
+      "baseDex": 485,
+      "species": "Heatran",
+      "name": "Mega Heatran",
+      "types": [
+        "fire",
+        "steel"
+      ],
+      "stone": "Heatranite",
+      "branch": null,
+      "gen": 4,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_darkrai",
+      "baseDex": 491,
+      "species": "Darkrai",
+      "name": "Mega Darkrai",
+      "types": [
+        "dark"
+      ],
+      "stone": "Darkrainite",
+      "branch": null,
+      "gen": 4,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_emboar",
+      "baseDex": 500,
+      "species": "Emboar",
+      "name": "Mega Emboar",
+      "types": [
+        "fire",
+        "fighting"
+      ],
+      "stone": "Emboarite",
+      "branch": null,
+      "gen": 5,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_excadrill",
+      "baseDex": 530,
+      "species": "Excadrill",
+      "name": "Mega Excadrill",
+      "types": [
+        "ground",
+        "steel"
+      ],
+      "stone": "Excadrillite",
+      "branch": null,
+      "gen": 5,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_audino",
+      "baseDex": 531,
+      "species": "Audino",
+      "name": "Mega Audino",
+      "types": [
+        "normal",
+        "fairy"
+      ],
+      "stone": "Audinite",
+      "branch": null,
+      "gen": 5,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_scolipede",
+      "baseDex": 545,
+      "species": "Scolipede",
+      "name": "Mega Scolipede",
+      "types": [
+        "bug",
+        "poison"
+      ],
+      "stone": "Scolipedite",
+      "branch": null,
+      "gen": 5,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_scrafty",
+      "baseDex": 560,
+      "species": "Scrafty",
+      "name": "Mega Scrafty",
+      "types": [
+        "dark",
+        "fighting"
+      ],
+      "stone": "Scraftynite",
+      "branch": null,
+      "gen": 5,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_eelektross",
+      "baseDex": 604,
+      "species": "Eelektross",
+      "name": "Mega Eelektross",
+      "types": [
+        "electric"
+      ],
+      "stone": "Eelektrossite",
+      "branch": null,
+      "gen": 5,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_chandelure",
+      "baseDex": 609,
+      "species": "Chandelure",
+      "name": "Mega Chandelure",
+      "types": [
+        "ghost",
+        "fire"
+      ],
+      "stone": "Chandelurite",
+      "branch": null,
+      "gen": 5,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_golurk",
+      "baseDex": 623,
+      "species": "Golurk",
+      "name": "Mega Golurk",
+      "types": [
+        "ground",
+        "ghost"
+      ],
+      "stone": "Golurkite",
+      "branch": null,
+      "gen": 5,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_chesnaught",
+      "baseDex": 652,
+      "species": "Chesnaught",
+      "name": "Mega Chesnaught",
+      "types": [
+        "grass",
+        "fighting"
+      ],
+      "stone": "Chesnaughtite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_delphox",
+      "baseDex": 655,
+      "species": "Delphox",
+      "name": "Mega Delphox",
+      "types": [
+        "fire",
+        "psychic"
+      ],
+      "stone": "Delphoxite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_greninja",
+      "baseDex": 658,
+      "species": "Greninja",
+      "name": "Mega Greninja",
+      "types": [
+        "water",
+        "dark"
+      ],
+      "stone": "Greninjite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_pyroar",
+      "baseDex": 668,
+      "species": "Pyroar",
+      "name": "Mega Pyroar",
+      "types": [
+        "fire",
+        "normal"
+      ],
+      "stone": "Pyroarite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_floette",
+      "baseDex": 670,
+      "species": "Floette",
+      "name": "Mega Floette",
+      "types": [
+        "fairy"
+      ],
+      "stone": "Floettite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_meowstic",
+      "baseDex": 678,
+      "species": "Meowstic",
+      "name": "Mega Meowstic",
+      "types": [
+        "psychic"
+      ],
+      "stone": "Meowsticite",
+      "branch": null,
+      "gen": 6,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_malamar",
+      "baseDex": 687,
+      "species": "Malamar",
+      "name": "Mega Malamar",
+      "types": [
+        "dark",
+        "psychic"
+      ],
+      "stone": "Malamarite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_barbaracle",
+      "baseDex": 689,
+      "species": "Barbaracle",
+      "name": "Mega Barbaracle",
+      "types": [
+        "rock",
+        "fighting"
+      ],
+      "stone": "Barbaraclite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_dragalge",
+      "baseDex": 691,
+      "species": "Dragalge",
+      "name": "Mega Dragalge",
+      "types": [
+        "poison",
+        "dragon"
+      ],
+      "stone": "Dragalgenite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_hawlucha",
+      "baseDex": 701,
+      "species": "Hawlucha",
+      "name": "Mega Hawlucha",
+      "types": [
+        "fighting",
+        "flying"
+      ],
+      "stone": "Hawluchanite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_zygarde",
+      "baseDex": 718,
+      "species": "Zygarde",
+      "name": "Mega Zygarde",
+      "types": [
+        "dragon",
+        "ground"
+      ],
+      "stone": "Zygardite",
+      "branch": null,
+      "gen": 6,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_diancie",
+      "baseDex": 719,
+      "species": "Diancie",
+      "name": "Mega Diancie",
+      "types": [
+        "rock",
+        "fairy"
+      ],
+      "stone": "Diancite",
+      "branch": null,
+      "gen": 6,
+      "origin": "ORAS"
+    },
+    {
+      "id": "mega_crabominable",
+      "baseDex": 740,
+      "species": "Crabominable",
+      "name": "Mega Crabominable",
+      "types": [
+        "fighting",
+        "ice"
+      ],
+      "stone": "Crabominite",
+      "branch": null,
+      "gen": 7,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_golisopod",
+      "baseDex": 768,
+      "species": "Golisopod",
+      "name": "Mega Golisopod",
+      "types": [
+        "bug",
+        "water"
+      ],
+      "stone": "Golisopodite",
+      "branch": null,
+      "gen": 7,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_drampa",
+      "baseDex": 780,
+      "species": "Drampa",
+      "name": "Mega Drampa",
+      "types": [
+        "normal",
+        "dragon"
+      ],
+      "stone": "Drampanite",
+      "branch": null,
+      "gen": 7,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_magearna",
+      "baseDex": 801,
+      "species": "Magearna",
+      "name": "Mega Magearna",
+      "types": [
+        "steel",
+        "fairy"
+      ],
+      "stone": "Magearnite",
+      "branch": null,
+      "gen": 7,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_zeraora",
+      "baseDex": 807,
+      "species": "Zeraora",
+      "name": "Mega Zeraora",
+      "types": [
+        "electric"
+      ],
+      "stone": "Zeraorite",
+      "branch": null,
+      "gen": 7,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_falinks",
+      "baseDex": 870,
+      "species": "Falinks",
+      "name": "Mega Falinks",
+      "types": [
+        "fighting"
+      ],
+      "stone": "Falinksite",
+      "branch": null,
+      "gen": 8,
+      "origin": "LEGENDS_ZA"
+    },
+    {
+      "id": "mega_scovillain",
+      "baseDex": 952,
+      "species": "Scovillain",
+      "name": "Mega Scovillain",
+      "types": [
+        "grass",
+        "fire"
+      ],
+      "stone": "Scovillainite",
+      "branch": null,
+      "gen": 9,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_glimmora",
+      "baseDex": 970,
+      "species": "Glimmora",
+      "name": "Mega Glimmora",
+      "types": [
+        "rock",
+        "poison"
+      ],
+      "stone": "Glimmorite",
+      "branch": null,
+      "gen": 9,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_tatsugiri",
+      "baseDex": 978,
+      "species": "Tatsugiri",
+      "name": "Mega Tatsugiri",
+      "types": [
+        "dragon",
+        "water"
+      ],
+      "stone": "Tatsugirite",
+      "branch": null,
+      "gen": 9,
+      "origin": "DLC_MEGA_DIMENSION"
+    },
+    {
+      "id": "mega_baxcalibur",
+      "baseDex": 998,
+      "species": "Baxcalibur",
+      "name": "Mega Baxcalibur",
+      "types": [
+        "dragon",
+        "ice"
+      ],
+      "stone": "Baxcaliburite",
+      "branch": null,
+      "gen": 9,
+      "origin": "DLC_MEGA_DIMENSION"
+    }
+  ],
+  "formVariations": [
+    {
+      "id": "mega_meowstic_female",
+      "baseDex": 678,
+      "species": "Meowstic",
+      "name": "Mega Meowstic (Female)",
+      "types": [
+        "psychic"
+      ],
+      "variationOf": "mega_meowstic",
+      "type": "Gender Variation"
+    },
+    {
+      "id": "mega_pyroar_female",
+      "baseDex": 668,
+      "species": "Pyroar",
+      "name": "Mega Pyroar (Female)",
+      "types": [
+        "fire",
+        "normal"
+      ],
+      "variationOf": "mega_pyroar",
+      "type": "Gender Variation"
+    },
+    {
+      "id": "mega_tatsugiri_droopy",
+      "baseDex": 978,
+      "species": "Tatsugiri",
+      "name": "Mega Tatsugiri (Droopy Form)",
+      "types": [
+        "dragon",
+        "water"
+      ],
+      "variationOf": "mega_tatsugiri",
+      "type": "Form Variation"
+    }
+  ],
+  "primalReversions": [
+    {
+      "id": "primal_kyogre",
+      "baseDex": 382,
+      "species": "Kyogre",
+      "name": "Primal Kyogre",
+      "types": [
+        "water"
+      ],
+      "item": "Blue Orb",
+      "category": "Primal Reversion"
+    },
+    {
+      "id": "primal_groudon",
+      "baseDex": 383,
+      "species": "Groudon",
+      "name": "Primal Groudon",
+      "types": [
+        "ground",
+        "fire"
+      ],
+      "item": "Red Orb",
+      "category": "Primal Reversion"
+    }
+  ]
+}
