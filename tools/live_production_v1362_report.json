@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-10-25T11:59:01.313Z",
+  "bundleSrc": "https://vunghia54.github.io/pokesurvivor-vietnam/js/app.min.js?v=2eea69e99a",
+  "audio": {
+    "hasBtnSound": true,
+    "soundIconChangedOnMute": false,
+    "soundIconRestoredOnUnmute": true,
+    "slidersFound": true
+  },
+  "ui": {
+    "topbarSingleRow": true,
+    "isShopOpen": true,
+    "hasScrollableBody": true
+  },
+  "canvas": {
+    "triangleCenterAlpha": 0
+  },
+  "consoleErrorsCount": 0,
+  "screenshot": "D:\\pokesurvivor-main\\tools\\screenshots\\live_production_v1362.png"
+}
