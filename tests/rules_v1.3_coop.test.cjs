@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('http');
+const { isEmulatorRunning } = require('./check_emulator.cjs');
 
 const PROJECT_ID = 'plucky-courier-365002';
 const AUTH_PORT = 9099;
@@ -101,6 +102,7 @@ async function commitGroupScore(board, docId, record, token) {
 }
 
 test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Isolation (3 Users Same Room)', async (t) => {
+  if (!(await isEmulatorRunning(AUTH_PORT))) { t.skip('Emulator offline'); return; }
   const userA = await createAuthUser(`host_a_${Date.now()}@test.vn`, 'Pass123456!');
   const userB = await createAuthUser(`guest_b_${Date.now()}@test.vn`, 'Pass123456!');
   const userC = await createAuthUser(`guest_c_${Date.now()}@test.vn`, 'Pass123456!');
@@ -326,6 +328,7 @@ test('Firebase Security Rules v1.3: Realtime Database Co-op Room & Signaling Iso
 });
 
 test('Firebase Security Rules v1.3: Chống tấn công chèn dữ liệu con giả mạo lúc tạo phòng mới', async (t) => {
+  if (!(await isEmulatorRunning(AUTH_PORT))) { t.skip('Emulator offline'); return; }
   const host = await createAuthUser(`atk_host_${Date.now()}@test.vn`, 'Pass123456!');
   const victim = await createAuthUser(`atk_vic_${Date.now()}@test.vn`, 'Pass123456!');
 
@@ -401,6 +404,7 @@ test('Firebase Security Rules v1.3: Chống tấn công chèn dữ liệu con gi
 });
 
 test('Firebase Security Rules v1.3: Firestore Group Leaderboard Protection (g and gm)', async (t) => {
+  if (!(await isEmulatorRunning(AUTH_PORT))) { t.skip('Emulator offline'); return; }
   const user1 = await createAuthUser(`p1_${Date.now()}@test.vn`, 'Pass123456!');
   const user2 = await createAuthUser(`p2_${Date.now()}@test.vn`, 'Pass123456!');
   const user3 = await createAuthUser(`p3_${Date.now()}@test.vn`, 'Pass123456!');
@@ -515,6 +519,7 @@ test('Firebase Security Rules v1.3: Firestore Group Leaderboard Protection (g an
 });
 
 test('RTDB server enforcement: four reservations, adversarial writes and reconnect', async t => {
+  if (!(await isEmulatorRunning(AUTH_PORT))) { t.skip('Emulator offline'); return; }
   const users = await Promise.all(Array.from({length:6},(_,i)=>createAuthUser(`seat_${i}_${Date.now()}@test.vn`,'Pass123456!')));
   const [host,b,c,d,fifth,sixth]=users;
   const id='capacity_'+Date.now();
@@ -559,6 +564,7 @@ test('RTDB server enforcement: four reservations, adversarial writes and reconne
 });
 
 test('Firestore compatibility: friend consent, invitations, unique group participants', async t => {
+  if (!(await isEmulatorRunning(AUTH_PORT))) { t.skip('Emulator offline'); return; }
   const [a,b,x]=await Promise.all(['a','b','x'].map(n=>createAuthUser(`friend_${n}_${Date.now()}@test.vn`,'Pass123456!')));
   const pair=[a.uid,b.uid].sort().join('_');
   const doc=(p)=>`projects/${PROJECT_ID}/databases/(default)/documents/${p}`;

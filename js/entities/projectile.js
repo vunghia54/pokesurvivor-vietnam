@@ -110,16 +110,30 @@ G.Projectiles = (() => {
 
   function draw(ctx) {
     const L = G.LIFT;
-    // Sombras primero, todas juntas.
-    ctx.fillStyle = 'rgba(0,0,0,.25)';
-    for (const p of list) {
-      ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r * 0.9, p.r * 0.38, 0, 0, 6.2832); ctx.fill();
-    }
-    // Los disparos enemigos llevan un aro rojo en el suelo: "esto te hace daño".
-    ctx.fillStyle = 'rgba(255,60,80,.35)';
-    for (const p of list) {
-      if (p.friendly) continue;
-      ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r * 1.5, p.r * 0.6, 0, 0, 6.2832); ctx.fill();
+    // Sombras primero, todas juntas (batched path).
+    if (list.length > 0) {
+      ctx.fillStyle = 'rgba(0,0,0,.25)';
+      ctx.beginPath();
+      for (let i = 0; i < list.length; i++) {
+        const p = list[i];
+        ctx.ellipse(p.x, p.y, p.r * 0.9, p.r * 0.38, 0, 0, 6.2832);
+      }
+      ctx.fill();
+
+      // Los disparos enemigos llevan un aro rojo en el suelo: "esto te hace daño".
+      let hasEnemyShots = false;
+      for (let i = 0; i < list.length; i++) {
+        if (!list[i].friendly) { hasEnemyShots = true; break; }
+      }
+      if (hasEnemyShots) {
+        ctx.fillStyle = 'rgba(255,60,80,.35)';
+        ctx.beginPath();
+        for (let i = 0; i < list.length; i++) {
+          const p = list[i];
+          if (!p.friendly) ctx.ellipse(p.x, p.y, p.r * 1.5, p.r * 0.6, 0, 0, 6.2832);
+        }
+        ctx.fill();
+      }
     }
     for (const p of list) {
       const v = p.vis || G.VFX.forType('normal');

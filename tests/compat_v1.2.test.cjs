@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('http');
+const { isEmulatorRunning } = require('./check_emulator.cjs');
 
 const PROJECT_ID = 'plucky-courier-365002';
 const AUTH_PORT = 9099;
@@ -101,6 +102,10 @@ function fromFirestoreDoc(doc) {
 }
 
 test('Kiểm định Tương thích Ngược v1.2 với Firebase Security Rules v1.3', async (t) => {
+  if (!(await isEmulatorRunning(AUTH_PORT))) {
+    t.skip('Firebase Emulator không chạy trên port ' + AUTH_PORT + '. Bỏ qua integration test.');
+    return;
+  }
   console.log('\n--- BẮT ĐẦU KIỂM THỬ TƯƠNG THÍCH V1.2 TRÊN FIREBASE RULES V1.3 ---');
 
   // Khởi tạo người chơi Client v1.2 (Khách Anonymous & Đăng nhập Email/Google)

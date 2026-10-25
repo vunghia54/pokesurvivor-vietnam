@@ -251,18 +251,24 @@ G.FX = (() => {
     }
 
     // Números de daño.
-    for (const t of texts) {
-      const k = 1 - t.t / t.life;
-      ctx.save();
-      ctx.globalAlpha = Math.min(1, k * 2.2);
-      ctx.font = (t.big ? '700 20px' : '700 13px') + ' Pixelify,"Segoe UI",sans-serif';
+    if (texts.length > 0) {
       ctx.textAlign = 'center';
       ctx.lineWidth = 3;
       ctx.strokeStyle = 'rgba(0,0,0,.75)';
-      ctx.strokeText(t.s, t.x, t.y);
-      ctx.fillStyle = t.color;
-      ctx.fillText(t.s, t.x, t.y);
-      ctx.restore();
+      const FONT_BIG = '700 20px Pixelify,"Segoe UI",sans-serif';
+      const FONT_SMALL = '700 13px Pixelify,"Segoe UI",sans-serif';
+      let lastFont = '';
+      for (let i = 0; i < texts.length; i++) {
+        const t = texts[i];
+        const k = 1 - t.t / t.life;
+        ctx.globalAlpha = Math.min(1, k * 2.2);
+        const curFont = t.big ? FONT_BIG : FONT_SMALL;
+        if (curFont !== lastFont) ctx.font = lastFont = curFont;
+        ctx.strokeText(t.s, t.x, t.y);
+        ctx.fillStyle = t.color;
+        ctx.fillText(t.s, t.x, t.y);
+      }
+      ctx.globalAlpha = 1;
     }
   }
 

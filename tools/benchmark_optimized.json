@@ -1,0 +1,35 @@
+{
+  "label": "optimized",
+  "timestamp": "2026-10-25T10:17:33.279Z",
+  "audio": {
+    "peak": 0.548,
+    "rms": 0.1059,
+    "nodesCreatedIn5sCombat": 754,
+    "breakdown": {
+      "oscillators": 211,
+      "gains": 321,
+      "filters": 156,
+      "bufferSources": 66
+    },
+    "nodesCreatedWhileMuted1500ms": {
+      "oscDiff": 0,
+      "gainDiff": 0
+    },
+    "sfxCallsCount": 3,
+    "sfxCallsBreakdown": {
+      "shot": 3
+    }
+  },
+  "performance": {
+    "avgFps": 143.8,
+    "minFps": 70.9,
+    "frameTimeP50": 6.9,
+    "frameTimeP95": 7.2,
+    "frameTimeP99": 7.5,
+    "memory": {
+      "usedJSHeapSizeMB": 20.58,
+      "totalJSHeapSizeMB": 28.7
+    }
+  },
+  "consoleErrors": []
+}

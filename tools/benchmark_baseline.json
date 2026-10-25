@@ -1,0 +1,37 @@
+{
+  "label": "baseline",
+  "timestamp": "2026-10-25T07:00:17.195Z",
+  "audio": {
+    "peak": 0.491,
+    "rms": 0.0971,
+    "nodesCreatedIn5sCombat": 784,
+    "breakdown": {
+      "oscillators": 220,
+      "gains": 334,
+      "filters": 160,
+      "bufferSources": 70
+    },
+    "nodesCreatedWhileMuted1500ms": {
+      "oscDiff": 41,
+      "gainDiff": 69
+    },
+    "sfxCallsCount": 10,
+    "sfxCallsBreakdown": {
+      "shot": 8,
+      "hit": 1,
+      "break": 1
+    }
+  },
+  "performance": {
+    "avgFps": 144,
+    "minFps": 122,
+    "frameTimeP50": 6.9,
+    "frameTimeP95": 7.4,
+    "frameTimeP99": 7.7,
+    "memory": {
+      "usedJSHeapSizeMB": 17.81,
+      "totalJSHeapSizeMB": 27.13
+    }
+  },
+  "consoleErrors": []
+}

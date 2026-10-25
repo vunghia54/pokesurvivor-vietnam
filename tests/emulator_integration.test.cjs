@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('http');
+const { isEmulatorRunning } = require('./check_emulator.cjs');
 
 const PROJECT_ID = 'plucky-courier-365002';
 const AUTH_PORT = 9099;
@@ -120,7 +121,11 @@ async function commitScore(board, docId, record, token) {
   }, payload);
 }
 
-test('Firebase Emulator Suite — Kiểm thử thực tế Firestore Rules và Database Rules', async () => {
+test('Firebase Emulator Suite — Kiểm thử thực tế Firestore Rules và Database Rules', async (t) => {
+  if (!(await isEmulatorRunning(AUTH_PORT))) {
+    t.skip('Firebase Emulator không chạy trên port ' + AUTH_PORT + '. Bỏ qua integration test.');
+    return;
+  }
   console.log('--- KHỞI TẠO TÀI KHOẢN TRÊN AUTH EMULATOR ---');
   const userA = await createAuthUser(`user_a_${Date.now()}@test.vn`, 'Password123!');
   const userB = await createAuthUser(`user_b_${Date.now()}@test.vn`, 'Password123!');
