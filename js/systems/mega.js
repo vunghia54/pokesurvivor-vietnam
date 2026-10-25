@@ -1884,7 +1884,8 @@ G.Mega = (() => {
           "spriteAvailable": false,
           "missingReason": "THIẾU SPRITE",
           "types": [
-              "dark"
+              "dark",
+              "ghost"
           ],
           "atkMul": 1.35,
           "paMul": 1.25,

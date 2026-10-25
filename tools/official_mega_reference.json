@@ -804,7 +804,8 @@
       "species": "Absol",
       "name": "Mega Absol Z",
       "types": [
-        "dark"
+        "dark",
+        "ghost"
       ],
       "stone": "Absolite Z",
       "branch": "Z",

@@ -150,6 +150,21 @@ test('5. Mega Stones và điều kiện kích hoạt đặc biệt (Rayquaza, Fl
   assert.equal(garchZ.stone, 'Garchompite Z');
   assert.deepEqual(garch.types, ['dragon', 'ground']);
   assert.deepEqual(garchZ.types, ['dragon']);
+
+  const abBase = G.Mega.FORMS['mega_absol'];
+  const abZ = G.Mega.FORMS['mega_absol_z'];
+  assert.equal(abBase.stone, 'Absolite');
+  assert.equal(abZ.stone, 'Absolite Z');
+  assert.deepEqual(abBase.types, ['dark']);
+  assert.deepEqual(abZ.types, ['dark', 'ghost'], 'Mega Absol Z phải có hệ Dark/Ghost theo chuẩn DLC Mega Dimension');
+  assert.equal(abZ.spriteAvailable, false, 'Mega Absol Z vẫn thiếu sprite nên phải khóa an toàn');
+
+  const raiX = G.Mega.FORMS['mega_raichu_x'];
+  const raiY = G.Mega.FORMS['mega_raichu_y'];
+  assert.equal(raiX.stone, 'Raichunite X');
+  assert.equal(raiY.stone, 'Raichunite Y');
+  assert.deepEqual(raiX.types, ['electric']);
+  assert.deepEqual(raiY.types, ['electric']);
 });
 
 test('6. Tách biệt hoàn toàn Primal Reversion (Kyogre & Groudon không nằm trong Mega Evolution)', () => {
@@ -209,3 +224,15 @@ test('9. Đảm bảo tính toàn vẹn của Latios (#381) và Latias (#380)', 
   assert.equal(latios.name, 'Mega Latios');
   assert.equal(latios.stone, 'Latiosite');
 });
+
+test('10. Kiểm tra tính toàn vẹn hệ của Barbaracle (#689): Base là Rock/Water trong Pokédex, Mega là Rock/Fighting trong G.Mega', () => {
+  require('../js/data/pokedex.js');
+  const base = G.DEX.find(p => p.dex === 689);
+  assert.ok(base, 'Barbaracle phải tồn tại trong Pokédex');
+  assert.deepEqual(base.types, ['rock', 'water'], 'Barbaracle dạng thường trong Pokédex phải có hệ Rock/Water');
+
+  const mega = G.Mega.FORMS['mega_barbaracle'];
+  assert.ok(mega, 'Mega Barbaracle phải tồn tại trong G.Mega.FORMS');
+  assert.deepEqual(mega.types, ['rock', 'fighting'], 'Mega Barbaracle phải có hệ Rock/Fighting theo canon');
+});
+
