@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-10-25T10:47:38.577Z",
+  "url": "https://vunghia54.github.io/pokesurvivor-vietnam/",
+  "targetVersion": "f3ef37e126",
+  "liveBundle": "https://vunghia54.github.io/pokesurvivor-vietnam/js/app.min.js?v=f3ef37e126",
+  "topbarCheck": {
+    "topbarVisible": true,
+    "topbarHeight": 30,
+    "isSameRow": true,
+    "gapBetween": 277,
+    "onlinePillText": "Online: 1",
+    "bodyNoOverflow": true
+  },
+  "shopCheck": {
+    "shopVisible": true,
+    "bodyExists": true,
+    "bodyScrollHeight": 835,
+    "bodyClientHeight": 304,
+    "isScrollable": true,
+    "itemsCount": 11
+  },
+  "upgCheck": true,
+  "gachaCheck": true,
+  "soundPanelCheck": {
+    "soundPanelOpen": true,
+    "slidersCount": 2,
+    "hasMuteButton": true,
+    "panelHtml": 12838
+  },
+  "consoleErrors": [],
+  "status": "PASSED_ALL"
+}
