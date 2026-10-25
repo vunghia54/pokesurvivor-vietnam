@@ -236,3 +236,74 @@ test('7. Đồng bộ Co-op cho toàn bộ 36 dạng: Puppet nhận đúng Anima
     assert.equal(puppet.anim.dex, f.baseDex, 'Puppet trở về base Dex');
   }
 });
+
+test('8. Kiểm tra toàn bộ 7 file hoạt ảnh và biến thể Shiny trên ổ đĩa cho 36 dạng', () => {
+  const G = setupTestEnv();
+  const ready = Object.values(G.Mega.FORMS).filter(f => f.spriteAvailable);
+  const root = path.join(__dirname, '..');
+  const REQUIRED = ['Idle', 'Walk', 'Attack', 'Shoot', 'Charge', 'Hurt', 'Faint'];
+
+  for (const r of ready) {
+    const meta = G.MEGA_SPRITE_META[r.spriteId];
+    assert.ok(meta, `Metadata tồn tại cho ${r.spriteId}`);
+    
+    // Kiểm tra metadata có đủ 7 hoạt ảnh và đều có 8 hướng
+    for (const a of REQUIRED) {
+      assert.ok(meta.a[a], `${r.spriteId} phải có anim ${a} trong metadata`);
+      assert.equal(meta.a[a].r, 8, `${r.spriteId} anim ${a} phải có đủ 8 hướng`);
+    }
+
+    const dir = path.join(root, 'assets', 'pokemon', r.spriteId);
+    assert.ok(fs.existsSync(dir), `Thư mục assets/pokemon/${r.spriteId} phải tồn tại`);
+
+    for (const a of REQUIRED) {
+      assert.ok(fs.existsSync(path.join(dir, `${a}.png`)), `assets/pokemon/${r.spriteId}/${a}.png phải tồn tại`);
+    }
+
+    if (meta.sh) {
+      const sDir = path.join(dir, 's');
+      assert.ok(fs.existsSync(sDir), `Thư mục shiny s/ phải tồn tại cho ${r.spriteId}`);
+      for (const a of REQUIRED) {
+        assert.ok(fs.existsSync(path.join(sDir, `${a}.png`)), `assets/pokemon/${r.spriteId}/s/${a}.png phải tồn tại`);
+      }
+    }
+  }
+});
+
+test('9. Kiểm định an toàn chống kích hoạt lặp và Aura Canvas rendering không lỗi', () => {
+  const G = setupTestEnv();
+  const ready = Object.values(G.Mega.FORMS).filter(f => f.spriteAvailable);
+
+  const fakeCtx = {
+    save: () => {},
+    restore: () => {},
+    beginPath: () => {},
+    arc: () => {},
+    ellipse: () => {},
+    moveTo: () => {},
+    lineTo: () => {},
+    closePath: () => {},
+    fill: () => {},
+    stroke: () => {},
+    createRadialGradient: () => ({ addColorStop: () => {} }),
+  };
+
+  for (const f of ready) {
+    const mon = G.DEX_BY[f.baseDex];
+    const pl = new G.Player(mon, {}, false);
+    G.Mega.setPreference(f.baseDex, f.id);
+    G.Mega.onRunStart(pl);
+    G.Mega.trigger(pl);
+    G.Mega.update(pl, 1.25);
+
+    // Kiểm tra chống kích hoạt 2 lần
+    assert.equal(G.Mega.canTrigger(pl), false, 'Không thể kích hoạt khi đang active');
+    assert.equal(G.Mega.trigger(pl), false, 'trigger trả về false khi đã active');
+
+    // Kiểm tra drawAura chạy mượt mà không văng exception
+    assert.doesNotThrow(() => {
+      G.Mega.drawAura(fakeCtx, pl);
+    }, `drawAura không được gây lỗi cho ${f.id}`);
+  }
+});
+
