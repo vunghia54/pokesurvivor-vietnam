@@ -499,8 +499,31 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
  * El puesto entero se dibuja en pixel art en #shop-scene (Scene, shop-ui.js);
  * aquí sólo el lienzo, el cartel (para que se traduzca), el bocadillo, el
  * objeto que vuela a la Mochila y la aparición del contenido. */
-#scr-shop .shop-box { overflow-x: hidden; }
-.shop-stall { position: relative; margin: -22px -24px 14px; height: 294px; border-radius: 9px 9px 0 0; overflow: hidden; background: #6fb8f0; }
+#scr-shop .shop-box { overflow: hidden; }
+.shop-stall {
+  position: relative;
+  margin: 0 0 12px 0;
+  width: 100%;
+  height: 260px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #6fb8f0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.shop-inner {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+.shop-body-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  min-height: 0;
+  box-sizing: border-box;
+}
 .shop-scene { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; cursor: default; }
 .shop-stall.opening .shop-scene { cursor: pointer; }
 /* Cartel colgado del toldo; cae balanceándose y se encienden sus bombillas. */
@@ -536,12 +559,16 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 @keyframes shopBump { 30% { transform: scale(1.25); } 60% { transform: scale(.92); } }
 @keyframes shopFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .shop-stall.opening ~ .shop-inner { animation: shopFade .5s 1.8s ease-out both; }
-@media (max-height: 520px) {                 /* (ahí la caja tiene 10px 14px de relleno) */
-  .shop-stall { margin: -10px -14px 10px; height: 200px; }
+@media (max-height: 540px) {
+  .shop-stall { height: 180px; margin: 0 0 8px 0; }
   .shop-sign { font-size: 14px; top: 3px; }
 }
+@media (max-height: 400px) {
+  .shop-stall { height: 150px; margin: 0 0 6px 0; }
+  .shop-sign { font-size: 13px; top: 2px; }
+}
 @media (max-width: 640px) {
-  .shop-stall { height: 220px; }
+  .shop-stall { height: 200px; }
   .shop-sign { font-size: 14px; }
   .shop-bubble { font-size: 11px; }
 }
@@ -1274,23 +1301,31 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     gap: 4px;
   }
 
-  /* Grid danh sách menu 2 cột */
+  /* Grid danh sách menu 2 cột cân đối hoàn hảo v1.3.4 */
   .menu-list {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-rows: auto repeat(5, 1fr) !important;
     gap: 4px 6px !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+    align-items: stretch !important;
   }
   .menu-item {
     font-size: 13.5px !important;
-    padding: 5px 7px !important;
-    min-height: 40px !important;
+    padding: 4px 8px !important;
+    min-height: 38px !important;
+    height: 100% !important;
     display: grid !important;
     grid-template-columns: 24px 1fr !important;
-    column-gap: 5px !important;
+    column-gap: 6px !important;
     align-items: center !important;
     border-radius: 8px !important;
-    background: rgba(10, 20, 50, 0.5) !important;
-    border: 1px solid rgba(244, 248, 255, 0.14) !important;
+    background: rgba(10, 20, 50, 0.55) !important;
+    border: 1px solid rgba(244, 248, 255, 0.15) !important;
+    box-sizing: border-box !important;
   }
   .menu-item:hover, .menu-item:focus-visible {
     background: rgba(255, 255, 255, 0.12) !important;
@@ -1311,7 +1346,7 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
   }
   .menu-item small {
     font-size: 10px !important;
-    line-height: 1.2 !important;
+    line-height: 1.15 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -1319,11 +1354,11 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
   .menu-item.play {
     grid-column: span 2 !important;
     font-size: 19px !important;
-    padding: 7px 12px !important;
-    min-height: 46px !important;
-    background: linear-gradient(135deg, rgba(255, 210, 63, 0.22), rgba(255, 75, 75, 0.22)) !important;
+    padding: 6px 12px !important;
+    min-height: 44px !important;
+    background: linear-gradient(135deg, rgba(255, 210, 63, 0.25), rgba(255, 75, 75, 0.25)) !important;
     border: 2px solid var(--gold) !important;
-    box-shadow: 0 0 10px rgba(255, 210, 63, 0.25) !important;
+    box-shadow: 0 0 10px rgba(255, 210, 63, 0.3) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1337,6 +1372,9 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     display: inline !important;
     font-size: 11px !important;
     color: #ffe37a !important;
+  }
+  .menu-item[data-go="settings"] {
+    grid-column: span 2 !important;
   }
   #menu-stats {
     font-size: 11px !important;
@@ -1469,9 +1507,16 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     font-size: 11px !important;
   }
   .menu-right {
-    width: min(56vw, 450px) !important;
+    width: min(60vw, 520px) !important;
+    max-width: calc(100vw - min(40vw, 340px)) !important;
     flex: 1 1 auto !important;
-    padding: max(68px, calc(env(safe-area-inset-top, 0px) + 64px)) max(10px, env(safe-area-inset-right, 10px)) 6px 8px !important;
+    height: 100% !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    padding: max(56px, calc(env(safe-area-inset-top, 0px) + 52px)) max(10px, env(safe-area-inset-right, 10px)) max(6px, env(safe-area-inset-bottom, 6px)) 6px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
@@ -1480,6 +1525,12 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
   }
   .menu-right .box {
     padding: 6px 8px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
   }
   .menu-right > .box:last-child {
     display: none !important;

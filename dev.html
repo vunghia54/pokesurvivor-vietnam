@@ -543,27 +543,27 @@
 <!-- ====== Tienda Kecleon (20-10-2026, del PR #236 de TheAdro7) ====== -->
 <section id="scr-shop" class="scr dim hidden subscreen-view">
   <div class="box wide shop-box subscreen-box">
-    <!-- El puesto: cae, se despliega el toldo, sube la persiana y salen los dos Kecleon (ver shop-ui.js). -->
-    <div class="shop-stall" id="shop-stall">
-      <!-- Todo el puesto (paisaje, toldo, estanterías, persiana, farolillos y los dos
-           Kecleon) se dibuja en pixel art en este lienzo: ver Scene en shop-ui.js. -->
-      <canvas id="shop-scene" class="shop-scene"></canvas>
-      <div class="shop-sign" id="shop-sign"><span>Tienda Kecleon</span></div>
-      <div class="shop-bubble hide" id="shop-bubble"></div>
-    </div>
-    <div class="shop-inner">
-      <header class="subscreen-header">
-        <div class="subscreen-header-left">
-          <button class="btn small ghost back-btn" data-back title="Volver"><span class="back-arrow">‹</span> <span class="back-text">Volver</span></button>
-          <h2 class="subscreen-title" style="margin:0">Tienda Kecleon</h2>
+    <header class="subscreen-header">
+      <div class="subscreen-header-left">
+        <button class="btn small ghost back-btn" data-back title="Volver"><span class="back-arrow">‹</span> <span class="back-text">Volver</span></button>
+        <h2 class="subscreen-title" style="margin:0">Tienda Kecleon</h2>
+      </div>
+      <div class="subscreen-header-right">
+        <div class="pill subscreen-resource" id="shop-coins-pill" title="Monedas">
+          <span class="coin"></span> <span id="shop-coins">0</span>
         </div>
-        <div class="subscreen-header-right">
-          <div class="pill subscreen-resource" id="shop-coins-pill" title="Monedas">
-            <span class="coin"></span> <span id="shop-coins">0</span>
-          </div>
-        </div>
-      </header>
-      <div class="subscreen-body">
+      </div>
+    </header>
+    <div class="subscreen-body shop-body-scroll">
+      <!-- El puesto: cae, se despliega el toldo, sube la persiana y salen los dos Kecleon (ver shop-ui.js). -->
+      <div class="shop-stall" id="shop-stall">
+        <!-- Todo el puesto (paisaje, toldo, estanterías, persiana, farolillos y los dos
+             Kecleon) se dibuja en pixel art en este lienzo: ver Scene en shop-ui.js. -->
+        <canvas id="shop-scene" class="shop-scene"></canvas>
+        <div class="shop-sign" id="shop-sign"><span>Tienda Kecleon</span></div>
+        <div class="shop-bubble hide" id="shop-bubble"></div>
+      </div>
+      <div class="shop-inner">
         <p class="sub" style="margin:8px 0 0" id="shop-hello">¡Bienvenido! Mentas, Cápsulas y MT. Lo que compres va a tu Mochila (en el menú principal); úsalo desde la ficha de cada Pokémon en la colección.</p>
         <div id="shop-body"></div>
       </div>
