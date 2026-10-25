@@ -105,14 +105,24 @@ G.MenuUI = (() => {
   /** Texto bajo "Amigos" y "Jugar": quién está en línea, solicitudes, sala. */
   function socialLine() {
     const room = G.Social.room;
+    const vn = (G.I18n && G.I18n.lang === 'vi-VN') || (window.PS_LOCALES && window.PS_LOCALES.lang === 'vi-VN');
     const play = document.querySelector('#scr-menu [data-go=play] small');
-    if (play) play.textContent = room ? 'Volver a tu sala (' + room.members.length + '/' + G.Social.MAX_PLAYERS + ')' : 'Entra en la mazmorra';
-    const fr = G.Social.friends;
+    if (play) {
+      if (room) {
+        play.textContent = vn ? `Quay lại phòng Co-op (${room.members.length}/${G.Social.MAX_PLAYERS})` : `Volver a tu sala (${room.members.length}/${G.Social.MAX_PLAYERS})`;
+      } else {
+        play.textContent = vn ? 'Bắt đầu cuộc phiêu lưu' : 'Entra en la mazmorra';
+      }
+    }
+    const fr = G.Social.friends || [];
     const req = fr.filter(f => f.status === 'in').length;
     const parts = [];
-    if (req) parts.push(req + (req === 1 ? ' solicitud' : ' solicitudes'));
-    $('menu-friends-sub').textContent = parts.length ? parts.join(' · ') : 'Juega en grupo, hasta 4';
-    $('menu-friends-sub').classList.toggle('gold', req > 0);
+    if (room) {
+      parts.push(vn ? `Đang trong phòng (${room.members.length}/${G.Social.MAX_PLAYERS})` : `En sala (${room.members.length}/${G.Social.MAX_PLAYERS})`);
+    }
+    if (req) parts.push(req + (vn ? ' lời mời' : (req === 1 ? ' solicitud' : ' solicitudes')));
+    $('menu-friends-sub').textContent = parts.length ? parts.join(' · ') : (vn ? 'Chơi cùng bạn bè, tối đa 4 người' : 'Juega en grupo, hasta 4');
+    $('menu-friends-sub').classList.toggle('gold', req > 0 || !!room);
   }
 
   // ---------------- colección ----------------
