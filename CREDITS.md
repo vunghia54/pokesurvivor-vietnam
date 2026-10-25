@@ -124,6 +124,18 @@ uso **no comercial** y con atribución a sus artistas.
 | YoukaiMinori | <@91001329228464128> | 252, 253 |
 | ◥θ┴θ◤ | DC:<@215638650434617345> | 157, 445, 501, 504, 505, 566, 577, 595, 627, 650, 651, 658, 661, 676, 684, 707, 724, 726, 728, 729, 730, 761, 763, 790, 823, 872, 907, 991 |
 
+### Mega Evolution (v1.4.0)
+
+Sprites de Mega Evolution procedentes de [SpriteCollab](https://github.com/PMDCollab/SpriteCollab) bajo licencia [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) (uso no comercial, con atribución a sus creadores):
+
+| Pokémon Mega | Base Dex | Carpeta | Artista Principal | Colaboradores | Licencia |
+|---|---|---|---|---|---|
+| **Mega Charizard X** | #6 | `assets/pokemon/mega_6_x` | **KEVIN0ITACHI** | Gaston564 (`<@!350050109741858829>`), Audino (`<@!479925530129596426>`) | CC BY-NC 4.0 |
+| **Mega Charizard Y** | #6 | *En desarrollo (bloqueado)* | — | SpriteCollab (Incompleto) | CC BY-NC 4.0 |
+| **Mega Gengar** | #94 | `assets/pokemon/mega_94` | **DonLawliet** (`<@!653416391201783856>`) | BaronVonDrak (`<@!237286997645983744>`), Nico-Nii (`<@!544245909639397378>`) | CC BY-NC 4.0 |
+| **Mega Lucario** | #448 | `assets/pokemon/mega_448` | **Nico-Nii** (`<@!544245909639397378>`) | — | CC BY-NC 4.0 |
+| **Mega Gardevoir** | #282 | `assets/pokemon/mega_282` | **Nico-Nii** (`<@!544245909639397378>`) | — | CC BY-NC 4.0 |
+
 ## Datos
 
 Stats base y nombres en español: [PokeAPI](https://pokeapi.co/),

@@ -382,3 +382,23 @@ test('18. Đồng bộ Co-op khi hết hạn: Puppet hoàn nguyên về dạng t
   assert.equal(puppet.megaForm, null);
   assert.equal(puppet.anim.dex, 94, 'Puppet trở lại sprite Gengar thường (dex 94)');
 });
+
+test('19. Đồng bộ Late Joiner: Puppet nhận đúng remaining time và không reset 25s', () => {
+  const G = setupTestEnv();
+  const lucario = G.DEX.find(x => x.dex === 448);
+  const puppet = new G.Player(lucario, {}, false);
+  puppet.remote = true;
+
+  // Người vào muộn nhận trạng thái khi Mega Lucario còn lại 14.5 giây
+  G.Mega.applyPuppet(puppet, 'mega_lucario', false, 14.5);
+  assert.equal(puppet.megaState, 'MEGA_ACTIVE');
+  assert.equal(puppet.megaForm.id, 'mega_lucario');
+  assert.equal(puppet.anim.dex, 'mega_448');
+  assert.equal(puppet.megaTimer, 14.5, 'Kế thừa chính xác 14.5s thay vì reset về 25s');
+
+  // Sau 14.6s game time, puppet hết hạn đúng lúc
+  G.Mega.update(puppet, 14.6);
+  assert.equal(puppet.megaState, 'MEGA_USED');
+  assert.equal(puppet.megaForm, null);
+  assert.equal(puppet.anim.dex, 448);
+});

@@ -336,7 +336,7 @@ G.Mega = (() => {
   }
 
   /** Áp dụng trạng thái Mega cho Puppet trong phòng Co-op */
-  function applyPuppet(puppet, formId, shiny) {
+  function applyPuppet(puppet, formId, shiny, remTime = null) {
     if (!puppet) return;
     if (!formId) {
       // Hoàn nguyên Puppet về dạng thường
@@ -353,7 +353,7 @@ G.Mega = (() => {
 
     puppet.megaState = STATES.MEGA_ACTIVE;
     puppet.megaForm = form;
-    puppet.megaTimer = CONFIG.duration;
+    puppet.megaTimer = (typeof remTime === 'number' && remTime > 0) ? remTime : CONFIG.duration;
     if (form.spriteId && G.Sprites) {
       puppet.anim = new G.Sprites.Animator(form.spriteId, puppet.scale, shiny);
     }
@@ -553,6 +553,7 @@ G.Mega = (() => {
     onRunStart,
     onRunEnd,
     applyPuppet,
+    expireMega,
     drawAura,
     drawButton
   };

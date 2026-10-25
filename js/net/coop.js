@@ -271,11 +271,11 @@ G.Coop = (() => {
         G.Spawner.say(m.name + ' ha vuelto', 2);
         // Đồng bộ trạng thái Mega hiện tại cho người chơi mới vào hoặc vừa kết nối lại
         if (local && local.megaState === 'MEGA_ACTIVE' && local.megaForm) {
-          m.q.push(['mega', me, local.megaForm.id, local.shiny ? 1 : 0]);
+          m.q.push(['mega', me, local.megaForm.id, local.shiny ? 1 : 0, local.megaTimer]);
         }
         for (const other of mates.values()) {
           if (other.uid !== u && other.pl && other.pl.megaState === 'MEGA_ACTIVE' && other.pl.megaForm) {
-            m.q.push(['mega', other.uid, other.pl.megaForm.id, other.pl.shiny ? 1 : 0]);
+            m.q.push(['mega', other.uid, other.pl.megaForm.id, other.pl.shiny ? 1 : 0, other.pl.megaTimer]);
           }
         }
       }
@@ -361,7 +361,7 @@ G.Coop = (() => {
         case 'he': holdOff(from); break;
         case 're': G.Rift.enterRequest(); break;
         case 'bye': mateGone(from); break;
-        case 'mega': if (G.Mega) G.Mega.applyPuppet(m.pl, ev[1], !!ev[2]); emit(['mega', from, ev[1], ev[2]], from); break;
+        case 'mega': if (from === m.uid) { if (G.Mega) G.Mega.applyPuppet(m.pl, ev[1], !!ev[2], ev[3]); emit(['mega', from, ev[1] || '', ev[2], ev[3]], from); } break;
       }
     }
   }
@@ -468,7 +468,7 @@ G.Coop = (() => {
       case 'fxr':
         if (typeof ev[4] === 'string') G.FX.ring(num(ev[1], 0, -1e6, 1e6), num(ev[2], 0, -1e6, 1e6), 8, num(ev[3], 8, 0, 2000), ev[4], 0.5, 3);
         break;
-      case 'mega': { const m = mates.get(ev[1]); if (m && G.Mega) G.Mega.applyPuppet(m.pl, ev[2], !!ev[3]); break; }
+      case 'mega': { const m = mates.get(ev[1]); if (m && G.Mega) G.Mega.applyPuppet(m.pl, ev[2], !!ev[3], ev[4]); break; }
     }
   }
 
