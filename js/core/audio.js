@@ -120,7 +120,10 @@ G.Audio = (() => {
     o.start(t);
     o.stop(end + 0.05);
     activeVoices++;
+    let ended = false;
     o.onended = () => {
+      if (ended) return;
+      ended = true;
       activeVoices = Math.max(0, activeVoices - 1);
       try { o.disconnect(); } catch (e) {}
       if (auxNodes) {
@@ -149,7 +152,10 @@ G.Audio = (() => {
     s.start(t, Math.random() * 0.5);
     s.stop(t + dur + 0.05);
     activeVoices++;
+    let ended = false;
     s.onended = () => {
+      if (ended) return;
+      ended = true;
       activeVoices = Math.max(0, activeVoices - 1);
       try { s.disconnect(); } catch (e) {}
       if (auxNodes) {

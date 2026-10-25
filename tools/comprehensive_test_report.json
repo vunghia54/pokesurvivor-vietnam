@@ -1,0 +1,148 @@
+{
+  "audioInit": {
+    "canPlay": true,
+    "running": true,
+    "track": "village",
+    "musicVol": 0.55,
+    "sfxVol": 0.7,
+    "muted": false,
+    "activeVoices": 32
+  },
+  "menuAudioMeter": {
+    "peak": 0.404,
+    "rms": 0.1145,
+    "clipping": 0,
+    "activeVoices": 27
+  },
+  "volTest": {
+    "s1": {
+      "music": 0.35,
+      "sfx": 0.8
+    },
+    "s2": {
+      "muted": true
+    },
+    "s3": {
+      "muted": false
+    }
+  },
+  "rapidMusic": {
+    "currentTrack": "village",
+    "activeVoices": 27
+  },
+  "combatMeter": {
+    "peak": 0.364,
+    "rms": 0.0682,
+    "clipping": 0,
+    "activeVoices": 20
+  },
+  "sfxAudit": {
+    "shotRequested": 10,
+    "shotTriggered": 0,
+    "highPrioCount": 0,
+    "lowPrioCount": 0,
+    "activeVoicesMax": 29
+  },
+  "coopSim": {
+    "puppetCount": 3,
+    "ghostShotRequests": 30,
+    "ghostShotPlayed": 0,
+    "activeVoices": 21,
+    "voicesBounded": true
+  },
+  "lifecycle": {
+    "stateBefore": {
+      "running": true,
+      "voices": 21
+    },
+    "stateSuspended": {
+      "running": false,
+      "state": false
+    },
+    "stateResumed": {
+      "running": true,
+      "canPlay": true,
+      "track": "boss"
+    }
+  },
+  "longRun": [
+    {
+      "minute": 0,
+      "heapMB": 23.83,
+      "enemiesAlive": 81,
+      "projectiles": 3,
+      "pickups": 1,
+      "activeVoices": 19
+    },
+    {
+      "minute": 5,
+      "heapMB": 23.83,
+      "enemiesAlive": 81,
+      "projectiles": 3,
+      "pickups": 1,
+      "activeVoices": 19
+    },
+    {
+      "minute": 10,
+      "heapMB": 23.83,
+      "enemiesAlive": 81,
+      "projectiles": 3,
+      "pickups": 1,
+      "activeVoices": 19
+    },
+    {
+      "minute": 20,
+      "heapMB": 27.78,
+      "enemiesAlive": 81,
+      "projectiles": 3,
+      "pickups": 1,
+      "activeVoices": 19
+    },
+    {
+      "minute": 30,
+      "heapMB": 27.78,
+      "enemiesAlive": 81,
+      "projectiles": 3,
+      "pickups": 1,
+      "activeVoices": 19
+    },
+    {
+      "minute": "ExitToMenu",
+      "heapMB": 27.78,
+      "enemiesAlive": 0,
+      "projectiles": 0,
+      "pickups": 0,
+      "activeVoices": 19
+    }
+  ],
+  "viewports": [
+    {
+      "vp": "Android Portrait",
+      "topbarVisible": true,
+      "topbarHeight": 56,
+      "menuVisible": true,
+      "bodyScrollWidth": 360,
+      "bodyClientWidth": 360,
+      "noHorizontalOverflow": true
+    },
+    {
+      "vp": "Android Landscape iPhone/Pixel",
+      "topbarVisible": true,
+      "topbarHeight": 30,
+      "menuVisible": true,
+      "bodyScrollWidth": 844,
+      "bodyClientWidth": 844,
+      "noHorizontalOverflow": true
+    },
+    {
+      "vp": "Android Landscape Galaxy S20+",
+      "topbarVisible": true,
+      "topbarHeight": 30,
+      "menuVisible": true,
+      "bodyScrollWidth": 915,
+      "bodyClientWidth": 915,
+      "noHorizontalOverflow": true
+    }
+  ],
+  "consoleErrors": []
+}
