@@ -1589,6 +1589,22 @@ html:lang(vi) .stat { grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 3
     height: 30px !important;
     padding: 3px 5px !important;
   }
+  /* Vùng chạm 44px chuẩn Mobile HIG không đè lên nút kế bên (giao nhau 0px) và không đè phần tử dưới */
+  .topbar-actions .btn.small::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: calc(100% + 4px) !important;
+    min-width: 100% !important;
+    max-width: calc(100% + 4px) !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    pointer-events: auto !important;
+    box-sizing: border-box !important;
+  }
   .pill {
     min-height: 26px !important;
     height: 26px !important;
